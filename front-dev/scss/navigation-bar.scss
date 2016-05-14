@@ -1,0 +1,88 @@
+.top-navbar {
+    .navbar-brand {
+        color: white;
+        padding-right: 0;
+        transition: all $transition-speed;
+    }
+    .navbar-nav {
+        &>li {
+            &>.dropdown-menu {
+                padding: 0;
+                li {
+                    a {
+                        transition: all $transition-speed;
+                    }
+                }
+            }
+            &>a {
+                transition: all $transition-speed;
+                color: black;
+                font-weight: 500;
+                &:hover {
+                    color: white;
+                }
+            }   
+        }
+    }
+    &.navbar-default {
+        background-color: transparent;
+        color: white;
+        margin-bottom: 0;
+        border: none;
+        .navbar-nav {
+            .open {
+                &>a, &>a:focus, &>a:hover {
+                    color: white;
+                    background: transparent;
+                }
+            }
+        }
+        .navbar-toggle {
+            transition: all $transition-speed;
+            border-color: white;
+            .icon-bar {
+                background-color: white;
+            }
+            &:focus {
+                background-color: $main-color;
+            }
+            &:hover {
+                background-color: white;
+                .icon-bar {
+                    background-color: $main-color;
+                }
+            }
+        }
+    }
+    .container {
+        background: $main-color;
+    }
+}
+
+
+.dropdown-menu .divider {
+    margin: 0;
+}
+
+@media (max-width: 767px) {
+    .top-navbar{
+        &.navbar-default {
+            .navbar-nav {
+                .open {
+                    .dropdown-menu {
+                        &>li {
+                            transition: all $transition-speed;
+                            &>a {
+                                color: black;
+                                font-weight: 500;
+                            }
+                            &:hover {
+                                background: white
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

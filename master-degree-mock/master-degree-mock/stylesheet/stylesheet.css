@@ -1,0 +1,356 @@
+body {
+    background: #E9E9E9;
+    min-width: 340px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.top-navbar.navbar-default {
+    background-color: transparent;
+    color: white;
+    margin-bottom: 0;
+    border: none;
+}
+.top-navbar .container {
+    background: #F1BB59;
+}
+
+.form-control, .btn {
+    border-radius: 0;
+}
+.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:focus, .navbar-default .navbar-nav>.open>a:hover {
+    color: white;
+    background: transparent;
+}
+
+.top-navbar .navbar-brand {
+    color: white;
+    padding-right: 0;
+}
+
+.messageCount {
+    border-radius: 100px;
+    background: red;
+    text-align: center;
+    line-height: 28px;
+    height: 28px;
+    width: 28px;
+    margin-top: -4px;
+    display: inline-block;
+    font-weight: 700;
+    color: white;
+}
+
+@media (max-width: 767px) {
+    .top-navbar.navbar-default .navbar-nav .open .dropdown-menu>li>a {
+        color: #FFF;
+        font-weight: 500;
+    }
+}
+
+.btn {
+    background: #F1BB59;
+    color: black;
+    font-weight: 500;
+}
+.top-navbar .navbar-nav>li>a {
+    color: black;
+    font-weight: 500;
+}
+
+.top-navbar .navbar-nav>li>a:hover {
+    color: white;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+.specification-side {
+    background: white;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.specification-side h2{
+    
+    font-weight: 300;
+    font-size: 28px;
+    padding-bottom: 10px;
+    display: block;
+    border-bottom: 2px solid #F1BB59;
+}
+
+.specification-side p {
+    margin-left: 15px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.specification-side form {
+    padding-right: 15px;
+    padding-top: 15px;
+}
+
+.footer-side {
+    background: #E9E9E9;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+    padding-top: 4px;
+    text-align: center;
+}
+
+.footer-side p {
+    margin-bottom: 0;
+}
+
+@media screen and (min-width: 992px) {
+    .row-eq-height {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display:         flex;
+    }
+}
+
+.profile-form {
+    padding: 0 30px;
+}
+
+.profile-form h2 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 300;
+    font-size: 30px;
+}
+
+.form-group {
+    margin-bottom: 26px;
+}
+
+.application {
+    background: white;
+}
+
+.application .sidebar {
+    background: #6CB2DF;
+}
+
+.application .sidebar ul {
+    list-style: none;
+    margin: 20px auto;
+    padding-left: 0;
+    width: 140px;
+}
+.application .sidebar ul li {
+    margin-bottom: 15px;
+}
+
+.application .sidebar a{
+    color: white;
+}
+
+.application .sidebar a:hover, .application .sidebar a:active, .application .sidebar a:focus {
+    color: wheat;
+    text-decoration: none;
+}
+
+.application .main {
+    min-height: 500px;
+}
+
+.conversation {
+    padding: 0 5px;
+}
+
+.conversation .reply {
+    border-left: 2px solid #F1BB59;
+    padding-left: 15px;
+}
+
+.conversation .reply .reply-button {
+    display: inline-block;
+}
+
+.conversation .send-message {
+    margin-top: 10px;
+}
+
+.conversation .send-message .input-group-addon {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+}
+
+.person {
+    font-weight: 700;
+}
+
+.group-options {
+    list-style-type: none;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    padding: 0;
+    padding-left: 3px;
+    border: 1px solid #ccc;
+    border-top: 0;
+    height: 30px;
+    line-height: 30px;
+}
+
+table {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+tr {
+    border: 1px solid #ccc;
+}
+
+th {
+    padding: 10px;
+    text-align: center;
+    background: #F1BB59;
+}
+
+td {
+    padding: 5px 10px;
+}
+tr>td:not(:last-of-type), tr>th:not(:last-of-type) {
+    border-right: 1px solid #ccc;
+}
+
+tr>td:last-of-type {
+    text-align: center;
+}
+
+tr>td .glyphicon-remove {
+    color: red;
+}
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+    border-radius: 0;
+}
+
+.group-options li {
+    display: inline;
+}
+
+.group-options li:not(:last-of-type) {
+    border-right: 1px solid #ccc;
+    line-height: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-block;
+    padding-right: 3px;
+    
+}
+
+.group-options li:not(:last-of-type) a {
+    margin-right: 2px;
+}
+
+.tab-pane .switcher {
+    position: absolute;
+    top: -25px;
+    right: 5px;
+    background: orange;
+    padding: 2px 4px;
+    color: black;
+    font-weight: 600;
+}
+.tab-pane .switcher:focus, .tab-pane .switcher:hover, .tab-pane .switcher:active {
+    text-decoration: none;
+}
+
+.tab-pane .switcher:hover {
+    color: white;
+}
+
+.postedAlgorithms {
+    margin-top: 20px;
+}
+
+.main p>span {
+    font-weight: 700;
+}
+.postedAlgorithm h2 {
+    border-bottom: 1px solid orange;
+    background-color: white;
+    margin-bottom: 5px;
+    padding-left: 15px;
+    font-weight: 300;
+    font-size: 25px;
+    margin-top: 0;
+}
+
+.postedAlgorithm p {
+    padding-left: 15px;
+    margin-bottom: 1px;
+}
+
+.postedAlgorithm p span {
+    font-weight: 600;
+}
+
+.postedAlgorithm .glyphicon-remove {
+    color: red;
+    top: 2px;
+}
+
+.boxWrapper {
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.boxWrapper h1 {
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+p.subtitle {
+    font-style: italic;
+    font-weight: 700;
+    padding-left: 20%;
+}
+
+textarea {
+    resize: none;
+}
+.conversation .input-group-addon {
+    background-color: #F1BB59;
+}
+
+.statisticsBox {
+    position: absolute;
+    right: 30px;
+}
+
+.statisticsBox .glyphicon-arrow-up {
+    color: #1bc11b;
+}
+
+.statisticsBox .glyphicon-arrow-down {
+    color: orangered;
+}
+
+.statisticsBox .report a {
+    color: #933513;
+}
+
+.posted .ace_gutter {
+    width: 120px;
+}
+
+.posted .ace_gutter .ace_layer {
+    width: 120px !important;
+}
+
+.posted .ace_gutter .ace_layer .ace_gutter-cell:hover {
+    background: white;
+    color: black;
+    cursor: pointer;
+}

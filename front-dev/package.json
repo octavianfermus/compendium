@@ -1,0 +1,19 @@
+{
+  "name": "compendium",
+  "version": "1.0.0",
+  "description": "Algorithm Compendium Front End",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Fermus Octavian",
+  "license": "ISC",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-compass": "^1.0.4",
+    "grunt-contrib-jshint": "^0.12.0",
+    "grunt-contrib-sass": "^0.9.2",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-sass": "^1.1.0"
+  }
+}
