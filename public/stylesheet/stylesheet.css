@@ -1,16 +1,16 @@
 .top-navbar .navbar-brand {
   color: white;
   padding-right: 0;
-  transition: all 0.17s;
+  transition: all 0.18s;
 }
 .top-navbar .navbar-nav > li > .dropdown-menu {
   padding: 0;
 }
 .top-navbar .navbar-nav > li > .dropdown-menu li a {
-  transition: all 0.17s;
+  transition: all 0.18s;
 }
 .top-navbar .navbar-nav > li > a {
-  transition: all 0.17s;
+  transition: all 0.18s;
   color: black;
   font-weight: 500;
 }
@@ -28,7 +28,7 @@
   background: transparent;
 }
 .top-navbar.navbar-default .navbar-toggle {
-  transition: all 0.17s;
+  transition: all 0.18s;
   border-color: white;
 }
 .top-navbar.navbar-default .navbar-toggle .icon-bar {
@@ -53,7 +53,7 @@
 
 @media (max-width: 767px) {
   .top-navbar.navbar-default .navbar-nav .open .dropdown-menu > li {
-    transition: all 0.17s;
+    transition: all 0.18s;
   }
   .top-navbar.navbar-default .navbar-nav .open .dropdown-menu > li > a {
     color: black;
