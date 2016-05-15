@@ -46,55 +46,66 @@
 
             <div class="col-md-5">
                 <ul class="nav nav-tabs">
-                    <li role="presentation" class="active"><a id="register-tab" role="tab" data-toggle="tab" aria-controls="register-form" aria-expanded="true" href="#register-form">Register</a></li>
-                    <li role="presentation"><a id="login-tab" role="tab" data-toggle="tab" aria-controls="login-form" aria-expanded="true" href="#login-form">Login</a></li>
+                    <li role="presentation"><a id="register-tab" role="tab" data-toggle="tab" aria-controls="register-form" aria-expanded="true" href="#register-form">Register</a></li>
+                    <li role="presentation" class="active"><a id="login-tab" role="tab" data-toggle="tab" aria-controls="login-form" aria-expanded="true" href="#login-form">Login</a></li>
                     <li role="presentation"><a id="forgotten-tab" role="tab" data-toggle="tab" aria-controls="forgotten-form" aria-expanded="true" href="#forgotten-form">Forgotten Password</a></li>
                 </ul>
                 <div class="tab-content"> 
-                    <div role="tabpanel" class="tab-pane fade active in" id="register-form" aria-labelledby="register-tab"> 
-                        <form role="form" class="register-form">
+                    <div role="tabpanel" class="tab-pane fade" id="register-form" aria-labelledby="register-tab">
+                       <!--
+    <ul>
+        @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+    
+    
+ 
+    
+ -->
+                        {{ Form::open(array('url'=>'users/create', 'class'=>'register-form')) }}
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <input name="lastName" id="lastName" type="text" placeholder="last name.." class="form-control">
+                                        {{ Form::text('last_name', null, array('class'=>'form-control', 'id'=>'lastName', 'placeholder'=>'last name..')) }}
                                     </div>
                                     <div class="col-md-6">
-                                        <input name="firstName" id="firstName" type="text" placeholder="first name.." class="form-control">
+                                        {{ Form::text('first_name', null, array('class'=>'form-control', 'id'=>'firstName', 'placeholder'=>'first name..')) }}
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <input type="email" class="form-control" id="email" placeholder="email..">
+                                {{ Form::text('email', null, array('class'=>'form-control', 'id'=>'email', 'placeholder'=>'email..')) }}
                             </div>
                             <div class="form-group">
                                 <div class="row">
                                     <div class="col-sm-6">
-                                        <input type="password" class="form-control" id="password" placeholder="password..">
+                                        {{ Form::password('password', array('class'=>'form-control', 'id'=>'password', 'placeholder'=>'password..')) }}
                                     </div>
                                     <div class="col-sm-6">
-                                        <input type="password" class="form-control" id="password" placeholder="repeat password..">
+                                        {{ Form::password('password_confirmation', array('class'=>'form-control', 'id'=>'password_confirmation', 'placeholder'=>'repeat password..')) }}
                                     </div>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <button type="submit" class="btn">Register</button>
+                                {{ Form::submit('Register', array('class'=>'btn'))}}
                             </div>
-                        </form>
+                        {{ Form::close() }}
                     </div> 
-                    <div role="tabpanel" class="tab-pane fade" id="login-form" aria-labelledby="login-tab"> 
-                        <form role="form" action="home.html" method="post">
+                    <div role="tabpanel" class="tab-pane fade active in" id="login-form" aria-labelledby="login-tab"> 
+                        {{ Form::open(array('url'=>'users/signin', 'class'=>'form-signin')) }}
                             <div class="form-group">
-                                <input type="text" class="form-control" id="email" placeholder="email..">
+                                {{ Form::text('email', null, array('class'=>'form-control', 'id'=>'email', 'placeholder'=>'email..')) }}
                             </div>
 
                             <div class="form-group">
-                                <input type="password" class="form-control" id="password" placeholder="password..">
+                                {{ Form::password('password', array('class'=>'form-control', 'id'=>'password', 'placeholder'=>'password..')) }}
                             </div>
 
                             <div class="text-right">
-                                <button type="submit" class="btn">Login</button>
+                                {{ Form::submit('Login', array('class'=>'btn'))}}
                             </div>
-                        </form>
+                        {{ Form::close() }}
                     </div> 
                     <div role="tabpanel" class="tab-pane fade" id="forgotten-form" aria-labelledby="forgotten-tab">  
                         <form role="form" action="landing.html">

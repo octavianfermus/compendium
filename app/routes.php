@@ -13,12 +13,21 @@
 
 Route::get('/', function()
 {
-	return View::make('landing');
+    if (Auth::guest()==true) {
+        return View::make('landing');
+    } else {
+	   return View::make('home');
+    }
 });
 
 Route::get('users', function()
 {
     $users = User::all();
-
     return View::make('users')->with('users', $users);
+});
+	
+Route::controller('users', 'UsersController');
+
+Route::get('check', function() {
+    return View::make('check');
 });
