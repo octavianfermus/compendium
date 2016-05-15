@@ -52,17 +52,6 @@
                 </ul>
                 <div class="tab-content"> 
                     <div role="tabpanel" class="tab-pane fade" id="register-form" aria-labelledby="register-tab">
-                       <!--
-    <ul>
-        @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-    
-    
- 
-    
- -->
                         {{ Form::open(array('url'=>'users/create', 'class'=>'register-form')) }}
                             <div class="form-group">
                                 <div class="row">
@@ -123,13 +112,27 @@
             </div>
         </div>
     </div>
-    <div class="container footer-side">
-        <div class="row">
-            <div class="col-md-12">
-                <p>University of Alexandru Ioan Cuza</p>
-                <p>Fermuș V. Vasile-Octavian</p>
-            </div>
-
-        </div>
-    </div>
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Errors</h4>
+                </div>
+                <div class="modal-body">
+                    @if(count($errors))
+                    <ul>
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <script src="{{ URL::to('scripts/landing.js') }}"></script>
 @stop

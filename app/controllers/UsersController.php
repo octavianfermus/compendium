@@ -26,7 +26,7 @@ class UsersController extends BaseController {
             }
         } else {
             //Failure
-            return Redirect::to('/')->with('message', 'The following errors occurred')->withErrors($validator)->withInput();
+            return Redirect::to('/')->withErrors($validator)->withInput();
         }
     }
     public function postSignin() {
@@ -35,6 +35,7 @@ class UsersController extends BaseController {
         } else {
             //Failure
             return Redirect::to('/')
+                ->withErrors(["Your email/password combination is invalid."])
                 ->withInput();
         }     
     }
