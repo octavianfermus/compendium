@@ -17,7 +17,7 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
               <ul class="nav navbar-nav navbar-right">
-                <li class><a href="home.html">Home</a></li>
+                <li class>{{ HTML::link('/', 'Home') }}</li>
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Links <span class="caret"></span></a>
                   <ul class="dropdown-menu">
@@ -51,7 +51,7 @@
                 <div class="col-md-12 main">
                     <div class="boxWrapper">
                         <h1>Algorithm management</h1>
-                        <p>Hello, <span class="person" id="person-me">Octavian</span>. Here you can search algorithms or choose to post one yourself.</p>
+                        <p>Hello, <span class="person" id="person-me">{{Auth::user()->last_name;}} {{Auth::user()->first_name;}}</span>. Here you can search algorithms or choose to post one yourself.</p>
                     </div>
                     <ul class="nav nav-tabs" style="margin-bottom: 25px">
                         <li role="presentation" class="active"><a id="my-posts-tab" role="tab" data-toggle="tab" aria-controls="my-posts" aria-expanded="true" href="#my-posts">My posts</a></li>
@@ -278,16 +278,6 @@
                 </div> 
             </div>
         </div>
-        
-
-        <div class="container footer-side">
-            <div class="row">
-                <div class="col-md-12">
-                    <p>University of Alexandru Ioan Cuza</p>
-                    <p>Fermuș V. Vasile-Octavian</p>
-                </div>
-            </div>
-        </div>
 
         <div class="modal fade" id="requestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
           <div class="modal-dialog" role="document">
@@ -318,10 +308,8 @@
             </div>
           </div>
         </div>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script src="js/ace/ace.js"></script>
-        <script src="js/ace/mode-ruby.js"></script>
-        <script src="js/jquery-ace.min.js"></script>
-        <script src="js/bootstrap.min.js"></script>
-        <script src="js/scripts.js"></script>
+        <script src="{{ URL::to('scripts/ace/ace.js') }}"></script>
+        <script src="{{ URL::to('scripts/ace/mode-ruby.js') }}"></script>
+        <script src="{{ URL::to('scripts/jquery-ace.min.js') }}"></script>
+        <script src="{{ URL::to('scripts/scripts.js') }}"></script>
 @stop
