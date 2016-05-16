@@ -62,15 +62,14 @@
                         {{ Form::close() }}
                     </div> 
                     <div role="tabpanel" class="tab-pane fade" id="forgotten-form" aria-labelledby="forgotten-tab">  
-                        <form role="form" action="landing.html">
-
+                        {{ Form::open(array('url'=>'password/postEmailReset', 'class'=>'form-reset')) }}
                             <div class="form-group">
-                                <input type="password" class="form-control" id="password" placeholder="password..">
+                                {{ Form::text('email', null, array('class'=>'form-control', 'id'=>'email', 'placeholder'=>'email..')) }}
                             </div>
-                             <div class="text-right">
-                                <button type="submit" class="btn">Send password reset email</button>
+                            <div class="text-right">
+                                {{ Form::submit('Send password reset email', array('class'=>'btn'))}}
                             </div>
-                        </form>
+                        {{ Form::close() }}
                     </div> 
                 </div>
 

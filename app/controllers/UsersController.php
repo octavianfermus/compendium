@@ -1,6 +1,10 @@
 <?php
- 
-class UsersController extends BaseController {
+
+use Illuminate\Auth\Reminders\RemindableTrait;
+use Illuminate\Auth\Reminders\RemindableInterface;
+
+class UsersController extends BaseController implements RemindableInterface {
+    use RemindableTrait;
     public function getRegister() {
         $this->layout->content = View::make('landing');
     }

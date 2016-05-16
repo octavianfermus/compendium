@@ -28,6 +28,14 @@ Route::get('users', function()
 	
 Route::controller('users', 'UsersController');
 
+Route::get('password/email', 'Auth\PasswordController@getEmail');
+Route::post('password/email', 'Auth\PasswordController@postEmail');
+
+// Password reset routes...
+Route::get('password/reset/{token}', 'Auth\PasswordController@getReset');
+Route::post('password/reset', 'Auth\PasswordController@postReset');
+
+Route::post('password/emailreset', 'Auth\PasswordController@postEmailReset');
 Route::get('check', function() {
     return View::make('check');
 });
