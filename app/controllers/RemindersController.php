@@ -47,11 +47,7 @@ class RemindersController extends Controller {
 	 *
 	 * @return Response
 	 */
-    public function postEmailReset()
-	{
-        $credentials = Input::only('email');
-        return Redirect::to('/');
-    }
+    
 	public function postReset()
 	{
 		$credentials = Input::only(
@@ -76,5 +72,15 @@ class RemindersController extends Controller {
 				return Redirect::to('/');
 		}
 	}
-
+    public function postEmailReset()
+	{
+        $email = Input::get('email');
+        //$results = DB::select('select * from users where email = "'.$email."'", array(1));
+        $results = DB::select("select * from users where email = ?", array($email));
+        if(count($results)) {
+            return Redirect::to('/')->withErrors(["Password reset email has been sent. Check your email!"]);
+        } else {
+            return Redirect::to('/')->withErrors(["No user with that email has been found."]);
+        }
+    }
 }

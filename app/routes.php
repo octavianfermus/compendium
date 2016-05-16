@@ -35,7 +35,7 @@ Route::post('password/email', 'Auth\PasswordController@postEmail');
 Route::get('password/reset/{token}', 'Auth\PasswordController@getReset');
 Route::post('password/reset', 'Auth\PasswordController@postReset');
 
-Route::post('password/emailreset', 'Auth\PasswordController@postEmailReset');
+Route::post('password/postEmailReset', 'RemindersController@postEmailReset');
 Route::get('check', function() {
     return View::make('check');
 });
