@@ -28,7 +28,7 @@
     &.navbar-default {
         background-color: transparent;
         color: white;
-        margin-bottom: 0;
+        margin-bottom: $default-margin;
         border: none;
         .navbar-nav {
             .open {

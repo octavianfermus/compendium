@@ -35,3 +35,19 @@ Route::get('check', function() {
 Route::get('contact', function() {
     return View::make('contact');
 });
+
+Route::get('about', function() {
+    return View::make('about');
+});
+
+Route::get('admin', function() {
+    return View::make('admin');
+});
+
+Route::get('profile', function() {
+    return View::make('profile');
+});
+
+Route::get('notifications', function() {
+    return View::make('notifications');
+});

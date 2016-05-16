@@ -21,7 +21,7 @@
 .top-navbar.navbar-default {
   background-color: transparent;
   color: white;
-  margin-bottom: 0;
+  margin-bottom: 20px;
   border: none;
 }
 .top-navbar.navbar-default .navbar-nav .open > a, .top-navbar.navbar-default .navbar-nav .open > a:focus, .top-navbar.navbar-default .navbar-nav .open > a:hover {

@@ -34,22 +34,20 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Profile <span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="#">Details</a></li>
-                                <li>@if(Auth::user()->user_type!=1) {{ HTML::link('users/admin', 'Admin Page') }} @endif</li>
+                                <li>{{ HTML::link('profile', 'Profile') }}</li>
+                                <li>@if(Auth::user()->user_type!=1) {{ HTML::link('admin', 'Admin Page') }} @endif</li>
                                 <li role="separator" class="divider"></li>
                                 <li>{{ HTML::link('users/logout', 'Logout') }}</li>
                             </ul>
                         </li>
-                        <li><a href="notifications.html">Notifications <span class="messageCount">99+</span></a></li>
+                        <li><a href="{{ URL::to('notifications') }}">Notifications <span class="messageCount">99+</span></a></li>
                         @endif
-                        
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Links <span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="#">Lorem</a></li>
-                                <li><a href="#">Ipsum</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="#">Dolor</a></li>
+                                <li><a href="#">Not</a></li>
+                                <li><a href="#">Yet</a></li>
+                                <li><a href="#">Needed.</a></li>
                                 <li role="separator" class="divider"></li>
                                 <li><a href="#">Hi</a></li>
                             </ul>
