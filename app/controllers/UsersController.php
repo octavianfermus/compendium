@@ -19,6 +19,7 @@ class UsersController extends BaseController {
             $user->first_name = Input::get('first_name');
             $user->last_name = Input::get('last_name');
             $user->email = Input::get('email');
+            $user->user_type = 1;
             $user->password = Hash::make(Input::get('password'));
             $user->save();
             if (Auth::attempt(array('email'=>Input::get('email'), 'password'=>Input::get('password')))) {

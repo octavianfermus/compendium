@@ -31,3 +31,7 @@ Route::controller('users', 'UsersController');
 Route::get('check', function() {
     return View::make('check');
 });
+
+Route::get('contact', function() {
+    return View::make('contact');
+});
