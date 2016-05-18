@@ -1,3 +1,4 @@
+
 $(document).ready(function() {
     /*
     $('#postedAlgorithmArea').ace({ 
@@ -15,7 +16,7 @@ $(document).ready(function() {
         x = e.pageX;
         y = e.pageY;
     }
-
+    
     function getMouseX() {
         return x;
     }
@@ -26,6 +27,7 @@ $(document).ready(function() {
     
     var decorator = $('#postedAlgorithmArea').data('ace');
     editor = decorator.editor.ace;
+    
     editor.setReadOnly(true);
     editor.setValue("function isPrime(value) {\n\tfor(var i = 2; i < value; i++) {\n\t\tif(value % i === 0) {\n\t\t\treturn false;\n\t\t}\n\t}\n\treturn value > 1;\n}");
     setTimeout(function() {
@@ -56,20 +58,35 @@ $(document).ready(function() {
             });
         });
     }, 2000);
-    $("#continueToCode").click(function() {
-        $('.my-code-area').ace({ 
-            theme: 'monokai'
-        });
+    
+    */
+    var codeEditor = null;
+    $("#continueToCode").click(function(e) {
+        e.preventDefault();
+        codeEditor = ace.edit("editor");
+        codeEditor.setTheme("ace/theme/monokai");
+        codeEditor.getSession().setMode("ace/mode/javascript");
         $(".ace_editor").css({
             width: "100%",
             height: 500,
             "margin-top": 35,
-            "margin-bottom": 35
+            "margin-bottom": 35,
+            "position": "relative"
         });
         $(".text-right.hidden").removeClass("hidden");
         $("#continueToCode").hide();
     });
-    */
+    
+    $("#saveAsTemplate").click(function(e) {
+        $("#isItTemplate").val("1");
+        $("[name='algorithm_code']").val(codeEditor.getValue());
+        $("#post_algorithm_form #submit_algorithm").click();
+    });
+    $("#publishAlgorithm").click(function(e) {
+        $("#isItTemplate").val("0");
+        $("[name='algorithm_code']").val(codeEditor.getValue());
+        $("#post_algorithm_form #submit_algorithm").click();
+    });
     $(".switcher").click(function() {
         if($(this).siblings("table").hasClass("hidden")) {
             $(this).siblings("table").removeClass("hidden");
@@ -79,5 +96,4 @@ $(document).ready(function() {
             $(this).siblings(".postedAlgorithms").removeClass("hidden");
         }
     });
-    
 });

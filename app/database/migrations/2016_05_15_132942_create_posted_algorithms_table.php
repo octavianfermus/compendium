@@ -18,7 +18,9 @@ class CreatePostedAlgorithmsTable extends Migration {
             $table->string('user_id');
             $table->string('name');
             $table->string('language');
-            $table->string('template');
+            $table->string('description');
+            $table->string('original_link');
+            $table->integer('template');
             $table->integer('upvotes');
             $table->integer('downvotes');
             $table->longText('content');

@@ -203,32 +203,7 @@
                             </div>
                         </div>
                         <div role="tabpanel" class="tab-pane fade" id="post-new" aria-labelledby="post-new-tab"> 
-                            <div class="boxWrapper">
-                                <label>Algorithm name</label>
-                                <input type="text" class="form-control" placeholder="Algorithm name">
-                                <label>Programming Language</label>
-                                <select class="form-control">
-                                    <option>All</option>
-                                    <option>Javascript</option>
-                                    <option>Java</option>
-                                    <option>PHP</option>
-                                    <option>C</option>
-                                    <option>C#</option>
-                                </select>
-                                <label>Description</label>
-                                <textarea class="form-control" placeholder="Add a short description"></textarea>
-                                
-                                <label>Original Link (optional)</label>
-                                <input type="text" class="form-control" placeholder="Original Algorithm Location">
-                                <textarea class="my-code-area" rows="4" style="width: 100%; display: none"></textarea>
-                                <div class="text-right" style="margin-top: 35px;">
-                                    <button class="btn" id="continueToCode">Continue</button>
-                                </div>
-                                <div class="text-right hidden">
-                                    <button class="btn">Save as template</button>
-                                    <button class="btn">Publish</button>
-                                </div>
-                            </div>
+                            @include('post_algorithm')
                         </div>
                     </div>
                 </div> 
@@ -264,8 +239,31 @@
             </div>
           </div>
         </div>
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Errors</h4>
+                </div>
+                <div class="modal-body">
+                    @if(count($errors))
+                    <ul>
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <script src="{{ URL::to('scripts/errorModal.js') }}"></script>
         <script src="{{ URL::to('scripts/ace/ace.js') }}"></script>
         <script src="{{ URL::to('scripts/ace/mode-ruby.js') }}"></script>
         <script src="{{ URL::to('scripts/jquery-ace.min.js') }}"></script>
-        <script src="{{ URL::to('scripts/scripts.js') }}"></script>
+        <script src="{{ URL::to('scripts/postAlgorithm.js') }}"></script>
 @stop

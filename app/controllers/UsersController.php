@@ -131,6 +131,11 @@ class UsersController extends BaseController implements RemindableInterface {
             return Redirect::to('/');
         }
     }
+    public function postPushalgorithm() {
+        $input = Input::all();
+        DB::insert('insert into algorithms (user_id, name, description, language,original_link, template, content) values (?, ?, ?, ?, ?, ?, ?)', array(Auth::user()->id, Input::get('algorithm_name'), Input::get('algorithm_description'), Input::get('original_link'), Input::get('language'), Input::get('template'), Input::get('algorithm_code')));
+        return Redirect::to('/')->withErrors(['Algorithm successfully added.']);
+    }
 }
 
 ?>

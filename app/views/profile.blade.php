@@ -78,5 +78,5 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    <script src="{{ URL::to('scripts/landing.js') }}"></script>
+    <script src="{{ URL::to('scripts/errorModal.js') }}"></script>
 @stop
