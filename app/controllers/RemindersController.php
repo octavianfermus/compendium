@@ -75,7 +75,6 @@ class RemindersController extends Controller {
     public function postEmailReset()
 	{
         $email = Input::get('email');
-        //$results = DB::select('select * from users where email = "'.$email."'", array(1));
         $results = DB::select("select * from users where email = ?", array($email));
         if(count($results)) {
             return Redirect::to('/')->withErrors(["Password reset email has been sent. Check your email!"]);

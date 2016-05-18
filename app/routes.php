@@ -36,6 +36,7 @@ Route::get('password/reset/{token}', 'Auth\PasswordController@getReset');
 Route::post('password/reset', 'Auth\PasswordController@postReset');
 
 Route::post('password/postEmailReset', 'RemindersController@postEmailReset');
+
 Route::get('check', function() {
     return View::make('check');
 });
@@ -46,14 +47,6 @@ Route::get('contact', function() {
 
 Route::get('about', function() {
     return View::make('about');
-});
-
-Route::get('admin', function() {
-    return View::make('admin');
-});
-
-Route::get('profile', function() {
-    return View::make('profile');
 });
 
 Route::get('notifications', function() {
