@@ -87,13 +87,5 @@ $(document).ready(function() {
         $("[name='algorithm_code']").val(codeEditor.getValue());
         $("#post_algorithm_form #submit_algorithm").click();
     });
-    $(".switcher").click(function() {
-        if($(this).siblings("table").hasClass("hidden")) {
-            $(this).siblings("table").removeClass("hidden");
-            $(this).siblings(".postedAlgorithms").addClass("hidden");
-        } else {
-            $(this).siblings("table").addClass("hidden");
-            $(this).siblings(".postedAlgorithms").removeClass("hidden");
-        }
-    });
+    
 });

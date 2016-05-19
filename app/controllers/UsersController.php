@@ -26,7 +26,24 @@ class UsersController extends BaseController implements RemindableInterface {
     public function getAdmin() {
         return View::make('admin');
     }
-    
+    public function getPostedalgorithms() {
+        $algorithms_unfiltered = DB::table('algorithms')->where('user_id', '=', Auth::user()->id)->get();
+        $algorithms = array();
+        $algorithms["data"]=array();
+        foreach ($algorithms_unfiltered as $array) {
+            $singular = array();
+            $singular["id"] = $array->id;
+            $singular["name"] = $array->name;
+            $singular["language"] = $array->language;
+            $singular["description"] = $array->description;
+            $singular["template"] = $array->template;
+            $singular["upvotes"] = $array->upvotes;
+            $singular["downvotes"] = $array->downvotes;
+            $singular["views"] = $array->views;
+            $algorithms["data"][]=$singular;
+        }
+        return Response::json($algorithms);
+    }
     public function postCreate() {
         $validator = Validator::make(Input::all(), User::$rules);
         
@@ -131,10 +148,43 @@ class UsersController extends BaseController implements RemindableInterface {
             return Redirect::to('/');
         }
     }
+    public function putDeletealgorithm() {
+        $algorithmId = Request::input('data.id');
+        $found = DB::table('algorithms')
+                    ->where('id', '=', $algorithmId)
+                    ->where('user_id', '=', Auth::user()->id)
+                    ->count();
+        if($found==1) {
+            DB::delete('delete from algorithms where id = ? and user_id = ?', array($algorithmId, Auth::user()->id));
+            return Response::json(array('state' => 'success', 'message'=>'Algorithm successfuly deleted.'));
+        }
+        return Response::json(array('state' => 'failure', 'message'=>'Algorithm not found.'));
+    }
     public function postPushalgorithm() {
         $input = Input::all();
-        DB::insert('insert into algorithms (user_id, name, description, language,original_link, template, content) values (?, ?, ?, ?, ?, ?, ?)', array(Auth::user()->id, Input::get('algorithm_name'), Input::get('algorithm_description'), Input::get('original_link'), Input::get('language'), Input::get('template'), Input::get('algorithm_code')));
+        DB::insert('insert into algorithms (user_id, name, description, language,original_link, template, content) values (?, ?, ?, ?, ?, ?, ?)', array(
+            Auth::user()->id, 
+            Input::get('algorithm_name'), 
+            Input::get('algorithm_description'), 
+            Input::get('original_link'), 
+            Input::get('language'), 
+            Input::get('template'), 
+            Input::get('algorithm_code'))
+                  );
         return Redirect::to('/')->withErrors(['Algorithm successfully added.']);
+    }
+    public function putPublishalgorithm() {
+        $algorithmId = Request::input('data.id');
+        $found = DB::table('algorithms')
+                    ->where('id', '=', $algorithmId)
+                    ->where('user_id', '=', Auth::user()->id)
+                    ->where('template', '=', 1)
+                    ->count();
+        if($found==1) {
+            DB::update('update algorithms set template = 0 where user_id = ? and id = ?', array(Auth::user()->id, $algorithmId));
+            return Response::json(array('state' => 'success', 'message'=>'Algorithm successfuly published.'));
+        }
+        return Response::json(array('state' => 'failure', 'message'=>'Algorithm not found.'));
     }
 }
 

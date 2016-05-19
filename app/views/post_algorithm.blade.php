@@ -27,5 +27,4 @@
             <button class="btn" id="saveAsTemplate">Save as template</button>
             <button class="btn" id="publishAlgorithm">Publish</button>
         </div>
-
 </div>

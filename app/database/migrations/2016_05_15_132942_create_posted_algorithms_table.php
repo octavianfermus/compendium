@@ -23,6 +23,7 @@ class CreatePostedAlgorithmsTable extends Migration {
             $table->integer('template');
             $table->integer('upvotes');
             $table->integer('downvotes');
+            $table->integer('views');
             $table->longText('content');
             $table->timestamps();      
         });
