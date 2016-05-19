@@ -166,8 +166,8 @@ class UsersController extends BaseController implements RemindableInterface {
             Auth::user()->id, 
             Input::get('algorithm_name'), 
             Input::get('algorithm_description'), 
-            Input::get('original_link'), 
             Input::get('language'), 
+            Input::get('original_link'), 
             Input::get('template'), 
             Input::get('algorithm_code'))
                   );
