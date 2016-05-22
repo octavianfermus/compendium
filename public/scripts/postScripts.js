@@ -8,7 +8,7 @@ $(document).ready(function() {
             data: {id: postId},
             success: function (data) {
                 console.log(data);
-                //$("#creatorUsername").html(username);
+                $("#creatorUsername").html(data.username);
                 $("#upvoteSpan").html(data.upvotes);
                 $("#downvoteSpan").html(data.downvotes);
                 $("#viewSpan").html(data.views);
