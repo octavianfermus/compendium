@@ -29,7 +29,7 @@ $(document).ready(function () {
             $(".postedAlgorithms").html("");
             $.each(data, function (index, value) {
                 var toAppend = '<div class="postedAlgorithm">' +
-                    '<h2><a target="_blank" href="algorithm?id=' + value.id + '">' + value.name + '</a> (<span>Language</span>: ' + value.language + ')</h2>' +
+                    '<h2><a target="_blank" href="posts/' + value.id + '">' + value.name + '</a> (<span>Language</span>: ' + value.language + ')</h2>' +
                     '<p><span>Description</span>: ' + value.description + '</p>' +
                     '<p><span>Ratings</span>: ' + value.upvotes + ' upvotes, ' + value.downvotes + ' downvotes with an aproval of ' + getApproval(value.upvotes, value.downvotes) + '%</p>' +
                     '<p>' + value.views + ' views, 0 comments</p>' +
@@ -70,7 +70,6 @@ $(document).ready(function () {
                 }
                 
             });
-            
         },
         deletePost = function(id) {
             var data = {

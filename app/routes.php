@@ -52,3 +52,29 @@ Route::get('about', function() {
 Route::get('notifications', function() {
     return View::make('notifications');
 });
+
+Route::get('posts/{id}', function ($postId) {
+    return View::make('post');
+});
+
+Route::get('post/postdata', function() {
+    $algorithmId = Request::input('id');
+    $returnData = array();
+    $found = DB::table('algorithms')
+                ->where('id', '=', $algorithmId)
+                ->where('template', '=', 0)
+                ->count();
+    if($found==1) {
+        $unparsedData = DB::select('select * from algorithms where id = ?', array($algorithmId));
+        $returnData["upvotes"] = $unparsedData[0]->upvotes;
+        $returnData["downvotes"] = $unparsedData[0]->downvotes;
+        $returnData["views"] = $unparsedData[0]->views;
+        $returnData["name"] = $unparsedData[0]->name;
+        $returnData["original_link"] = $unparsedData[0]->original_link;
+        $returnData["content"] = $unparsedData[0]->content;
+        $returnData["description"] = $unparsedData[0]->description;
+        $returnData["language"] = $unparsedData[0]->language;
+        return Response::json($returnData);
+    }
+    return Response::json(array('data'=>$returnData));
+});
