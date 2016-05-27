@@ -54,7 +54,14 @@ Route::get('notifications', function() {
 });
 
 Route::get('posts/{id}', function ($postId) {
-    return View::make('post');
+    $found = DB::table('algorithms')
+                ->where('id', '=', $postId)
+                ->where('template', '=', 0)
+                ->count();
+    if($found==1) {
+        return View::make('post');
+    } 
+    return View::make('404');
 });
 
 Route::get('post/postdata', function() {

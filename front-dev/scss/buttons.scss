@@ -1,0 +1,9 @@
+.btn {
+    border-radius: 0;
+    background: $main-color;
+    color: black;
+    font-weight: 700;
+    &.danger {
+        background-color: red;
+    }
+}

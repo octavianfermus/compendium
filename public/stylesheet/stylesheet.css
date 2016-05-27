@@ -64,13 +64,23 @@
     background: white;
   }
 }
+.btn {
+  border-radius: 0;
+  background: #F1BB59;
+  color: black;
+  font-weight: 700;
+}
+.btn.danger {
+  background-color: red;
+}
+
 body {
   background: #E9E9E9;
   min-width: 340px;
   font-family: "Open Sans", sans-serif;
 }
 
-.form-control, .btn {
+.form-control {
   border-radius: 0;
 }
 
@@ -85,12 +95,6 @@ body {
   display: inline-block;
   font-weight: 700;
   color: white;
-}
-
-.btn {
-  background: #F1BB59;
-  color: black;
-  font-weight: 500;
 }
 
 a:hover {

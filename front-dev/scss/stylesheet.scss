@@ -1,5 +1,6 @@
 @import 'global-settings.scss';
 @import 'navigation-bar.scss';
+@import 'buttons.scss';
 
 body { 
     background: $background-color;
@@ -7,7 +8,7 @@ body {
     font-family: $main-font;
 }
 
-.form-control, .btn {
+.form-control {
     border-radius: 0;
 }
 
@@ -22,12 +23,6 @@ body {
     display: inline-block;
     font-weight: 700;
     color: white;
-}
-
-.btn {
-    background: $main-color;
-    color: black;
-    font-weight: 500;
 }
 
 a:hover {

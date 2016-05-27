@@ -11,6 +11,18 @@ class UsersController extends BaseController implements RemindableInterface {
     public function getLogin() {
         return View::make('landing');
     }
+    public function getEditalgorithm($algorithmId) {
+        if(Auth::check()) {
+            $found = DB::table('algorithms')
+                ->where('user_id', '=', Auth::user()->id)
+                ->where('id', '=', $algorithmId)
+                ->where('template', '=', 1)
+                ->count();
+            if($found==1) {
+                return View::make('edit');
+            }
+        }
+    }
     public function getLogout() {
         Session::flush();
         return Redirect::to('/');
@@ -173,6 +185,22 @@ class UsersController extends BaseController implements RemindableInterface {
                   );
         return Redirect::to('/')->withErrors(['Algorithm successfully added.']);
     }
+    public function postEditalgorithm() {
+        $input = Input::all();
+        DB::update('update algorithms set name = ?, language = ?, description = ?, template = ?, original_link = ?, content = ? where id = ?', array(
+            Input::get('algorithm_name'), 
+            Input::get('language'), 
+            Input::get('algorithm_description'), 
+            Input::get('template'), 
+            Input::get('original_link'), 
+            Input::get('algorithm_code'),
+            Input::get('algorithm_id')));
+        if(Input::get('template') == 0) {
+            return Redirect::to('/')->withErrors("Algorithm successfuly published.");
+        } else {
+            return Redirect::to('/users/editalgorithm/'.Input::get('algorithm_id'))->withErrors("Algorithm successfuly updated.");
+        }
+    }
     public function putPublishalgorithm() {
         $algorithmId = Request::input('data.id');
         $found = DB::table('algorithms')
@@ -185,6 +213,27 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'success', 'message'=>'Algorithm successfuly published.'));
         }
         return Response::json(array('state' => 'failure', 'message'=>'Algorithm not found.'));
+    }
+    public function getTemplatedata() {
+        $algorithmId = Request::input('id');
+        $returnData = array();
+        $found = DB::table('algorithms')
+                    ->where('id', '=', $algorithmId)
+                    ->where('template', '=', 1)
+                    ->count();
+        if($found==1) {
+            $unparsedData = DB::select('select * from algorithms where id = ?', array($algorithmId));
+            $returnData["name"] = $unparsedData[0]->name;
+            $returnData["original_link"] = $unparsedData[0]->original_link;
+            $returnData["content"] = $unparsedData[0]->content;
+            $returnData["description"] = $unparsedData[0]->description;
+            $returnData["language"] = $unparsedData[0]->language;
+            $returnData["creator_id"] = $unparsedData[0]->user_id;
+            $returnData["algorithm_id"] = $algorithmId;
+            return Response::json($returnData);
+        }
+        return Response::json(array('data'=>$found));
+       
     }
 }
 
