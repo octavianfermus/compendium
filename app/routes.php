@@ -64,6 +64,31 @@ Route::get('posts/{id}', function ($postId) {
     return View::make('404');
 });
 
+Route::post('post/searchalgorithm', function() {
+    $tags = Request::input('tags');
+    $language = Request::input('language');
+    $ratio = Request::input('ratio');
+    if($tags=="" && $language=="All" && $ratio == "false") {
+        $algorithms_unfiltered = DB::table('algorithms')->get();
+        $algorithms = array();
+        $algorithms["data"]=array();
+        foreach ($algorithms_unfiltered as $array) {
+            $singular = array();
+            $singular["id"] = $array->id;
+            $singular["user_id"] = $array->user_id;
+            $singular["name"] = $array->name;
+            $singular["language"] = $array->language;
+            $singular["description"] = $array->description;
+            $singular["template"] = $array->template;
+            $singular["upvotes"] = $array->upvotes;
+            $singular["downvotes"] = $array->downvotes;
+            $singular["views"] = $array->views;
+            $algorithms["data"][]=$singular;
+        }
+        return Response::json($algorithms);
+    }
+    return Response::json(array('data'=>"some"));
+});
 Route::get('post/postdata', function() {
     $algorithmId = Request::input('id');
     $returnData = array();

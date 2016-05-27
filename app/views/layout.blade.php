@@ -7,6 +7,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Algorithm Compendium</title>
         <link href="{{ URL::asset('stylesheet/bootstrap.min.css')}}" rel="stylesheet">
+        <link href="{{ URL::asset('stylesheet/jquery.tagit.css')}}" rel="stylesheet">
+        <link href="{{ URL::asset('stylesheet/tagit.ui-zendesk.css')}}" rel="stylesheet" type="text/css">
         <link href="{{ URL::asset('stylesheet/stylesheet.css')}}" rel="stylesheet">
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700' rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
