@@ -82,4 +82,7 @@ $(document).ready(function () {
             $(this).siblings(".searchedAlgorithms").removeClass("hidden");
         }
     });
+    $("#submitRequest").click(function() {
+        $("#submit_algorithm_form input[type='submit']").click();
+    });
 });

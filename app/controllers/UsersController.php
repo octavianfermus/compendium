@@ -201,6 +201,26 @@ class UsersController extends BaseController implements RemindableInterface {
             return Redirect::to('/users/editalgorithm/'.Input::get('algorithm_id'))->withErrors("Algorithm successfuly updated.");
         }
     }
+    public function postSubmitrequest() {
+        if(Auth::check()) {
+            $algorithm_name = Input::get('algorithm_name');
+            $algorithmdescription = Input::get('algorithm_description');
+            $language = Input::get('language');
+            if($algorithm_name =="" || $algorithmdescription =="" || $language =="") {
+                return Redirect::to('/')->withErrors("All request fields must be completed.")->withInput();
+            }
+            DB::insert('insert into algorithm_requests (user_id, name, description, language) values (?, ?, ?, ?)', array(
+            Auth::user()->id, 
+                Input::get('algorithm_name'), 
+                Input::get('algorithm_description'), 
+                Input::get('language'))
+            );
+            return Redirect::to('/')->withErrors("Algorithm request successfully submitted.");
+        } else {
+            return Redirect::to('404');
+        }
+        
+    }
     public function putPublishalgorithm() {
         $algorithmId = Request::input('data.id');
         $found = DB::table('algorithms')

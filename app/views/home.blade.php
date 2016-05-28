@@ -30,28 +30,7 @@
             </div>
         </div>
 
-        <div class="modal fade" id="requestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Request Algorithm</h4>
-              </div>
-              <div class="modal-body">
-                <label>Algorithm Name</label>
-                <input type="text" class="form-control" placeholder="algorithm title..">
-                <label>Algorithm Description</label>
-                <textarea class="form-control" placeholder="short algorithm description.."></textarea>
-                <label>Programming Language</label>
-                <input class="form-control" name="language" placeholder="programming language..">
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Submit Request</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        
     <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">

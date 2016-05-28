@@ -9,7 +9,6 @@
         <link href="{{ URL::asset('stylesheet/bootstrap.min.css')}}" rel="stylesheet">
         <link href="{{ URL::asset('stylesheet/jquery.tagit.css')}}" rel="stylesheet">
         <link href="{{ URL::asset('stylesheet/tagit.ui-zendesk.css')}}" rel="stylesheet" type="text/css">
-        <link href="{{ URL::asset('stylesheet/stylesheet.css')}}" rel="stylesheet">
         <link href="{{ URL::asset('stylesheet/jquery-ui.min.css')}}" rel="stylesheet">
         <link href="{{ URL::asset('stylesheet/jquery-ui.theme.min.css')}}" rel="stylesheet">
         <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700' rel='stylesheet' type='text/css'>
@@ -20,6 +19,7 @@
         <script src="{{ URL::to('scripts/searchAlgorithms.js') }}"></script>
         <script src="{{ URL::to('scripts/jquery-ui.min.js') }}"></script>
         <script src="{{ URL::to('scripts/tag-it.min.js') }}"></script>
+        <link href="{{ URL::asset('stylesheet/stylesheet.css')}}" rel="stylesheet">
     </head>
     <body>
         <nav class="navbar navbar-default top-navbar">

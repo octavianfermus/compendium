@@ -2,7 +2,7 @@
     {{ Form::open(array('url'=>'users/pushalgorithm', 'id'=>'post_algorithm_form')) }}
         {{ Form::label('algorithm_name', 'Algorithm name') }}
         {{ Form::text('algorithm_name', null, array('class'=>'form-control', 'placeholder'=>'algorithm name..')) }}
-        {{ Form::label('programming_language', 'Programming Language') }}
+        {{ Form::label('language', 'Programming Language') }}
         {{ Form::text('language', null, array('class'=>'form-control', 'placeholder'=>'algorithm language..')) }}
         {{ Form::label('description', 'Description') }}
         {{ Form::textarea('algorithm_description', null, array('class'=>'form-control', 'rows'=>'2', 'placeholder'=>'add a short description..')) }}
