@@ -6,36 +6,34 @@ $(document).ready(function () {
             return upvotes / (upvotes + downvotes) * 100;
         },
         createList = function (data) {
-            $(".postedAlgorithms").html("");
+            $(".searchedAlgorithms").html("");
             $.each(data, function (index, value) {
                 var toAppend = '<div class="postedAlgorithm">' +
-                    (value.template ? '<h2><a target="_blank" href="users/editalgorithm/' + value.id + '">' + value.name + '</a> (<span>Language</span>: ' + value.language + ')</h2>': 
-                    '<h2><a target="_blank" href="posts/' + value.id + '">' + value.name + '</a> (<span>Language</span>: ' + value.language + ')</h2>') +
-                    
+                    '<h2><a target="_blank" href="posts/' + value.id + '">' + value.name + '</a> (<span>Language</span>: ' + value.language + ')</h2>' +            
+                    '<p><span>By</span>: ' + value.username + '</p>' +
                     '<p><span>Description</span>: ' + value.description + '</p>' +
                     '<p><span>Ratings</span>: ' + value.upvotes + ' upvotes, ' + value.downvotes + ' downvotes with an aproval of ' + getApproval(value.upvotes, value.downvotes) + '%</p>' +
                     '<p>' + value.views + ' views, 0 comments</p>' +
-                    '<p>' + publishOrDelete(value.template, value.id) + '</p>' +
                     '</div>';
-                $(".postedAlgorithms").append(toAppend);
+                $(".searchedAlgorithms").append(toAppend);
             });
             
         },
         createTable = function (data) {
-            $(".postedAlgorithmsTable tbody").html("");
+            $(".searchedAlgorithmsTable tbody").html("");
             $.each(data, function (index, value) {
                 var toAppend = '<tr>' +
-                    (value.template ? '<td><a target="_blank" href="users/editalgorithm?id=' + value.id + '">' + value.name + '</a></td>' : 
-                    '<td><a target="_blank" href="algorithm?id=' + value.id + '">' + value.name + '</a></td>') +
+                    '<td><a target="_blank" href="posts/' + value.id + '">' + value.name + '</a></td>' +
                     '<td>' + value.language + '</td>' +
                     '<td>' + value.upvotes + '</td>' +
                     '<td>' + value.downvotes + '</td>' +
                     '<td>' + getApproval(value.upvotes, value.downvotes) + '% </td>' +
                     '<td>' + value.views + '</td>' +
                     '<td> 0 </td>' +
-                    '<td>' + publishOrDelete(value.template, value.id) + '</td>' +
+                    '<td>' + value.username+ '</td>' +
                     '</tr>';
-                $(".postedAlgorithmsTable tbody").append(toAppend);
+                console.log(toAppend);
+                $(".searchedAlgorithmsTable tbody").append(toAppend);
             });
         },
         getLists = function (data) {
@@ -46,8 +44,8 @@ $(document).ready(function () {
                 data: data,
                 success: function (data) {
                     console.log(data);
-                    //createList(data.data);
-                    //createTable(data.data);
+                    createList(data.data);
+                    createTable(data.data);
                 },
                 error: function (data) {
                     console.log(data);
@@ -64,5 +62,14 @@ $(document).ready(function () {
         };
         console.log(data);
         getLists(data);
+    });
+    $(".switcher#searchPostsSwitcher").click(function() {
+        if($(this).siblings("table").hasClass("hidden")) {
+            $(this).siblings("table").removeClass("hidden");
+            $(this).siblings(".searchedAlgorithms").addClass("hidden");
+        } else {
+            $(this).siblings("table").addClass("hidden");
+            $(this).siblings(".searchedAlgorithms").removeClass("hidden");
+        }
     });
 });

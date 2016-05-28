@@ -7,7 +7,6 @@ $(document).ready(function() {
             dataType: "json",
             data: {id: postId},
             success: function (data) {
-                console.log(data);
                 $("#creatorUsername").html(data.username);
                 $("#upvoteSpan").html(data.upvotes);
                 $("#downvoteSpan").html(data.downvotes);

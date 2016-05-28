@@ -118,7 +118,7 @@ $(document).ready(function () {
             });
             getLists();
         };
-    $(".switcher").click(function() {
+    $(".switcher#myPostsSwitcher").click(function() {
         if($(this).siblings("table").hasClass("hidden")) {
             $(this).siblings("table").removeClass("hidden");
             $(this).siblings(".postedAlgorithms").addClass("hidden");

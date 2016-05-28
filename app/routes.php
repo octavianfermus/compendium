@@ -69,7 +69,9 @@ Route::post('post/searchalgorithm', function() {
     $language = Request::input('language');
     $ratio = Request::input('ratio');
     if($tags=="" && $language=="All" && $ratio == "false") {
-        $algorithms_unfiltered = DB::table('algorithms')->get();
+        $algorithms_unfiltered = DB::table('algorithms')
+                                    ->where('template','=','0')
+                                    ->get();
         $algorithms = array();
         $algorithms["data"]=array();
         foreach ($algorithms_unfiltered as $array) {
@@ -79,15 +81,88 @@ Route::post('post/searchalgorithm', function() {
             $singular["name"] = $array->name;
             $singular["language"] = $array->language;
             $singular["description"] = $array->description;
-            $singular["template"] = $array->template;
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
             $singular["views"] = $array->views;
+            $name = DB::select('select * from users where id = ?', array($array->user_id));
+            $singular["username"] = $name[0]->last_name." ".$name[0]->first_name;
             $algorithms["data"][]=$singular;
         }
         return Response::json($algorithms);
+    } else {
+        $algorithms_unfiltered_all = DB::table('algorithms')
+            ->where('template','=','0')
+            ->get();
+        $algorithms_unfiltered = array();
+        $algorithms_unfiltered_ratio = array();
+        $algorithms_unfiltered_language = array();
+        if($ratio=="true") {
+            $algorithms_unfiltered_ratio = DB::table('algorithms')
+                ->where('template','=','0')
+                ->where('upvotes','!<','downvotes')
+                ->get();
+        } else {
+            $algorithms_unfiltered_ratio = DB::table('algorithms')
+                ->where('template','=','0')
+                ->get();
+        }
+        if($language!="All") {
+            $algorithms_unfiltered_language = DB::table('algorithms')
+                ->where('template','=','0')
+                ->where('language','=',$language)
+                ->get();
+        } else {
+            $algorithms_unfiltered_language = DB::table('algorithms')
+                ->where('template','=','0')
+                ->get();
+        }
+        
+        foreach ($algorithms_unfiltered_all as $array) {
+            if(in_array($array,$algorithms_unfiltered_language)&&
+               in_array($array,$algorithms_unfiltered_ratio)&&
+               in_array($array,$algorithms_unfiltered_language)) {
+                $algorithms_unfiltered[] = $array;
+            }
+        }
+        $algorithms = array();
+        $algorithms["data"]=array();
+        foreach ($algorithms_unfiltered as $array) {
+            $singular = array();
+            $singular["id"] = $array->id;
+            $singular["user_id"] = $array->user_id;
+            $singular["name"] = $array->name;
+            $singular["language"] = $array->language;
+            $singular["description"] = $array->description;
+            $singular["upvotes"] = $array->upvotes;
+            $singular["downvotes"] = $array->downvotes;
+            $singular["views"] = $array->views;
+            $name = DB::select('select * from users where id = ?', array($array->user_id));
+            $singular["username"] = $name[0]->last_name." ".$name[0]->first_name;
+            if(strlen($tags)) {
+                $tagArray = explode(",", $tags);
+                $inIt = false;
+                
+                
+                foreach($tagArray as $tag) {
+                    if($inIt == false) {
+                        if (
+                            strpos(strtolower($singular["name"]), strtolower($tag)) !== false || 
+                            strpos(strtolower($singular["description"]), strtolower($tag)) !== false ||
+                            strpos(strtolower($singular["username"]), strtolower($tag)) !== false || 
+                            strpos(strtolower($singular["language"]), strtolower($tag)) !== false
+                        ) {
+                            $algorithms["data"][]=$singular;
+                            $inIt = true;
+                        }
+                    }
+                }
+                
+            } else {
+                $algorithms["data"][]=$singular;
+            }
+        }
+        return Response::json($algorithms);
     }
-    return Response::json(array('data'=>"some"));
 });
 Route::get('post/postdata', function() {
     $algorithmId = Request::input('id');

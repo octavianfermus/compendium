@@ -81,7 +81,6 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-    <script src="{{ URL::to('scripts/searchAlgorithms.js') }}"></script>
     <script src="{{ URL::to('scripts/postedAlgorithms.js') }}"></script>
     <script src="{{ URL::to('scripts/errorModal.js') }}"></script>
     <script src="{{ URL::to('scripts/ace/ace.js') }}"></script>
