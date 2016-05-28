@@ -209,11 +209,12 @@ class UsersController extends BaseController implements RemindableInterface {
             if($algorithm_name =="" || $algorithmdescription =="" || $language =="") {
                 return Redirect::to('/')->withErrors("All request fields must be completed.")->withInput();
             }
-            DB::insert('insert into algorithm_requests (user_id, name, description, language) values (?, ?, ?, ?)', array(
+            DB::insert('insert into algorithm_requests (user_id, name, description, language, upvotes) values (?, ?, ?, ?, ?)', array(
             Auth::user()->id, 
                 Input::get('algorithm_name'), 
                 Input::get('algorithm_description'), 
-                Input::get('language'))
+                Input::get('language')),
+                1
             );
             return Redirect::to('/')->withErrors("Algorithm request successfully submitted.");
         } else {

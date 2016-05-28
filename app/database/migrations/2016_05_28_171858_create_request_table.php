@@ -13,6 +13,7 @@ class CreateRequestTable extends Migration {
             $table->string('name');
             $table->string('language');
             $table->string('description');
+            $table->integer('upvotes');
             $table->timestamps();
         });
     }
