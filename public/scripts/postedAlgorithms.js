@@ -73,6 +73,7 @@ $(document).ready(function () {
                         $("#postedErrorMessage").html("You currently don't have any algorithms here.. Why don't you <a href='javascript:void(0)'>post</a> one?</p>");    
                         $(".postedAlgorithms").html("");
                         $(".postedAlgorithmsTable tbody").html("");
+                        $(".switcher#myPostsSwitcher").addClass("hidden");
                         $(".postedAlgorithmsTable").addClass("hidden");
                         $("#postedErrorMessage a").click(function(e) {                    
                             $("#postedErrorMessage").addClass("hidden");
