@@ -8,6 +8,7 @@ $(document).ready(function() {
             data: {id: postId},
             success: function (data) {
                 $("#creatorUsername").html(data.username);
+                $("#creatorUsername").attr("href","../users/"+data.user_id);
                 $("#upvoteSpan").html(data.upvotes);
                 $("#downvoteSpan").html(data.downvotes);
                 $("#viewSpan").html(data.views);

@@ -1,5 +1,6 @@
 <div class="boxWrapper">
-    <a href="javascript:void(0)" class="switcher" id="myPostsSwitcher">Switch View Mode</a>
+    <p class="hidden" id="postedErrorMessage"></p>
+    <a href="javascript:void(0)" class="switcher hidden" id="myPostsSwitcher">Switch View Mode</a>
     <div class="postedAlgorithms">
         
     </div>

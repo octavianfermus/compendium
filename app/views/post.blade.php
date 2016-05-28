@@ -13,7 +13,7 @@
                     </div>
                     <h1 id="algorithmName"></h1>
                     <p id="language"><span>Language: </span></p>
-                    <p class="subtitle">By <a href="javascript:void(0)" id="creatorUsername"></a></p>
+                    <p class="subtitle">By <a href="../users/" id="creatorUsername"></a></p>
                     <p><span>Original Link</span>: <a href id="originalLink">Find the original link here</a></p>
                     <p id="algorithmDescription"><span>Description: </span></p>
                 </div> 

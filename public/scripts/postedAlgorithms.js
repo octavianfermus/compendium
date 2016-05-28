@@ -64,9 +64,22 @@ $(document).ready(function () {
                 url: "users/postedalgorithms",
                 dataType: "json",
                 success: function (data) {
-                    console.log(data);
-                    createList(data.data);
-                    createTable(data.data);
+                    if(data.data.length > 0) {
+                        $(".switcher#myPostsSwitcher").removeClass("hidden");
+                        createList(data.data);
+                        createTable(data.data);
+                    } else {
+                        $("#postedErrorMessage").removeClass("hidden");
+                        $("#postedErrorMessage").html("You currently don't have any algorithms here.. Why don't you <a href='javascript:void(0)'>post</a> one?</p>");    
+                        $(".postedAlgorithms").html("");
+                        $(".postedAlgorithmsTable tbody").html("");
+                        $(".postedAlgorithmsTable").addClass("hidden");
+                        $("#postedErrorMessage a").click(function(e) {                    
+                            $("#postedErrorMessage").addClass("hidden");
+                            e.preventDefault();
+                            $("a[href='#post-new']").click();
+                        });
+                    }
                 },
                 error: function (data) {
 
@@ -87,11 +100,9 @@ $(document).ready(function () {
                 data: data,
                 success: function (data) {
                     console.log("success");
-                    console.log(data);
                 },
                 error: function (data) {
                     console.log("error");
-                    console.log(data);
                 }
             });
             getLists();

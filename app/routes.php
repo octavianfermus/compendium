@@ -181,7 +181,7 @@ Route::get('post/postdata', function() {
         $returnData["content"] = $unparsedData[0]->content;
         $returnData["description"] = $unparsedData[0]->description;
         $returnData["language"] = $unparsedData[0]->language;
-        $returnData["creator_id"] = $unparsedData[0]->user_id;
+        $returnData["user_id"] = $unparsedData[0]->user_id;
         $name = DB::select('select * from users where id = ?', array($unparsedData[0]->user_id));
         $returnData["username"] = $name[0]->last_name." ".$name[0]->first_name;
         return Response::json($returnData);

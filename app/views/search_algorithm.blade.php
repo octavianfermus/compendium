@@ -20,8 +20,9 @@
     
 </div>
 <div style="position: relative; margin-top: 25px">
-    <a href="javascript:void(0)" class="switcher" id="searchPostsSwitcher">Switch View Mode</a>
-    <div class="searchedAlgorithms">
+    <p class="hidden" id="searchErrorMessage"></p>
+    <a href="javascript:void(0)" class="switcher hidden" id="searchPostsSwitcher">Switch View Mode</a>
+    <div class="hidden searchedAlgorithms">
         
     </div>
     <table class="hidden searchedAlgorithmsTable">
