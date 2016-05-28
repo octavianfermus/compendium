@@ -43,7 +43,7 @@ $(document).ready(function () {
                 data: data,
                 success: function (data) {
                     if(data.data.length > 0) {
-                        $("#errorMessage").addClass("hidden");
+                        $("#searchErrorMessage").addClass("hidden");
                         $(".searchedAlgorithms").removeClass("hidden");
                         $(".searchedAlgorithmsTable").addClass("hidden");
                         $(".switcher#searchPostsSwitcher").removeClass("hidden");
@@ -67,9 +67,9 @@ $(document).ready(function () {
     $("#search_algorithms_form .btn").click(function(e) {
         e.preventDefault();
         var data = {
-            tags: $("#keywords").val(),
-            language: $("select[name='language']").val(),
-            ratio: $("input[name='ratio']:checked").length ? true : false
+            tags: $("#search_algorithms_form #keywords").val(),
+            language: $("#search_algorithms_form input[name='language']").val(),
+            ratio: $("#search_algorithms_form input[name='ratio']:checked").length ? true : false
         };
         getLists(data);
     });

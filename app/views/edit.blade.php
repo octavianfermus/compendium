@@ -9,13 +9,7 @@
                         {{ Form::label('algorithm_name', 'Algorithm name') }}
                         {{ Form::text('algorithm_name', null, array('class'=>'form-control', 'placeholder'=>'algorithm name..')) }}
                         {{ Form::label('programming_language', 'Programming Language') }}
-                        {{ Form::select('language', array(
-                            'Javascript' => 'Javascript',
-                            'Java' => 'Java', 
-                            'PHP' => 'PHP', 
-                            'C' => 'C',
-                            'C#' => 'C#'
-                        ), null, array('class'=>'form-control')) }}
+                        {{ Form::text('language', null, array('class'=>'form-control')) }}
                         {{ Form::label('description', 'Description') }}
                         {{ Form::textarea('algorithm_description', null, array('class'=>'form-control', 'rows'=>'2', 'placeholder'=>'add a short description..')) }}
                         {{ Form::label('original_link', 'Original Link (optional)') }}

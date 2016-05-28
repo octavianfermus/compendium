@@ -12,6 +12,15 @@ body {
     border-radius: 0;
 }
 
+input, textarea {
+    margin-bottom: 10px;
+}
+
+
+
+.ui-front {
+    z-index: 10000000;
+}
 .messageCount {
     border-radius: 100px;
     background: red;

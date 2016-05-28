@@ -3,14 +3,7 @@
         {{ Form::label('keywords', 'Keywords') }}
         {{ Form::text('keywords', null, array('class'=>'form-control', 'placeholder'=>'keywords separated by coma..')) }}
         {{ Form::label('programming_language', 'Programming Language') }}
-        {{ Form::select('language', array(
-            'All' => 'All',
-            'Javascript' => 'Javascript',
-            'Java' => 'Java', 
-            'PHP' => 'PHP', 
-            'C' => 'C',
-            'C#' => 'C#'
-        ), null, array('class'=>'form-control')) }}
+        {{ Form::text('language', null, array('class'=>'form-control', 'placeholder'=>'algorithm language..')) }}
         <label class="checkbox-inline">{{ Form::checkbox('ratio', 'positive') }}Positive like/dislike ratio</label>
         <p><a href="javascript:void(0)" data-toggle="modal" data-target="#requestModal">Can't find what you are searching for? Submit a request</a></p>
         <div class="text-right">
@@ -39,7 +32,3 @@
         <tbody></tbody>
     </table>
 </div>
-
-<script src="{{ URL::to('scripts/searchAlgorithms.js') }}"></script>
-<script src="{{ URL::to('scripts/jquery-ui.min.js') }}"></script>
-<script src="{{ URL::to('scripts/tag-it.min.js') }}"></script>

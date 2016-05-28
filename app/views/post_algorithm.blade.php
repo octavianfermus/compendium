@@ -3,19 +3,12 @@
         {{ Form::label('algorithm_name', 'Algorithm name') }}
         {{ Form::text('algorithm_name', null, array('class'=>'form-control', 'placeholder'=>'algorithm name..')) }}
         {{ Form::label('programming_language', 'Programming Language') }}
-        {{ Form::select('language', array(
-            'Javascript' => 'Javascript',
-            'Java' => 'Java', 
-            'PHP' => 'PHP', 
-            'C' => 'C',
-            'C#' => 'C#'
-        ), null, array('class'=>'form-control')) }}
+        {{ Form::text('language', null, array('class'=>'form-control', 'placeholder'=>'algorithm language..')) }}
         {{ Form::label('description', 'Description') }}
         {{ Form::textarea('algorithm_description', null, array('class'=>'form-control', 'rows'=>'2', 'placeholder'=>'add a short description..')) }}
         {{ Form::label('original_link', 'Original Link (optional)') }}
         {{ Form::text('original_link', null, array('class'=>'form-control', 'placeholder'=>'original algorithm location..')) }}
-        <div id="editor">
-        </div>
+        <div id="editor"></div>
         {{ Form::textarea('algorithm_code', null, array('class'=>'hidden', 'placeholder'=>'add a short description..')) }}
         {{ Form::text('template', null, array('class'=>'hidden','id'=>'isItTemplate')) }}
         {{ Form::submit('Submit changes', array('class'=>'btn hidden', 'id'=>'submit_algorithm'))}}

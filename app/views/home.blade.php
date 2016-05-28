@@ -39,18 +39,11 @@
               </div>
               <div class="modal-body">
                 <label>Algorithm Name</label>
-                <input type="text" class="form-control" placeholder="algorithm title">
+                <input type="text" class="form-control" placeholder="algorithm title..">
                 <label>Algorithm Description</label>
-                <textarea class="form-control" placeholder="short algorithm description"></textarea>
+                <textarea class="form-control" placeholder="short algorithm description.."></textarea>
                 <label>Programming Language</label>
-                <select class="form-control">
-                    <option>All</option>
-                    <option>Javascript</option>
-                    <option>Java</option>
-                    <option>PHP</option>
-                    <option>C</option>
-                    <option>C#</option>
-                </select>
+                <input class="form-control" name="language" placeholder="programming language..">
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>

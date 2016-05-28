@@ -14,7 +14,7 @@ $(document).ready(function() {
                 $("input[name='algorithm_name']").val(data.name);
                 $("input[name='original_link']").val(data.original_link);
                 $("textarea[name='algorithm_description']").val(data.description);
-                $("select[name='language']").val(data.language);
+                $("input[name='language']").val(data.language);
                 algorithm_id = data.algorithm_id;
                 $('#postedAlgorithmArea').ace({ 
                     theme: 'monokai',

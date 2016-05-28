@@ -6,7 +6,7 @@ $(document).ready(function() {
         e.preventDefault();
         codeEditor = ace.edit("editor");
         codeEditor.setTheme("ace/theme/monokai");
-        codeEditor.getSession().setMode("ace/mode/javascript");
+        codeEditor.getSession();
         $(".ace_editor").css({
             width: "100%",
             height: 500,

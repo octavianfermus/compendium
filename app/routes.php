@@ -68,7 +68,7 @@ Route::post('post/searchalgorithm', function() {
     $tags = Request::input('tags');
     $language = Request::input('language');
     $ratio = Request::input('ratio');
-    if($tags=="" && $language=="All" && $ratio == "false") {
+    if($tags=="" && $language=="" && $ratio == "false") {
         $algorithms_unfiltered = DB::table('algorithms')
                                     ->where('template','=','0')
                                     ->get();
@@ -106,7 +106,7 @@ Route::post('post/searchalgorithm', function() {
                 ->where('template','=','0')
                 ->get();
         }
-        if($language!="All") {
+        if($language!="") {
             $algorithms_unfiltered_language = DB::table('algorithms')
                 ->where('template','=','0')
                 ->where('language','=',$language)
