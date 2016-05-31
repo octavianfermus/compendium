@@ -41,6 +41,12 @@
                 <h4 class="modal-title" id="myModalLabel">Request Algorithm</h4>
             </div>
             <div class="modal-body">
+                <div class="requestedAlgorithms">
+                    <p class="text-justify">Here is a list of algorithms already requested by the users. You can upvote the requests you are interested in. If you can't find the algorithm you were looking for, submit the request yourself!</p>
+                    <input class="form-control" id="searchRequests" placeholder="Search..">
+                    <div class="requested-box"></div>
+                    <a href="javascript:void(0)" id="letMeRequest">Can't find it.. I'll make a request</a>
+                </div>
                 {{ Form::open(array('url'=>'users/submitrequest', 'id'=>'submit_algorithm_form')) }}
                 {{ Form::label('algorithm_name', 'Algorithm Name') }}
                 {{ Form::text('algorithm_name', null, array('class'=>'form-control', 'placeholder'=>'algorithm name..')) }}
@@ -49,11 +55,12 @@
                 {{ Form::label('language', 'Programming Language') }}
                 {{ Form::text('language', null, array('class'=>'form-control', 'placeholder'=>'programming language..')) }}
                 {{ Form::submit('Submit Request', array('class'=>'btn hidden'))}}
+                <a href="javascript:void(0)" id="existentRequests">Return to the existent requests</a>
                 {{ Form::close() }}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="submitRequest">Submit Request</button>
+                <button type="button" class="btn btn-primary hidden" id="submitRequest">Submit Request</button>
             </div>
         </div>
     </div>

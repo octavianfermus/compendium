@@ -5,11 +5,6 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreatePostedAlgorithmsTable extends Migration {
 
-	/**
-	 * Run the migrations.
-	 *
-	 * @return void
-	 */
 	public function up()
 	{
 		Schema::create('algorithms', function($table)

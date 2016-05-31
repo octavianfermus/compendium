@@ -172,6 +172,49 @@ class UsersController extends BaseController implements RemindableInterface {
         }
         return Response::json(array('state' => 'failure', 'message'=>'Algorithm not found.'));
     }
+    
+    public function putVoterequest() {
+        $request_id = Request::input('data.id');
+        $time = date('Y-m-d H:i:s');
+        
+        $found = DB::table('algorithm_request_votes')
+                    ->where('request_id', '=', $request_id)
+                    ->where('user_id', '=', Auth::user()->id)
+                    ->count();
+        
+        if($found==1) {
+            DB::delete('delete from algorithm_request_votes where request_id = ? and user_id = ?', array($request_id, Auth::user()->id));
+            $updater = DB::table('algorithm_request_votes')
+                ->where('request_id', '=', $request_id)
+                ->count();
+            DB::update('update algorithm_requests set upvotes = ?, updated_at = ? where id = ?', array(
+            $updater,
+            $time, 
+            $request_id, 
+            ));
+            return Response::json(array('state' => 'success', 'message'=>'Request successfuly downvoted.'));
+        } else {
+            
+            DB::insert('insert into algorithm_request_votes (user_id, request_id, created_at, updated_at) values (?, ?, ?, ?)', array(
+                Auth::user()->id, 
+                $request_id,
+                $time,
+                $time)
+            );
+            $updater = DB::table('algorithm_request_votes')
+                ->where('request_id', '=', $request_id)
+                ->count();
+            DB::update('update algorithm_requests set upvotes = ?, updated_at = ? where id = ?', array(
+            $updater,
+            $time, 
+            $request_id, 
+            ));
+            return Response::json(array('state' => 'success', 'message'=>'Request successfully upvoted.'));
+        }
+        
+        return Response::json(array('state' => 'failure', 'message'=>'Algorithm not found.'));
+       
+    }
     public function postPushalgorithm() {
         $input = Input::all();
         DB::insert('insert into algorithms (user_id, name, description, language,original_link, template, content) values (?, ?, ?, ?, ?, ?, ?)', array(
@@ -196,27 +239,45 @@ class UsersController extends BaseController implements RemindableInterface {
             Input::get('algorithm_code'),
             Input::get('algorithm_id')));
         if(Input::get('template') == 0) {
-            return Redirect::to('/')->withErrors("Algorithm successfuly published.");
+            return Redirect::to('/')->withErrors("Algorithm successfully published.");
         } else {
-            return Redirect::to('/users/editalgorithm/'.Input::get('algorithm_id'))->withErrors("Algorithm successfuly updated.");
+            return Redirect::to('/users/editalgorithm/'.Input::get('algorithm_id'))->withErrors("Algorithm successfully updated.");
         }
     }
     public function postSubmitrequest() {
         if(Auth::check()) {
+            
             $algorithm_name = Input::get('algorithm_name');
-            $algorithmdescription = Input::get('algorithm_description');
+            $algorithm_description = Input::get('algorithm_description');
             $language = Input::get('language');
-            if($algorithm_name =="" || $algorithmdescription =="" || $language =="") {
+            if($algorithm_name =="" || $algorithm_description =="" || $language =="") {
                 return Redirect::to('/')->withErrors("All request fields must be completed.")->withInput();
             }
-            DB::insert('insert into algorithm_requests (user_id, name, description, language, upvotes) values (?, ?, ?, ?, ?)', array(
-            Auth::user()->id, 
-                Input::get('algorithm_name'), 
-                Input::get('algorithm_description'), 
-                Input::get('language')),
-                1
+            $time = date('Y-m-d H:i:s');
+            DB::insert('insert into algorithm_requests (user_id, name, description, language, upvotes,created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?)', array(
+                Auth::user()->id, 
+                $algorithm_name, 
+                $algorithm_description, 
+                $language,
+                1,
+                $time,
+                $time)
             );
-            return Redirect::to('/')->withErrors("Algorithm request successfully submitted.");
+            
+            $algorithm_request_id = DB::table('algorithm_requests')
+                ->where('user_id', '=', Auth::user()->id)
+                ->where('name', '=', $algorithm_name)
+                ->where('description', '=', $algorithm_description)
+                ->where('created_at', '=', $time)
+                ->where('language', '=', $language)->first();
+              
+            DB::insert('insert into algorithm_request_votes (user_id, request_id, created_at, updated_at) values (?, ?, ?, ?)', array(
+                Auth::user()->id, 
+                $algorithm_request_id->id,
+                $time,
+                $time)
+            );
+            return Redirect::to('/')->withErrors('Algorithm request successfuly submitted.');
         } else {
             return Redirect::to('404');
         }
@@ -254,7 +315,25 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json($returnData);
         }
         return Response::json(array('data'=>$found));
-       
+    }
+    public function getViewrequests() {
+        if(Auth::check()) {
+            $unparsedData = DB::select('select * from algorithm_requests');
+            $requests = array();
+            $requests["data"]=array();
+            foreach ($unparsedData as $array) {
+                $singular = array();
+                $singular["id"] = $array->id;
+                $singular["name"] = $array->name;
+                $singular["language"] = $array->language;
+                $singular["description"] = $array->description;
+                $singular["upvotes"] = $array->upvotes;
+                $found = DB::table('algorithm_request_votes')->where('request_id','=',$array->id)->where('user_id','=',Auth::user()->id)->count();
+                $singular["userVote"]=$found;
+                $requests["data"][]=$singular;
+            }
+            return Response::json($requests);
+        }
     }
 }
 

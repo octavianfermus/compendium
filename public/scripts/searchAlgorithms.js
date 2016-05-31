@@ -1,5 +1,6 @@
 $(document).ready(function () {
-    var getApproval = function (upvotes, downvotes) {
+    var requests = null,
+        getApproval = function (upvotes, downvotes) {
             if (upvotes === 0) {
                 return 0;
             }
@@ -17,7 +18,6 @@ $(document).ready(function () {
                     '</div>';
                 $(".searchedAlgorithms").append(toAppend);
             });
-            
         },
         createTable = function (data) {
             $(".searchedAlgorithmsTable tbody").html("");
@@ -34,6 +34,64 @@ $(document).ready(function () {
                     '</tr>';
                 $(".searchedAlgorithmsTable tbody").append(toAppend);
             });
+        },
+        getRequestList = function(data) {
+            var data = data,
+                    toAppend="";
+                $.each(data,function(index,value) {
+                    toAppend +="<div>" +
+                        "<h2>"+value.name+"</h2>" +
+                        "<p><span>Language</span>: "+ value.language + "</p>"+
+                        "<p><span>Description</span>: "+ value.description + "</p>"+
+                        "<p><button req_id="+value.id+"><span class='glyphicon glyphicon-plus "+(value.userVote == 1 ? "green" : "gray")+"'></span></button>"+value.upvotes+" people upvoted this request.</p>" +
+                        "</div>";
+                });
+                $(".requested-box").html(toAppend);
+                $(".requested-box button").click(function() {
+                    var data = {
+                        data: {
+                            id: $(this).attr("req_id")
+                        }
+                    };
+                    jQuery.ajax({
+                        method: 'put',
+                        url: "users/voterequest",
+                        dataType: "json",
+                        data: data,
+                        success: function (data) {
+                            getRequests();
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        } 
+                    });
+                });
+        },
+        getRequests = function() {
+            jQuery.ajax({
+                method: 'get',
+                url: "users/viewrequests",
+                success: function (data) {
+                    requests = data.data;
+                    getRequestList(requests);
+                    filterRequests();
+                },
+                error: function (data) {
+                    console.log(data);
+                } 
+            });
+        },
+        filterRequests = function() {
+            var newList = [],
+            currentSearch = $("#searchRequests").val();
+            $.each(requests,function(index,value) {
+                if(value.name.toLowerCase().indexOf(currentSearch.toLowerCase()) >-1 || 
+                   value.description.toLowerCase().indexOf(currentSearch.toLowerCase())>-1 ||
+                  value.language.toLowerCase().indexOf(currentSearch.toLowerCase())>-1) {
+                    newList.push(value);
+                }
+            });
+            getRequestList(newList);
         },
         getLists = function (data) {
             jQuery.ajax({
@@ -63,6 +121,12 @@ $(document).ready(function () {
                 } 
             });
         };
+    $("[data-target='#requestModal']").click(function() {
+        $(".requestedAlgorithms").slideDown();
+        $("#submit_algorithm_form").slideUp();
+        $("#submitRequest").addClass("hidden");
+        getRequests();
+    });
     $("#keywords").tagit();
     $("#search_algorithms_form .btn").click(function(e) {
         e.preventDefault();
@@ -85,4 +149,20 @@ $(document).ready(function () {
     $("#submitRequest").click(function() {
         $("#submit_algorithm_form input[type='submit']").click();
     });
+    $("#letMeRequest").click(function() {
+        $(".requestedAlgorithms").slideUp();
+        $("#submit_algorithm_form").slideDown();
+        $("#submitRequest").removeClass("hidden");
+    });
+    
+    $("#existentRequests").click(function() {
+        $(".requestedAlgorithms").slideDown();
+        $("#submit_algorithm_form").slideUp();
+        $("#submitRequest").addClass("hidden");
+    });
+    
+    $("#searchRequests").keyup(function(e) {
+        filterRequests();
+    });
+    $("#submit_algorithm_form").slideUp();
 });

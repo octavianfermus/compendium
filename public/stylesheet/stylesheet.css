@@ -88,6 +88,25 @@ input, textarea {
   margin-bottom: 10px;
 }
 
+.requested-box {
+  max-height: 300px;
+  overflow: auto;
+}
+.requested-box div {
+  border: 1px solid #F1BB59;
+  margin-bottom: 20px;
+}
+.requested-box button {
+  background: transparent;
+  border: none;
+}
+.requested-box button .green {
+  color: green;
+}
+.requested-box button .gray {
+  color: gray;
+}
+
 .ui-front {
   z-index: 10000000;
 }
@@ -289,7 +308,7 @@ table th {
   font-weight: 700;
 }
 
-.postedAlgorithm h2 {
+.postedAlgorithm h2, .requested-box h2 {
   border-bottom: 1px solid orange;
   background-color: white;
   margin-bottom: 5px;
@@ -298,14 +317,14 @@ table th {
   font-size: 25px;
   margin-top: 0;
 }
-.postedAlgorithm p {
+.postedAlgorithm p, .requested-box p {
   padding-left: 15px;
   margin-bottom: 1px;
 }
-.postedAlgorithm p span {
+.postedAlgorithm p span, .requested-box p span {
   font-weight: 600;
 }
-.postedAlgorithm .glyphicon-remove {
+.postedAlgorithm .glyphicon-remove, .requested-box .glyphicon-remove {
   color: red;
   top: 2px;
 }

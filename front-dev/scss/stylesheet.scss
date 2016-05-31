@@ -16,7 +16,24 @@ input, textarea {
     margin-bottom: 10px;
 }
 
-
+.requested-box {
+    max-height: 300px;
+    overflow: auto;
+    div {
+        border: 1px solid $main-color;
+        margin-bottom: $default-margin;
+    }
+    button {
+        background: transparent;
+        border: none;
+        .green {
+            color: green;
+        }
+        .gray {
+            color: gray;
+        }
+    }
+}
 
 .ui-front {
     z-index: 10000000;
@@ -223,7 +240,7 @@ table {
 .main p>span {
     font-weight: 700;
 }
-.postedAlgorithm {
+.postedAlgorithm, .requested-box {
     h2 {
         border-bottom: 1px solid orange;
         background-color: white;
