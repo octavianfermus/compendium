@@ -20,6 +20,7 @@ class CreatePostedAlgorithmsTable extends Migration {
             $table->integer('downvotes');
             $table->integer('views');
             $table->longText('content');
+            $table->integer('request_id');
             $table->timestamps();      
         });
 	}

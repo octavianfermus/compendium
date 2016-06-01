@@ -16,6 +16,9 @@ $(document).ready(function() {
                 $("#originalLink").attr("href",data.original_link);
                 $("#algorithmDescription").append(data.description);
                 $("#language").append(data.language);
+                if(data.request_id!=0) {
+                    $("#thisRequest").removeClass("hidden");
+                }
                 $('#postedAlgorithmArea').ace({ 
                     theme: 'monokai',
                     height: 140

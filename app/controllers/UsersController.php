@@ -216,27 +216,32 @@ class UsersController extends BaseController implements RemindableInterface {
        
     }
     public function postPushalgorithm() {
-        $input = Input::all();
-        DB::insert('insert into algorithms (user_id, name, description, language,original_link, template, content) values (?, ?, ?, ?, ?, ?, ?)', array(
+        $time = date('Y-m-d H:i:s');
+        DB::insert('insert into algorithms (user_id, name, description, language, original_link, template, content, request_id, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
             Auth::user()->id, 
             Input::get('algorithm_name'), 
             Input::get('algorithm_description'), 
             Input::get('language'), 
             Input::get('original_link'), 
             Input::get('template'), 
-            Input::get('algorithm_code'))
+            Input::get('algorithm_code'),
+            Input::get('byrequest'),
+            $time,
+            $time)
                   );
         return Redirect::to('/')->withErrors(['Algorithm successfully added.']);
     }
     public function postEditalgorithm() {
-        $input = Input::all();
-        DB::update('update algorithms set name = ?, language = ?, description = ?, template = ?, original_link = ?, content = ? where id = ?', array(
+        $time = date('Y-m-d H:i:s');
+        DB::update('update algorithms set name = ?, language = ?, description = ?, template = ?, original_link = ?, content = ?, request_id = ?, updated_at = ? where id = ?', array(
             Input::get('algorithm_name'), 
             Input::get('language'), 
             Input::get('algorithm_description'), 
             Input::get('template'), 
             Input::get('original_link'), 
             Input::get('algorithm_code'),
+            Input::get('byrequest'),
+            $time,
             Input::get('algorithm_id')));
         if(Input::get('template') == 0) {
             return Redirect::to('/')->withErrors("Algorithm successfully published.");
@@ -312,6 +317,7 @@ class UsersController extends BaseController implements RemindableInterface {
             $returnData["language"] = $unparsedData[0]->language;
             $returnData["creator_id"] = $unparsedData[0]->user_id;
             $returnData["algorithm_id"] = $algorithmId;
+            $returnData["request_id"] = $unparsedData[0]->request_id;
             return Response::json($returnData);
         }
         return Response::json(array('data'=>$found));

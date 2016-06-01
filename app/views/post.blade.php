@@ -16,6 +16,7 @@
                     <p class="subtitle">By <a href="../users/" id="creatorUsername"></a></p>
                     <p><span>Original Link</span>: <a href id="originalLink">Find the original link here</a></p>
                     <p id="algorithmDescription"><span>Description: </span></p>
+                    <p id="thisRequest" class="text-right hidden"><em>This algoritm is made by request!</em></p>
                 </div> 
                 <textarea id="postedAlgorithmArea" rows="4" style="width: 100%;"></textarea>
 

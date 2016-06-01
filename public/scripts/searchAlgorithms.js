@@ -46,8 +46,8 @@ $(document).ready(function () {
                         "<p><button req_id="+value.id+"><span class='glyphicon glyphicon-plus "+(value.userVote == 1 ? "green" : "gray")+"'></span></button>"+value.upvotes+" people upvoted this request.</p>" +
                         "</div>";
                 });
-                $(".requested-box").html(toAppend);
-                $(".requested-box button").click(function() {
+                $("#requestModal .requested-box").html(toAppend);
+                $("#requestModal .requested-box button").click(function() {
                     var data = {
                         data: {
                             id: $(this).attr("req_id")
@@ -83,7 +83,7 @@ $(document).ready(function () {
         },
         filterRequests = function() {
             var newList = [],
-            currentSearch = $("#searchRequests").val();
+            currentSearch = $("#requestModal #searchRequests").val();
             $.each(requests,function(index,value) {
                 if(value.name.toLowerCase().indexOf(currentSearch.toLowerCase()) >-1 || 
                    value.description.toLowerCase().indexOf(currentSearch.toLowerCase())>-1 ||
@@ -161,7 +161,7 @@ $(document).ready(function () {
         $("#submitRequest").addClass("hidden");
     });
     
-    $("#searchRequests").keyup(function(e) {
+    $("#requestModal #searchRequests").keyup(function(e) {
         filterRequests();
     });
     $("#submit_algorithm_form").slideUp();

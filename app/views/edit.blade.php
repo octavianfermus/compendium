@@ -5,6 +5,11 @@
         <div class="row">
             <div class="col-md-12 main">
                 <div class="boxWrapper">
+                    <div class="text-right">
+                        <a href="javascript:void(0)" id="cancelRequest">Reset progress</a>
+                        <span> | </span>
+                        <a href="javascript:void(0)" id="takeRequestModalOpener">I want to create an algorithm based on a request..</a>
+                    </div>
                     {{ Form::open(array('url'=>'users/editalgorithm', 'id'=>'post_algorithm_form')) }}
                         {{ Form::label('algorithm_name', 'Algorithm name') }}
                         {{ Form::text('algorithm_name', null, array('class'=>'form-control', 'placeholder'=>'algorithm name..')) }}
@@ -18,10 +23,12 @@
                         {{ Form::textarea('algorithm_code', null, array('class'=>'hidden', 'placeholder'=>'add a short description..')) }}
                         {{ Form::text('template', null, array('class'=>'hidden','id'=>'isItTemplate')) }}
                         {{ Form::text('algorithm_id', null, array('class'=>'hidden','id'=>'algorithm_id')) }}
+                        {{ Form::text('byrequest', null, array('class'=>'hidden','id'=>'isItByRequest')) }}
                         {{ Form::submit('Submit changes', array('class'=>'btn hidden', 'id'=>'submit_algorithm'))}}
                     {{ Form::close() }}
                         <div class="text-right">
-                             <button class="btn danger" data-toggle="modal" data-target="#confirmationModal">Delete</button>
+                            <span class="fader" id="submitFader">You must fill all mandatory fields before publishing an algorithm.</span>
+                            <button class="btn danger" data-toggle="modal" data-target="#confirmationModal">Delete</button>
                             <button class="btn" id="saveAsTemplate">Save as template</button>
                             <button class="btn" id="publishAlgorithm">Publish</button>
                         </div>
@@ -68,6 +75,25 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+    <div class="modal fade" id="takeRequestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Create Algorithm by Request</h4>
+            </div>
+            <div class="modal-body">
+                <div class="requestedAlgorithms">
+                    <input class="form-control" id="searchRequests" placeholder="Search..">
+                    <div class="requested-box"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
     <script src="{{ URL::to('scripts/errorModal.js') }}"></script>
     <script src="{{ URL::to('scripts/ace/ace.js') }}"></script>
     <script src="{{ URL::to('scripts/ace/mode-ruby.js') }}"></script>

@@ -84,6 +84,12 @@ body {
   border-radius: 0;
 }
 
+.fader {
+  display: none;
+  color: red;
+  font-weight: 700;
+}
+
 input, textarea {
   margin-bottom: 10px;
 }
