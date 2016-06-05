@@ -301,6 +301,47 @@ class UsersController extends BaseController implements RemindableInterface {
         }
         return Response::json(array('state' => 'failure', 'message'=>'Algorithm not found.'));
     }
+    
+    public function postVotealgorithm() {
+        if(Auth::check()) {
+            $algorithm_id = Request::input('id');
+            $vote = Request::input('vote');
+            
+            
+            $found = DB::table('algorithm_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->count();
+            $time = date('Y-m-d H:i:s');
+            
+            if($found==0) {
+                DB::insert('insert into algorithm_votes (user_id, algorithm_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?)', array(
+                    Auth::user()->id, 
+                    $algorithm_id,
+                    $vote,
+                    $time,
+                    $time)
+                );
+            } else {
+                DB::update('update algorithm_votes set vote = ?, updated_at = ? where user_id = ? and algorithm_id = ?', array($vote, $time,  Auth::user()->id, $algorithm_id));
+            }
+            
+            $downvotes = DB::table('algorithm_votes')
+                ->where('user_id','=', Auth::user()->id)
+                ->where('algorithm_id','=',$algorithm_id)
+                ->where('vote','=',0)
+                ->count();
+            
+            $upvotes = DB::table('algorithm_votes')
+                ->where('user_id','=', Auth::user()->id)
+                ->where('algorithm_id','=',$algorithm_id)
+                ->where('vote','=',1)
+                ->count(); 
+            DB::update('update algorithms set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $algorithm_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+        }
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote an algorithm.'));
+    }
     public function getTemplatedata() {
         $algorithmId = Request::input('id');
         $returnData = array();

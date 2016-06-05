@@ -53,15 +53,38 @@ Route::get('notifications', function() {
     return View::make('notifications');
 });
 
-Route::get('posts/{id}', function ($postId) {
+Route::get('posts/{id}', function ($algorithmId) {
     $found = DB::table('algorithms')
-                ->where('id', '=', $postId)
+                ->where('id', '=', $algorithmId)
                 ->where('template', '=', 0)
                 ->count();
     if($found==1) {
-        return View::make('post');
-    } 
-    return View::make('404');
+        if(Auth::check()) {
+                $found = DB::table('algorithm_views')
+                        ->where('algorithm_id', '=', $algorithmId)
+                        ->where('user_id', '=', Auth::user()->id)
+                        ->count();
+            if($found==0) {
+                $time = date('Y-m-d H:i:s');
+                DB::insert('insert into algorithm_views (user_id, algorithm_id, created_at, updated_at) values (?, ?, ?, ?)', array(
+                    Auth::user()->id, 
+                    $algorithmId,
+                    $time,
+                    $time)
+                );
+                $updater = DB::table('algorithm_views')
+                ->where('algorithm_id', '=', $algorithmId)
+                ->count();
+                DB::update('update algorithms set views = ?, updated_at = ? where id = ?', array(
+                    $updater,
+                    $time, 
+                    $algorithmId, 
+                ));
+            }
+            return View::make('post');
+        } 
+        return View::make('404');
+    }
 });
 
 Route::post('post/searchalgorithm', function() {

@@ -1,5 +1,6 @@
 $(document).ready(function() {
     var postId = window.location.href.split("/")[window.location.href.split("/").length-1],
+        yourVote = undefined,
         getPostData = function () {
         jQuery.ajax({
             method: 'get',
@@ -80,9 +81,31 @@ $(document).ready(function() {
             error: function (data) {
                 console.log(window.location.href.split("/")[window.location.href.split("/").length-1]);
             }
-
         });
-
+    },
+    voteAjax = function() {
+        jQuery.ajax({
+            method: 'post',
+            url: "../users/votealgorithm",
+            dataType: "json",
+            data: {id: postId, vote: yourVote},
+            success: function (data) {
+                $("#upvoteSpan").html(data.upvotes);
+                $("#downvoteSpan").html(data.downvotes);
+            },
+            fail: function(data) {
+                console.log(data);
+            }
+        });
+        console.log(yourVote);
     };
     getPostData();
+    $(".upvote a").click(function() {
+        yourVote = 1;
+        voteAjax();
+    });
+    $(".downvote a").click(function() {
+        yourVote = 0;
+        voteAjax();
+    });
 });
