@@ -144,8 +144,28 @@ a:hover {
         }
     }
     .reply {
+        transition: all $transition-speed;
         border-left: 2px solid $main-color;
         padding-left: 15px;
+        margin-bottom: $default-margin; 
+        .green {
+            font-weight: 600;
+            color: green;
+        }
+        .red {
+            font-weight: 600;
+            color:red;
+        }
+        hr {
+            margin: 0;
+        }
+        p {
+            margin: 0;
+        }
+        .created {
+            font-weight: 600;
+            color: gray;
+        }
         .reply-button {
             display: inline-block;
         }

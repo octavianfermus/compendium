@@ -53,32 +53,32 @@ Route::get('notifications', function() {
     return View::make('notifications');
 });
 
-Route::get('posts/{id}', function ($algorithmId) {
+Route::get('posts/{id}', function ($algorithm_id) {
     $found = DB::table('algorithms')
-                ->where('id', '=', $algorithmId)
+                ->where('id', '=', $algorithm_id)
                 ->where('template', '=', 0)
                 ->count();
     if($found==1) {
         if(Auth::check()) {
                 $found = DB::table('algorithm_views')
-                        ->where('algorithm_id', '=', $algorithmId)
+                        ->where('algorithm_id', '=', $algorithm_id)
                         ->where('user_id', '=', Auth::user()->id)
                         ->count();
             if($found==0) {
                 $time = date('Y-m-d H:i:s');
                 DB::insert('insert into algorithm_views (user_id, algorithm_id, created_at, updated_at) values (?, ?, ?, ?)', array(
                     Auth::user()->id, 
-                    $algorithmId,
+                    $algorithm_id,
                     $time,
                     $time)
                 );
                 $updater = DB::table('algorithm_views')
-                ->where('algorithm_id', '=', $algorithmId)
+                ->where('algorithm_id', '=', $algorithm_id)
                 ->count();
                 DB::update('update algorithms set views = ?, updated_at = ? where id = ?', array(
                     $updater,
                     $time, 
-                    $algorithmId, 
+                    $algorithm_id, 
                 ));
             }
             return View::make('post');
@@ -188,14 +188,14 @@ Route::post('post/searchalgorithm', function() {
     }
 });
 Route::get('post/postdata', function() {
-    $algorithmId = Request::input('id');
+    $algorithm_id = Request::input('id');
     $returnData = array();
     $found = DB::table('algorithms')
-                ->where('id', '=', $algorithmId)
+                ->where('id', '=', $algorithm_id)
                 ->where('template', '=', 0)
                 ->count();
     if($found==1) {
-        $unparsedData = DB::select('select * from algorithms where id = ?', array($algorithmId));
+        $unparsedData = DB::select('select * from algorithms where id = ?', array($algorithm_id));
         $returnData["upvotes"] = $unparsedData[0]->upvotes;
         $returnData["downvotes"] = $unparsedData[0]->downvotes;
         $returnData["views"] = $unparsedData[0]->views;
@@ -208,6 +208,22 @@ Route::get('post/postdata', function() {
         $returnData["request_id"] = $unparsedData[0]->request_id;
         $name = DB::select('select * from users where id = ?', array($unparsedData[0]->user_id));
         $returnData["username"] = $name[0]->last_name." ".$name[0]->first_name;
+        $comments_unfiltered = DB::table('algorithm_discussion')->where('algorithm_id', '=', $algorithm_id)->get();
+        $comments = array();
+        foreach ($comments_unfiltered as $array) {
+            $singular = array();
+            $singular["id"] = $array->id;
+            $singular["user_id"] = $array->user_id;
+            $singular["text"] = $array->text;
+            $singular["deleted"] = $array->deleted;
+            $singular["upvotes"] = $array->upvotes;
+            $singular["downvotes"] = $array->downvotes;
+            $singular["created_at"] = $array->created_at;
+            $name = DB::select('select * from users where id = ?', array($array->user_id));
+            $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+            $comments[]=$singular;
+        }
+        $returnData["comments"]=$comments;
         return Response::json($returnData);
     }
     return Response::json(array('data'=>$returnData));

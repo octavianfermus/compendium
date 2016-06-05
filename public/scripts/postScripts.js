@@ -1,6 +1,28 @@
 $(document).ready(function() {
     var postId = window.location.href.split("/")[window.location.href.split("/").length-1],
         yourVote = undefined,
+        comments = undefined,
+        populateComments = function() {
+            var toAppend = "";
+            $.each(comments, function(index, value) {
+                console.log(value);
+                value.text = value.text.split("\n").join("<br>");
+                toAppend += '<div class="reply" tabindex="'+index+'">'+
+                    '<p><span class="person"><a href="../users/"'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
+                    '<p>'+value.text+'</p><hr>'+
+                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Reply</a> | <a href="javascript:void(0)">Report</a> </p>'+
+                    '</div>';
+            });
+            $("#algorithmComments").html(toAppend);
+            $(".dislikeComment").click(function() {
+                tabindex = $(this).closest(".reply").attr("tabindex");
+                voteCommentAjax(0,comments[tabindex].id, postId, tabindex);
+            });
+            $(".likeComment").click(function() {
+                tabindex = $(this).closest(".reply").attr("tabindex");
+                voteCommentAjax(1,comments[tabindex].id, postId, tabindex);
+            });
+        },
         getPostData = function () {
         jQuery.ajax({
             method: 'get',
@@ -8,6 +30,8 @@ $(document).ready(function() {
             dataType: "json",
             data: {id: postId},
             success: function (data) {
+                comments = data.comments;
+                populateComments();
                 $("#creatorUsername").html(data.username);
                 $("#creatorUsername").attr("href","../users/"+data.user_id);
                 $("#upvoteSpan").html(data.upvotes);
@@ -83,12 +107,28 @@ $(document).ready(function() {
             }
         });
     },
-    voteAjax = function() {
+    voteCommentAjax = function(vote, comment_id, algorithm_id, tabindex) {
+        jQuery.ajax({
+            method: 'post',
+            url: "../users/votecomment",
+            dataType: "json",
+            data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
+            success: function (data) {
+                $(".reply[tabindex='"+tabindex+"'] .green").html("("+data.upvotes+")");
+                $(".reply[tabindex='"+tabindex+"'] .red").html("("+data.downvotes+")");
+                console.log(data);
+            },
+            fail: function(data) {
+                console.log(data);
+            }
+        });
+    },
+    voteAlgorithmAjax = function(vote) {
         jQuery.ajax({
             method: 'post',
             url: "../users/votealgorithm",
             dataType: "json",
-            data: {id: postId, vote: yourVote},
+            data: {id: postId, vote: vote},
             success: function (data) {
                 $("#upvoteSpan").html(data.upvotes);
                 $("#downvoteSpan").html(data.downvotes);
@@ -97,15 +137,31 @@ $(document).ready(function() {
                 console.log(data);
             }
         });
-        console.log(yourVote);
     };
     getPostData();
     $(".upvote a").click(function() {
-        yourVote = 1;
-        voteAjax();
+        voteAlgorithmAjax(1);
     });
     $(".downvote a").click(function() {
-        yourVote = 0;
-        voteAjax();
+        voteAlgorithmAjax(0);
+    });
+    $("#sendButton .btn").click(function() {
+        var comment = $(".send-message textarea").val().trim();
+        if(comment.length>0) {
+            $(".send-message textarea").val("");
+            jQuery.ajax({
+                method: 'post',
+                url: "../users/discussalgorithm",
+                dataType: "json",
+                data: {id: postId, comment: comment},
+                success: function(data) {
+                    comments = data;
+                    populateComments();
+                },
+                fail: function(data) {
+                    
+                }
+            });
+        }
     });
 });

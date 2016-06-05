@@ -3,24 +3,26 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAlgorithmVotesTable extends Migration {
+class CreateAlgorithmDiscussionTable extends Migration {
 
 	public function up()
 	{
-		Schema::create('algorithm_votes', function($table)
+		Schema::create('algorithm_discussion', function($table)
         {
             $table->increments('id');
             $table->integer('user_id');
-            $table->integer('comment_id');
             $table->integer('algorithm_id');
-            $table->integer('vote');
+            $table->string('text');
+            $table->integer('upvotes');
+            $table->integer('downvotes');
+            $table->boolean('deleted');
             $table->timestamps();
         });
 	}
 
 	public function down()
 	{
-		Schema::drop('algorithm_votes');
+		Schema::drop('algorithm_discussion');
 	}
 
 }

@@ -219,8 +219,28 @@ a:hover {
   border-radius: 0;
 }
 .conversation .reply {
+  transition: all 0.2s;
   border-left: 2px solid #F1BB59;
   padding-left: 15px;
+  margin-bottom: 20px;
+}
+.conversation .reply .green {
+  font-weight: 600;
+  color: green;
+}
+.conversation .reply .red {
+  font-weight: 600;
+  color: red;
+}
+.conversation .reply hr {
+  margin: 0;
+}
+.conversation .reply p {
+  margin: 0;
+}
+.conversation .reply .created {
+  font-weight: 600;
+  color: gray;
 }
 .conversation .reply .reply-button {
   display: inline-block;

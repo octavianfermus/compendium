@@ -342,6 +342,81 @@ class UsersController extends BaseController implements RemindableInterface {
         }
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote an algorithm.'));
     }
+    public function postDiscussalgorithm() {
+        if(Auth::check()) {
+            $algorithm_id = Request::input('id');
+            $comment = Request::input('comment');
+            $time = date('Y-m-d H:i:s');
+            DB::insert('insert into algorithm_discussion (user_id, algorithm_id, text, deleted, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                Auth::user()->id, 
+                $algorithm_id,
+                $comment,
+                FALSE,
+                $time,
+                $time)
+            );
+            
+            $comments_unfiltered = DB::table('algorithm_discussion')->where('algorithm_id', '=', $algorithm_id)->get();
+            $comments = array();
+            foreach ($comments_unfiltered as $array) {
+                $singular = array();
+                $singular["id"] = $array->id;
+                $singular["user_id"] = $array->user_id;
+                $singular["text"] = $array->text;
+                $singular["deleted"] = $array->deleted;
+                $singular["upvotes"] = $array->upvotes;
+                $singular["downvotes"] = $array->downvotes;
+                $singular["created_at"] = $array->created_at;
+                $name = DB::select('select * from users where id = ?', array($array->user_id));
+                $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                $comments[]=$singular;
+            }
+            return Response::json($comments);
+        } 
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote an algorithm.'));
+    }
+    public function postVotecomment() {
+        if(Auth::check()) {
+            $algorithm_id = Request::input('algorithm_id');
+            $comment_id = Request::input('comment_id');
+            $vote = Request::input('vote');
+            $time = date('Y-m-d H:i:s');
+            $found = DB::table('comment_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->count();
+            if($found==0) {
+                DB::insert('insert into comment_votes (user_id, comment_id, algorithm_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                    Auth::user()->id, 
+                    $comment_id,
+                    $algorithm_id,
+                    $vote,
+                    $time,
+                    $time)
+                );
+            } else {
+                DB::update('update comment_votes set vote = ?, updated_at = ? where user_id = ? and algorithm_id = ? and comment_id = ?', array($vote, $time,  Auth::user()->id, $algorithm_id, $comment_id));
+            }
+            
+            $downvotes = DB::table('comment_votes')
+                ->where('user_id','=', Auth::user()->id)
+                ->where('algorithm_id','=',$algorithm_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+            $upvotes = DB::table('comment_votes')
+                ->where('user_id','=', Auth::user()->id)
+                ->where('algorithm_id','=',$algorithm_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',1)
+                ->count(); 
+            DB::update('update algorithm_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+        }
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
+    }
     public function getTemplatedata() {
         $algorithmId = Request::input('id');
         $returnData = array();

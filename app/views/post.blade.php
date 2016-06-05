@@ -22,18 +22,12 @@
 
                 <div class="boxWrapper">
                     <div class="conversation">
-                        <div class="reply">
-                            <p><span class="person"><a href="javascript:void(0)">Richard Sluder</a></span></p>
-                            <p>Great! just what I needed. Thumbs up</p>
-                            <div class="reply">
-                                <p><span class="person"><a href="javascript:void(0)"> Isac Ohlqvist</a></span></p>
-                                <p>Always eager to help</p>
-                            </div>
+                        <div id="algorithmComments">
+                            
                         </div>
                         <div class="send-message">
                             <div class="input-group">
-                                <textarea placeholder="Write your message here" aria-describedby="sendButton" class="form-control">
-                                </textarea>
+                                <textarea placeholder="Write your message here" aria-describedby="sendButton" class="form-control"></textarea>
                                 <span class="input-group-addon" id="sendButton"><button class="btn">Send</button></span>
                             </div>
                         </div>
