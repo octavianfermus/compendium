@@ -5,22 +5,67 @@ $(document).ready(function() {
         populateComments = function() {
             var toAppend = "";
             $.each(comments, function(index, value) {
-                console.log(value);
                 value.text = value.text.split("\n").join("<br>");
-                toAppend += '<div class="reply" tabindex="'+index+'">'+
+                toAppend += '<div class="reply" tabindex="'+index+'" parent="parent">'+
                     '<p><span class="person"><a href="../users/"'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
-                    '<p>'+value.text+'</p><hr>'+
-                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Reply</a> | <a href="javascript:void(0)">Report</a> </p>'+
+                    '<p>'+value.text+'</p>';
+                $.each(value.replies, function(secIndex, secValue) {
+                    toAppend +='<div class="reply" tabindex="'+secIndex+'">' +
+                    '<p><span class="person"><a href="../users/"'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>';
+                    secValue.text = secValue.text.split("\n").join("<br>");
+                    toAppend += '<p>'+secValue.text+'</p>' +
+                    ' <hr>'+
+                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+secValue.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+secValue.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p>'+
+                    '</div>';
+                
+                });
+                toAppend+=' <hr>'+
+                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)" class="replyComment">Reply</a> | <a href="javascript:void(0)">Report</a> </p>'+
                     '</div>';
             });
             $("#algorithmComments").html(toAppend);
             $(".dislikeComment").click(function() {
-                tabindex = $(this).closest(".reply").attr("tabindex");
+                var tabindex = $(this).closest(".reply").attr("tabindex");
                 voteCommentAjax(0,comments[tabindex].id, postId, tabindex);
             });
             $(".likeComment").click(function() {
-                tabindex = $(this).closest(".reply").attr("tabindex");
+                var tabindex = $(this).closest(".reply").attr("tabindex");
                 voteCommentAjax(1,comments[tabindex].id, postId, tabindex);
+            });
+            $(".replyComment").click(function() {
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
+                    toAppend ="";
+                if($(".reply[tabindex='"+tabindex+"'] .replyToComment").length == 0) {
+                    toAppend = '<div class="replyToComment">' +
+                        '<div class="input-group">' +
+                        '<textarea placeholder="Write your message here" aria-describedby="sendButton" class="form-control"></textarea>' +
+                        '<span class="input-group-addon" id="sendButton"><button class="btn">Send</button></span>' +
+                        '</div></div>';
+                    $(".reply[tabindex='"+tabindex+"'][parent='parent']").append(toAppend);
+                    $(".reply[tabindex='"+tabindex+"'][parent='parent'] .btn").click(function() {
+                        var comment = $(".reply[tabindex='"+tabindex+"'][parent='parent'] textarea").val().trim();
+                        if(comment.length>0) {
+                            $(".send-message textarea").val("");
+                            jQuery.ajax({
+                                method: 'post',
+                                url: "../users/respondtocomment",
+                                dataType: "json",
+                                data: {id: postId, commentid: comments[tabindex].id, comment: comment},
+                                success: function(data) {
+                                    console.log(data);
+                                    comments = data;
+                                    populateComments();
+                                    $(".reply[tabindex='"+tabindex+"'] .replyToComment").remove();
+                                },
+                                fail: function(data) {
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    $(".reply[tabindex='"+tabindex+"'] .replyToComment").remove();
+                }
             });
         },
         getPostData = function () {
@@ -116,7 +161,6 @@ $(document).ready(function() {
             success: function (data) {
                 $(".reply[tabindex='"+tabindex+"'] .green").html("("+data.upvotes+")");
                 $(".reply[tabindex='"+tabindex+"'] .red").html("("+data.downvotes+")");
-                console.log(data);
             },
             fail: function(data) {
                 console.log(data);
@@ -145,7 +189,7 @@ $(document).ready(function() {
     $(".downvote a").click(function() {
         voteAlgorithmAjax(0);
     });
-    $("#sendButton .btn").click(function() {
+    $(".send-message #sendButton .btn").click(function() {
         var comment = $(".send-message textarea").val().trim();
         if(comment.length>0) {
             $(".send-message textarea").val("");

@@ -20,7 +20,7 @@
                 </div> 
                 <textarea id="postedAlgorithmArea" rows="4" style="width: 100%;"></textarea>
 
-                <div class="boxWrapper">
+                <div class="boxWrapper bg-color">
                     <div class="conversation">
                         <div id="algorithmComments">
                             

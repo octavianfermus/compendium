@@ -219,6 +219,24 @@ Route::get('post/postdata', function() {
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
             $singular["created_at"] = $array->created_at;
+            $singular["replies"] = array(); 
+            $reply_comments_unfiltered = DB::table('algorithm_discussion_replies')
+                ->where('algorithm_id', '=', $algorithm_id)
+                ->where('comment_id', '=', $singular["id"])
+                ->get();
+            foreach ($reply_comments_unfiltered as $secondaryArray) {
+                $secondarySingular = array();
+                $secondarySingular["user_id"] = $secondaryArray->user_id;
+                $secondarySingular["text"] = $secondaryArray->text;
+                $secondarySingular["deleted"] = $secondaryArray->deleted;
+                $secondarySingular["created_at"] = $secondaryArray->created_at;
+                $secondarySingular["upvotes"] = $secondaryArray->upvotes;
+                $secondarySingular["downvotes"] = $secondaryArray->downvotes;
+                $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
+                $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
+                $singular["replies"][] = $secondarySingular;
+            }
+
             $name = DB::select('select * from users where id = ?', array($array->user_id));
             $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
             $comments[]=$singular;

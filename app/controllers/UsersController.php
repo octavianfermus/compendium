@@ -367,6 +367,24 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["upvotes"] = $array->upvotes;
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;
+                $singular["replies"] = array(); 
+                $reply_comments_unfiltered = DB::table('algorithm_discussion_replies')
+                    ->where('algorithm_id', '=', $algorithm_id)
+                    ->where('comment_id', '=', $singular["id"])
+                    ->get();
+                foreach ($reply_comments_unfiltered as $secondaryArray) {
+                    $secondarySingular = array();
+                    $secondarySingular["user_id"] = $secondaryArray->user_id;
+                    $secondarySingular["text"] = $secondaryArray->text;
+                    $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    $secondarySingular["created_at"] = $secondaryArray->created_at;
+                    $secondarySingular["upvotes"] = $secondaryArray->upvotes;
+                    $secondarySingular["downvotes"] = $secondaryArray->downvotes;
+                    $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
+                    $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
+                    $singular["replies"][] = $secondarySingular;
+                }
+                
                 $name = DB::select('select * from users where id = ?', array($array->user_id));
                 $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
                 $comments[]=$singular;
@@ -416,6 +434,59 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
         }
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
+    }
+    public function postRespondtocomment() {
+        if(Auth::check()) {
+            $algorithm_id = Request::input('id');
+            $comment = Request::input('comment');
+            $comment_id = Request::input('commentid');
+            $time = date('Y-m-d H:i:s');
+            DB::insert('insert into algorithm_discussion_replies (user_id, algorithm_id, comment_id, text, deleted, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?)', array(
+                Auth::user()->id, 
+                $algorithm_id,
+                $comment_id,
+                $comment,
+                FALSE,
+                $time,
+                $time)
+            );
+            
+            $comments_unfiltered = DB::table('algorithm_discussion')->where('algorithm_id', '=', $algorithm_id)->get();
+            $comments = array();
+            foreach ($comments_unfiltered as $array) {
+                $singular = array();
+                $singular["id"] = $array->id;
+                $singular["user_id"] = $array->user_id;
+                $singular["text"] = $array->text;
+                $singular["deleted"] = $array->deleted;
+                $singular["upvotes"] = $array->upvotes;
+                $singular["downvotes"] = $array->downvotes;
+                $singular["created_at"] = $array->created_at;
+                $singular["replies"] = array(); 
+                $reply_comments_unfiltered = DB::table('algorithm_discussion_replies')
+                    ->where('algorithm_id', '=', $algorithm_id)
+                    ->where('comment_id', '=', $singular["id"])
+                    ->get();
+                foreach ($reply_comments_unfiltered as $secondaryArray) {
+                    $secondarySingular = array();
+                    $secondarySingular["user_id"] = $secondaryArray->user_id;
+                    $secondarySingular["text"] = $secondaryArray->text;
+                    $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    $secondarySingular["upvotes"] = $secondaryArray->upvotes;
+                    $secondarySingular["downvotes"] = $secondaryArray->downvotes;
+                    $secondarySingular["created_at"] = $secondaryArray->created_at;
+                    $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
+                    $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
+                    $singular["replies"][] = $secondarySingular;
+                }
+                
+                $name = DB::select('select * from users where id = ?', array($array->user_id));
+                $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                $comments[]=$singular;
+            }
+            return Response::json($comments);
+        } 
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to able to respond to a comment.'));
     }
     public function getTemplatedata() {
         $algorithmId = Request::input('id');

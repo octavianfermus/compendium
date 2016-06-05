@@ -12,6 +12,10 @@ body {
     border-radius: 0;
 }
 
+.bg-color {
+    background-color: $background-color;
+}
+
 .fader {
     display: none;
     color: red;
@@ -146,8 +150,14 @@ a:hover {
     .reply {
         transition: all $transition-speed;
         border-left: 2px solid $main-color;
-        padding-left: 15px;
+        padding-left: 10px;
         margin-bottom: $default-margin; 
+        .reply {
+            margin-bottom: 0;
+            padding-bottom: 5px;
+            line-height: 14px;
+            padding-left: 10px;
+        }
         .green {
             font-weight: 600;
             color: green;

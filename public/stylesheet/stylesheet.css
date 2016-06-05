@@ -84,6 +84,10 @@ body {
   border-radius: 0;
 }
 
+.bg-color {
+  background-color: #E9E9E9;
+}
+
 .fader {
   display: none;
   color: red;
@@ -221,8 +225,14 @@ a:hover {
 .conversation .reply {
   transition: all 0.2s;
   border-left: 2px solid #F1BB59;
-  padding-left: 15px;
+  padding-left: 10px;
   margin-bottom: 20px;
+}
+.conversation .reply .reply {
+  margin-bottom: 0;
+  padding-bottom: 5px;
+  line-height: 14px;
+  padding-left: 10px;
 }
 .conversation .reply .green {
   font-weight: 600;
