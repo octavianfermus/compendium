@@ -2,6 +2,36 @@ $(document).ready(function() {
     var postId = window.location.href.split("/")[window.location.href.split("/").length-1],
         yourVote = undefined,
         comments = undefined,
+        voteCommentAjax = function(vote, comment_id, algorithm_id, tabindex) {
+            jQuery.ajax({
+                method: 'post',
+                url: "../users/votecomment",
+                dataType: "json",
+                data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
+                success: function (data) {
+                    $(".reply[tabindex='"+tabindex+"'] .likeComment .green").html("("+data.upvotes+")");
+                    $(".reply[tabindex='"+tabindex+"'] .dislikeComment .red").html("("+data.downvotes+")");
+                },
+                fail: function(data) {
+                    console.log(data);
+                }
+            });
+        },
+        voteReplyAjax = function(vote, comment_id, algorithm_id, tabindex, sectabindex) {
+            jQuery.ajax({
+                method: 'post',
+                url: "../users/votereply",
+                dataType: "json",
+                data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
+                success: function (data) {
+                    $(".reply[tabindex='"+tabindex+"'] .reply[sectabindex='"+sectabindex+"'] .likeReply .green").html("("+data.upvotes+")");
+                    $(".reply[tabindex='"+tabindex+"']  .reply[sectabindex='"+sectabindex+"'] .dislikeReply .red").html("("+data.downvotes+")");
+                },
+                fail: function(data) {
+                    console.log(data);
+                }
+            });
+        },
         populateComments = function() {
             var toAppend = "";
             $.each(comments, function(index, value) {
@@ -10,12 +40,12 @@ $(document).ready(function() {
                     '<p><span class="person"><a href="../users/"'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
                     '<p>'+value.text+'</p>';
                 $.each(value.replies, function(secIndex, secValue) {
-                    toAppend +='<div class="reply" tabindex="'+secIndex+'">' +
-                    '<p><span class="person"><a href="../users/"'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>';
+                    toAppend +='<div class="reply" sectabindex="'+secIndex+'" parent="noparent">' +
+                    '<p><span class="person"><a href="../users/"'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
                     secValue.text = secValue.text.split("\n").join("<br>");
                     toAppend += '<p>'+secValue.text+'</p>' +
                     ' <hr>'+
-                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+secValue.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+secValue.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p>'+
+                    '<p><a href="javascript:void(0)" class="likeReply">Like <span class="green">('+secValue.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeReply">Dislike <span class="red">('+secValue.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p>'+
                     '</div>';
                 
                 });
@@ -25,12 +55,25 @@ $(document).ready(function() {
             });
             $("#algorithmComments").html(toAppend);
             $(".dislikeComment").click(function() {
-                var tabindex = $(this).closest(".reply").attr("tabindex");
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
                 voteCommentAjax(0,comments[tabindex].id, postId, tabindex);
             });
             $(".likeComment").click(function() {
-                var tabindex = $(this).closest(".reply").attr("tabindex");
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
                 voteCommentAjax(1,comments[tabindex].id, postId, tabindex);
+            });
+            $(".dislikeReply").click(function() {
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
+                    sectabindex = $(this).closest(".reply[parent='noparent']").attr("sectabindex");
+                console.log("disliked reply " + tabindex + " " + sectabindex);
+                voteReplyAjax(0,comments[tabindex].replies[sectabindex].id, postId, tabindex, sectabindex);
+            });
+            $(".likeReply").click(function() {
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
+                    sectabindex = $(this).closest(".reply[parent='noparent']").attr("sectabindex");
+                console.log("liked reply " + tabindex + " " + sectabindex);
+                console.log(comments[tabindex].replies[sectabindex]);
+                voteReplyAjax(1,comments[tabindex].replies[sectabindex].id, postId, tabindex, sectabindex);
             });
             $(".replyComment").click(function() {
                 var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
@@ -149,21 +192,6 @@ $(document).ready(function() {
             },
             error: function (data) {
                 console.log(window.location.href.split("/")[window.location.href.split("/").length-1]);
-            }
-        });
-    },
-    voteCommentAjax = function(vote, comment_id, algorithm_id, tabindex) {
-        jQuery.ajax({
-            method: 'post',
-            url: "../users/votecomment",
-            dataType: "json",
-            data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
-            success: function (data) {
-                $(".reply[tabindex='"+tabindex+"'] .green").html("("+data.upvotes+")");
-                $(".reply[tabindex='"+tabindex+"'] .red").html("("+data.downvotes+")");
-            },
-            fail: function(data) {
-                console.log(data);
             }
         });
     },

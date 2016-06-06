@@ -226,6 +226,7 @@ Route::get('post/postdata', function() {
                 ->get();
             foreach ($reply_comments_unfiltered as $secondaryArray) {
                 $secondarySingular = array();
+                $secondarySingular["id"] = $secondaryArray->id;
                 $secondarySingular["user_id"] = $secondaryArray->user_id;
                 $secondarySingular["text"] = $secondaryArray->text;
                 $secondarySingular["deleted"] = $secondaryArray->deleted;
