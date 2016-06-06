@@ -243,6 +243,23 @@ Route::get('post/postdata', function() {
             $comments[]=$singular;
         }
         $returnData["comments"]=$comments;
+        $comments_unfiltered = DB::table('inline_algorithm_comments')->where('algorithm_id', '=', $algorithm_id)->get();
+        $comments = array();
+        foreach ($comments_unfiltered as $array) {
+            $singular = array();
+            $singular["id"] = $array->id;
+            $singular["line"] = $array->line;
+            $singular["user_id"] = $array->user_id;
+            $singular["text"] = $array->text;
+            $singular["deleted"] = $array->deleted;
+            $singular["upvotes"] = $array->upvotes;
+            $singular["downvotes"] = $array->downvotes;
+            $singular["created_at"] = $array->created_at;     
+            $name = DB::select('select * from users where id = ?', array($array->user_id));
+            $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+            $comments[]=$singular;
+        }
+        $returnData["inline_comments"]=$comments;
         return Response::json($returnData);
     }
     return Response::json(array('data'=>$returnData));

@@ -2,6 +2,30 @@ $(document).ready(function() {
     var postId = window.location.href.split("/")[window.location.href.split("/").length-1],
         yourVote = undefined,
         comments = undefined,
+        lineComments = undefined,
+        currentLineSubmitter = undefined,
+        voteLineCommentAjax = function(vote, comment_id, algorithm_id, tabindex) {
+            console.log(vote, comment_id, algorithm_id, tabindex);
+            jQuery.ajax({
+                method: 'post',
+                url: "../users/voteinlinecomment",
+                dataType: "json",
+                data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
+                success: function (data) {
+                    console.log(lineComments);
+                    console.log(lineComments[currentLineSubmitter]);
+                    console.log(lineComments[currentLineSubmitter][tabindex]);
+                    lineComments[currentLineSubmitter][tabindex].upvotes = data.upvotes;
+                    lineComments[currentLineSubmitter][tabindex].downvotes = data.downvotes;
+                    console.log(data);
+                    $(".conversation .reply[tabindex='"+tabindex+"'] .likeLineComment .green").html("("+data.upvotes+")");
+                    $(".conversation .reply[tabindex='"+tabindex+"'] .dislikeLineComment .red").html("("+data.downvotes+")");
+                },
+                fail: function(data) {
+                    console.log(data);
+                }
+            });
+        },
         voteCommentAjax = function(vote, comment_id, algorithm_id, tabindex) {
             jQuery.ajax({
                 method: 'post',
@@ -14,6 +38,39 @@ $(document).ready(function() {
                 },
                 fail: function(data) {
                     console.log(data);
+                }
+            });
+        },
+        populateInlineUI = function() {
+            $(".lineComments .conversation").empty();
+            if(lineComments === [] || lineComments[currentLineSubmitter]== undefined) {
+                $(".lineComments .conversation").append("<p>No other comments on this line yet..</p>");
+            } else {
+                $.each(lineComments[currentLineSubmitter], function(index,value) {
+                    $(".lineComments .conversation").append('<div class="reply" tabindex="'+index+'" parent="parent">'+
+                    '<p><span class="person"><a href="../users/"'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
+                    '<p>'+value.text+'</p>' +
+                    '<p><a href="javascript:void(0)" class="likeLineComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeLineComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p><hr>');
+                });
+                $(".dislikeLineComment").click(function() {
+                    var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
+                    voteLineCommentAjax(0,lineComments[currentLineSubmitter][tabindex].id, postId, tabindex);
+                });
+                $(".likeLineComment").click(function() {
+                    var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
+                    voteLineCommentAjax(1,lineComments[currentLineSubmitter][tabindex].id, postId, tabindex);
+                });
+            }
+        },
+        parseLineComments = function(data) {
+            lineComments = [];
+            $.each(data, function(index,value) {
+                lineComments[value.line] = lineComments[value.line] ? lineComments[value.line] : [];
+                lineComments[value.line].push(value);
+            });
+            $.each(lineComments, function(index,value) {
+                if(value!=undefined) {
+                    $(".ace_gutter-cell[tabindex='"+index+"']").html("<span class='commentSection' style='position: absolute; left: 5px'>"+value.length+" comments </span>"+(index+1));
                 }
             });
         },
@@ -38,7 +95,8 @@ $(document).ready(function() {
                 value.text = value.text.split("\n").join("<br>");
                 toAppend += '<div class="reply" tabindex="'+index+'" parent="parent">'+
                     '<p><span class="person"><a href="../users/"'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
-                    '<p>'+value.text+'</p>';
+                    '<p>'+value.text+'</p>' +
+                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p><hr>';
                 $.each(value.replies, function(secIndex, secValue) {
                     toAppend +='<div class="reply" sectabindex="'+secIndex+'" parent="noparent">' +
                     '<p><span class="person"><a href="../users/"'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
@@ -49,9 +107,7 @@ $(document).ready(function() {
                     '</div>';
                 
                 });
-                toAppend+=' <hr>'+
-                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)" class="replyComment">Reply</a> | <a href="javascript:void(0)">Report</a> </p>'+
-                    '</div>';
+                toAppend+='<p><a href="javascript:void(0)" class="replyComment">Reply to this</a></p></div>';
             });
             $("#algorithmComments").html(toAppend);
             $(".dislikeComment").click(function() {
@@ -65,14 +121,11 @@ $(document).ready(function() {
             $(".dislikeReply").click(function() {
                 var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
                     sectabindex = $(this).closest(".reply[parent='noparent']").attr("sectabindex");
-                console.log("disliked reply " + tabindex + " " + sectabindex);
                 voteReplyAjax(0,comments[tabindex].replies[sectabindex].id, postId, tabindex, sectabindex);
             });
             $(".likeReply").click(function() {
                 var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
                     sectabindex = $(this).closest(".reply[parent='noparent']").attr("sectabindex");
-                console.log("liked reply " + tabindex + " " + sectabindex);
-                console.log(comments[tabindex].replies[sectabindex]);
                 voteReplyAjax(1,comments[tabindex].replies[sectabindex].id, postId, tabindex, sectabindex);
             });
             $(".replyComment").click(function() {
@@ -95,7 +148,6 @@ $(document).ready(function() {
                                 dataType: "json",
                                 data: {id: postId, commentid: comments[tabindex].id, comment: comment},
                                 success: function(data) {
-                                    console.log(data);
                                     comments = data;
                                     populateComments();
                                     $(".reply[tabindex='"+tabindex+"'] .replyToComment").remove();
@@ -119,6 +171,9 @@ $(document).ready(function() {
             data: {id: postId},
             success: function (data) {
                 comments = data.comments;
+                setTimeout(function() {
+                    parseLineComments(data.inline_comments);
+                }, 2000);
                 populateComments();
                 $("#creatorUsername").html(data.username);
                 $("#creatorUsername").attr("href","../users/"+data.user_id);
@@ -162,33 +217,55 @@ $(document).ready(function() {
                 editor.setReadOnly(true);
                 editor.setValue(data.content);
                 setTimeout(function() {
-                    $($(".ace_gutter .ace_layer .ace_gutter-cell")[0]).append("<span class='commentSection' style='position: absolute; left: 5px'>2 comments </span>");
-                    $(".ace_gutter .ace_layer .ace_gutter-cell").click(function(e) {
-                        if($(this).children('.commentSection').length>0) {
-                            $(".lineComments").remove();
-                            $("body").append('<div class="lineComments"></div>');
-                            $(".lineComments").css({
-                                position: 'absolute',
-                                top: getMouseY() + 10,
-                                left: getMouseX() + 10,
-                                width: "30%",
-                                'z-index': 1000,
-                                border: '1px solid #ccc',
-                                background: 'white',
-                                padding: '0 10px',
-                                'overflow-y': 'scroll',
-                                'resize': 'both'
-                            });
-                            $(".lineComments").append('<div class="boxWrapper"><label>Your Message</label><textarea class="form-control"></textarea><div class="text-right"><button class="btn" id="commentCloser" style="margin-top: 10px; margin-right: 3px">Close</button><button class="btn" style="margin-top: 10px">Submit</button></div></div>');
-                            $(".lineComments").append('<div class="conversation"><div class="reply"><p><span class="person"><a href="javascript:void(0)">Richard Sluder</a></span></p><p>Great! just what I needed. Thumbs up</p></div></div>');
-                            $(".lineComments").append('<div class="conversation"><div class="reply"><p><span class="person"><a href="javascript:void(0)">Emilia</a></span></p><p>Easy and concise, but is there a faster version?</p></div></div>');
-                        }
+                    $.each($(".ace_gutter-cell"), function(index, value) {
+                        $(value).attr("tabindex",index);
+                    });
+                    $(".ace_gutter-cell").click(function() {
+                        currentLineSubmitter = $(this).attr("tabindex");
+                        $(".lineComments").remove();
+                        $("body").append('<div class="lineComments"></div>');
+                        $(".lineComments").css({
+                            position: 'absolute',
+                            top: getMouseY() + 10,
+                            left: getMouseX() + 10,
+                            width: "40%",
+                            height: "70%",
+                            'z-index': 1000,
+                            border: '1px solid #ccc',
+                            background: 'white',
+                            padding: '0 10px',
+                            'overflow-y': 'scroll',
+                            'resize': 'both'
+                        });
+                        $(".lineComments").append('<div class="boxWrapper"><label>Your Message</label><textarea class="form-control"></textarea><div class="text-right"><button class="btn" id="commentCloser" style="margin-top: 10px; margin-right: 3px">Close</button><button class="btn" id="submitInline" style="margin-top: 10px">Submit</button></div></div>');
+                        $(".lineComments").append('<div class="conversation"></div>');
+                        populateInlineUI();
                         $(".lineComments").draggable();
-                        $("#commentCloser").unbind().click(function() {
+                        $("#submitInline").click(function() {
+                            comment = $(".lineComments textarea").val().trim();
+                            if(comment.length>0) {
+                                $(".lineComments textarea").val("");
+                                jQuery.ajax({
+                                    method: 'post',
+                                    url: "../users/commentline",
+                                    dataType: "json",
+                                    data: {id: postId, line: currentLineSubmitter, comment: comment},
+                                    success: function(data) {
+                                        parseLineComments(data);
+                                        populateInlineUI();
+                                    },
+                                    fail: function(data) {
+
+                                    }
+                                });
+                            }
+                        });
+                        $("#commentCloser").click(function() {
                             $(".lineComments").remove();
                         });
                     });
-                }, 2000);
+                    
+                }, 1000);
             },
             error: function (data) {
                 console.log(window.location.href.split("/")[window.location.href.split("/").length-1]);

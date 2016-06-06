@@ -152,6 +152,11 @@ a:hover {
         border-left: 2px solid $main-color;
         padding-left: 10px;
         margin-bottom: $default-margin; 
+        .replyComment {
+            font-weight: 700;
+            font-size: 15px;
+            margin: 10px;
+        }
         .reply {
             margin-bottom: 0;
             padding-bottom: 5px;

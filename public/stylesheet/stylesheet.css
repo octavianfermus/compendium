@@ -228,6 +228,11 @@ a:hover {
   padding-left: 10px;
   margin-bottom: 20px;
 }
+.conversation .reply .replyComment {
+  font-weight: 700;
+  font-size: 15px;
+  margin: 10px;
+}
 .conversation .reply .reply {
   margin-bottom: 0;
   padding-bottom: 5px;
