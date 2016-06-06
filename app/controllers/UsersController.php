@@ -306,14 +306,35 @@ class UsersController extends BaseController implements RemindableInterface {
         if(Auth::check()) {
             $algorithm_id = Request::input('id');
             $vote = Request::input('vote');
-            
-            
+            $time = date('Y-m-d H:i:s');
             $found = DB::table('algorithm_votes')
                     ->where('user_id','=', Auth::user()->id)
                     ->where('algorithm_id','=',$algorithm_id)
+                    ->where('vote','=',$vote)
                     ->count();
-            $time = date('Y-m-d H:i:s');
             
+            if($found == 1) {
+                DB::table('algorithm_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->where('vote','=',$vote)
+                    ->delete();
+                $downvotes = DB::table('algorithm_votes')
+                ->where('algorithm_id','=',$algorithm_id)
+                ->where('vote','=',0)
+                ->count();
+            
+                $upvotes = DB::table('algorithm_votes')
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->where('vote','=',1)
+                    ->count(); 
+                DB::update('update algorithms set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $algorithm_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+            }
+            $found = DB::table('algorithm_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->count();        
             if($found==0) {
                 DB::insert('insert into algorithm_votes (user_id, algorithm_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?)', array(
                     Auth::user()->id, 
@@ -402,6 +423,33 @@ class UsersController extends BaseController implements RemindableInterface {
                     ->where('user_id','=', Auth::user()->id)
                     ->where('algorithm_id','=',$algorithm_id)
                     ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->count();
+            if($found == 1) {
+                DB::table('comment_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->delete();
+                $downvotes = DB::table('comment_votes')
+                ->where('algorithm_id','=',$algorithm_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+                $upvotes = DB::table('comment_votes')
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',1)
+                    ->count(); 
+                DB::update('update algorithm_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+            }
+            $found = DB::table('comment_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->where('comment_id','=',$comment_id)
                     ->count();
             if($found==0) {
                 DB::insert('insert into comment_votes (user_id, comment_id, algorithm_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
@@ -438,6 +486,33 @@ class UsersController extends BaseController implements RemindableInterface {
             $comment_id = Request::input('comment_id');
             $vote = Request::input('vote');
             $time = date('Y-m-d H:i:s');
+            $found = DB::table('reply_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->count();
+            if($found == 1) {
+                DB::table('reply_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->delete();
+                $downvotes = DB::table('reply_votes')
+                ->where('algorithm_id','=',$algorithm_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+                $upvotes = DB::table('reply_votes')
+                    ->where('algorithm_id','=',$algorithm_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',1)
+                    ->count(); 
+                DB::update('update algorithm_discussion_replies set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+            }
             $found = DB::table('reply_votes')
                     ->where('user_id','=', Auth::user()->id)
                     ->where('algorithm_id','=',$algorithm_id)
