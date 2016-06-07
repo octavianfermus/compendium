@@ -19,6 +19,9 @@
         <script src="{{ URL::to('scripts/searchAlgorithms.js') }}"></script>
         <script src="{{ URL::to('scripts/jquery-ui.min.js') }}"></script>
         <script src="{{ URL::to('scripts/tag-it.min.js') }}"></script>
+        @if(Auth::check())
+            <script src="{{ URL::to('scripts/notifications.js') }}"></script>
+        @endif
         <link href="{{ URL::asset('stylesheet/stylesheet.css')}}" rel="stylesheet">
     </head>
     <body>
@@ -48,7 +51,19 @@
                                 <li>{{ HTML::link('users/logout', 'Logout') }}</li>
                             </ul>
                         </li>
-                        <li><a href="{{ URL::to('notifications') }}">Notifications <span class="messageCount">99+</span></a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Notifications <span class="messageCount hidden"></span><span class="caret"></span></a>
+                            <ul class="dropdown-menu notifications">
+                                <li role="separator" class="divider"></li>
+                                <li class="text-center">
+                                    <p>
+                                        <a href="javascript:void(0)">Mark all as seen</a>
+                                        <span style="color: black"> | </span>
+                                        <a href="{{ URL::to('notifications') }}">See all notifications</a>
+                                    </p>
+                                </li>
+                            </ul>
+                        </li>
                         @endif
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Links <span class="caret"></span></a>
@@ -66,7 +81,25 @@
                 </div><!-- /.navbar-collapse -->
             </div><!-- /.container-fluid -->
         </nav>
-        @yield('content')
+        @if(Auth::check())
+        <div class="container application">
+            
+            <!-- Logged in -->
+                <div class="row row-eq-height">
+                    <div class="col-md-2 sidebar">
+                        @include('sidebar')
+                    </div>
+                    <div class="col-md-10 main">
+                        @yield('content')
+                    </div>
+                </div>
+            
+               
+            
+        </div>
+        @else
+            @yield('content')
+        @endif
         <div class="container footer-side">
             <div class="row">
                 <div class="col-md-12">

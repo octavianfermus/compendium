@@ -88,6 +88,28 @@ body {
   background-color: #E9E9E9;
 }
 
+ul.notifications {
+  width: 270px;
+}
+ul.notifications li {
+  font-size: 13px;
+}
+ul.notifications li p {
+  margin: 0;
+}
+ul.notifications li.unread {
+  background-color: #E9E9E9;
+}
+ul.notifications li.unread:not(:first-of-type) {
+  border-top: 1px solid #F1BB59;
+}
+ul.notifications li a {
+  white-space: initial;
+}
+ul.notifications li a hr {
+  margin: 0;
+}
+
 .fader {
   display: none;
   color: red;

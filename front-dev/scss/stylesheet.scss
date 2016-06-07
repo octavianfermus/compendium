@@ -15,7 +15,27 @@ body {
 .bg-color {
     background-color: $background-color;
 }
-
+ul.notifications {
+    width: 270px;
+    li {
+        p {
+            margin: 0;
+        }
+        font-size: 13px;
+        &.unread {
+            background-color: $background-color;
+            &:not(:first-of-type) {
+                border-top: 1px solid $main-color;
+            }
+        }
+        a {
+            hr {
+                margin: 0;
+            }
+            white-space: initial;
+        }
+    }
+}
 .fader {
     display: none;
     color: red;

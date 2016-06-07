@@ -12,12 +12,8 @@ $(document).ready(function() {
                 dataType: "json",
                 data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
                 success: function (data) {
-                    console.log(lineComments);
-                    console.log(lineComments[currentLineSubmitter]);
-                    console.log(lineComments[currentLineSubmitter][tabindex]);
                     lineComments[currentLineSubmitter][tabindex].upvotes = data.upvotes;
                     lineComments[currentLineSubmitter][tabindex].downvotes = data.downvotes;
-                    console.log(data);
                     $(".conversation .reply[tabindex='"+tabindex+"'] .likeLineComment .green").html("("+data.upvotes+")");
                     $(".conversation .reply[tabindex='"+tabindex+"'] .dislikeLineComment .red").html("("+data.downvotes+")");
                 },
@@ -229,7 +225,7 @@ $(document).ready(function() {
                             top: getMouseY() + 10,
                             left: getMouseX() + 10,
                             width: "40%",
-                            height: "70%",
+                            "max-height": "70%",
                             'z-index': 1000,
                             border: '1px solid #ccc',
                             background: 'white',

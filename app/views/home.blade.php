@@ -1,34 +1,27 @@
 @extends('layout')
 
 @section('content')
-    
-        <div class="container application">
-            <div class="row">
-                <div class="col-md-12 main">
-                    <div class="boxWrapper">
-                        <h1>Algorithm management</h1>
-                        <p>Hello, <span class="person" id="person-me">{{Auth::user()->last_name;}} {{Auth::user()->first_name;}}</span>. Here you can search algorithms or choose to post one yourself.</p>
-                    </div>
-                    <ul class="nav nav-tabs" style="margin-bottom: 25px">
-                        <li role="presentation" class="active"><a id="my-posts-tab" role="tab" data-toggle="tab" aria-controls="my-posts" aria-expanded="true" href="#my-posts">My posts</a></li>
-                        <li role="presentation"><a id="search-algorithms-tab" role="tab" data-toggle="tab" aria-controls="search-algorithms" aria-expanded="false" href="#search-algorithms">Search</a></li>
-                        <li role="presentation"><a id="post-new-tab" role="tab" data-toggle="tab" aria-controls="post-new" aria-expanded="false" href="#post-new">Post a new algorithm</a></li>
-                    </ul>
-                    <div class="tab-content">
-                        <div role="tabpanel" class="tab-pane fade active in" id="my-posts" aria-labelledby="my-posts-tab" style="position: relative">
-                            @include('my_algorithms')
-                        </div> 
-                        <div role="tabpanel" class="tab-pane fade" id="search-algorithms" aria-labelledby="search-algorithms-tab"> 
-                            @include('search_algorithm')
-                            
-                        </div>
-                        <div role="tabpanel" class="tab-pane fade" id="post-new" aria-labelledby="post-new-tab"> 
-                            @include('post_algorithm')
-                        </div>
-                    </div>
-                </div> 
-            </div>
+    <div class="boxWrapper">
+        <h1>Algorithm management</h1>
+        <p>Hello, <span class="person" id="person-me">{{Auth::user()->last_name;}} {{Auth::user()->first_name;}}</span>. Here you can search algorithms or choose to post one yourself.</p>
+    </div>
+    <ul class="nav nav-tabs" style="margin-bottom: 25px">
+        <li role="presentation" class="active"><a id="my-posts-tab" role="tab" data-toggle="tab" aria-controls="my-posts" aria-expanded="true" href="#my-posts">My posts</a></li>
+        <li role="presentation"><a id="search-algorithms-tab" role="tab" data-toggle="tab" aria-controls="search-algorithms" aria-expanded="false" href="#search-algorithms">Search</a></li>
+        <li role="presentation"><a id="post-new-tab" role="tab" data-toggle="tab" aria-controls="post-new" aria-expanded="false" href="#post-new">Post a new algorithm</a></li>
+    </ul>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane fade active in" id="my-posts" aria-labelledby="my-posts-tab" style="position: relative">
+            @include('my_algorithms')
+        </div> 
+        <div role="tabpanel" class="tab-pane fade" id="search-algorithms" aria-labelledby="search-algorithms-tab"> 
+            @include('search_algorithm')
+
         </div>
+        <div role="tabpanel" class="tab-pane fade" id="post-new" aria-labelledby="post-new-tab"> 
+            @include('post_algorithm')
+        </div>
+    </div>
 
         
     <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
