@@ -755,20 +755,33 @@ class UsersController extends BaseController implements RemindableInterface {
                 $time)
             );
             
-            $notification_user_id = DB::table('algorithms')->where('id', $algorithm_id)->first();
+            $notification_user_id = DB::table('algorithm_discussion')->where('id', $comment_id)->first();
             $notification_user_id = $notification_user_id->user_id;
+            
+            if($notification_user_id != Auth::user()->id) { 
+                    DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
+                        $notification_user_id, 
+                        Auth::user()->id,
+                        '/posts/'.$algorithm_id,
+                        "New reply!",
+                        "replied to something you said.",
+                        FALSE,
+                        $time,
+                        $time)
+                    );     
+                }
             $send_to_users = DB::table('algorithm_discussion_replies')
-                ->where('algorithm_id', '=', $algorithm_id)
+                ->where('comment_id', '=', $comment_id)
                 ->where('user_id', '!=', Auth::user()->id)
                 ->get();
             foreach ($send_to_users as $array) {
-                if($array->user_id != $notification_user_id) { 
+                if($array->user_id != Auth::user()->id && $array->user_id != $notification_user_id) { 
                     DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
                         $array->user_id, 
                         Auth::user()->id,
                         '/posts/'.$algorithm_id,
                         "New reply!",
-                        "replied to something you said.",
+                        "also replied to a comment you replied to.",
                         FALSE,
                         $time,
                         $time)
@@ -858,7 +871,7 @@ class UsersController extends BaseController implements RemindableInterface {
         if(Auth::check()) {
             $notifications_unfiltered = DB::table('notifications')
                 ->where('user_id', '=', Auth::user()->id)
-                ->orderBy('id', 'asc')
+                ->orderBy('id', 'desc')
                 ->get();
             $notifications = array();
             foreach ($notifications_unfiltered as $array) {
