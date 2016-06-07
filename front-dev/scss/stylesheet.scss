@@ -34,6 +34,9 @@ hr {
     &:first-of-type {
         margin-top: $default-margin;
     }
+    &:last-of-type {
+        margin-bottom: $default-margin;
+    }
     hr {
         margin: 0;
     }

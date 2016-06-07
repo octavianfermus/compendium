@@ -106,6 +106,9 @@ hr {
 .extendedNotification:first-of-type {
   margin-top: 20px;
 }
+.extendedNotification:last-of-type {
+  margin-bottom: 20px;
+}
 .extendedNotification hr {
   margin: 0;
 }

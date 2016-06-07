@@ -44,7 +44,7 @@ $(document).ready(function() {
             } else {
                 $.each(lineComments[currentLineSubmitter], function(index,value) {
                     $(".lineComments .conversation").append('<div class="reply" tabindex="'+index+'" parent="parent">'+
-                    '<p><span class="person"><a href="../users/"'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
+                    '<p><span class="person"><a href="../users/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
                     '<p>'+value.text+'</p>' +
                     '<p><a href="javascript:void(0)" class="likeLineComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeLineComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p><hr>');
                 });
@@ -90,16 +90,17 @@ $(document).ready(function() {
             $.each(comments, function(index, value) {
                 value.text = value.text.split("\n").join("<br>");
                 toAppend += '<div class="reply" tabindex="'+index+'" parent="parent">'+
-                    '<p><span class="person"><a href="../users/"'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
+                    '<p><span class="person"><a href="../users/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
                     '<p>'+value.text+'</p>' +
                     '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p><hr>';
                 $.each(value.replies, function(secIndex, secValue) {
                     toAppend +='<div class="reply" sectabindex="'+secIndex+'" parent="noparent">' +
-                    '<p><span class="person"><a href="../users/"'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
+                    '<p><span class="person"><a href="../users/'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
                     secValue.text = secValue.text.split("\n").join("<br>");
                     toAppend += '<p>'+secValue.text+'</p>' +
-                    ' <hr>'+
+                    
                     '<p><a href="javascript:void(0)" class="likeReply">Like <span class="green">('+secValue.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeReply">Dislike <span class="red">('+secValue.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p>'+
+                    ' <hr>'+
                     '</div>';
                 
                 });
