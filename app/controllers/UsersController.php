@@ -883,6 +883,7 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["title"] = $array->title;
                 $singular["text"] = $array->text;
                 $singular["seen"] = $array->seen;
+                $singular["checked_out"] = $array->checked_out;
                 $singular["created_at"] = $array->created_at;
                 $name = DB::select('select * from users where id = ?', array($array->who_said));
                 $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;

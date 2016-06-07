@@ -8,6 +8,45 @@ body {
     font-family: $main-font;
 }
 
+hr {
+    border-top: 1px solid $main-color;
+}
+
+.boxWrapper {
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    h1 {
+        margin-top: 10px;
+        margin-bottom: 0px;
+    }
+    &.heading {
+        h1, p {
+            margin: 0;
+        }
+    }
+}
+.extendedNotification {
+    margin-bottom: 0;
+    margin-top: 1px;
+    transition: all, $transition-speed;
+    &:first-of-type {
+        margin-top: $default-margin;
+    }
+    hr {
+        margin: 0;
+    }
+    &.unread {
+        background: $background-color;        
+    }
+    .buttons {
+        float: right;
+        a {
+            margin-left: 5px;
+        }
+    }
+}
 .form-control {
     border-radius: 0;
 }
@@ -324,16 +363,6 @@ table {
     }
 }
 
-.boxWrapper {
-    padding: 10px;
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
-    margin-top: 10px;
-    h1 {
-        margin-top: 10px;
-        margin-bottom: 0px;
-    }
-}
 
 p.subtitle {
     font-style: italic;

@@ -50,7 +50,16 @@ Route::get('about', function() {
 });
 
 Route::get('notifications', function() {
-    return View::make('notifications');
+    if(Auth::check()) {
+        $time = date('Y-m-d H:i:s');
+        DB::update('update notifications set seen = 1, updated_at = ? where user_id = ?', array(
+            $time, 
+            Auth::user()->id, 
+        ));
+        return View::make('notifications');
+    } else {
+        return View::make('404');
+    }
 });
 
 Route::get('posts/{id}', function ($algorithm_id) {

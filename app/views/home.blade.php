@@ -1,7 +1,7 @@
 @extends('layout')
 
 @section('content')
-    <div class="boxWrapper">
+    <div class="boxWrapper heading">
         <h1>Algorithm management</h1>
         <p>Hello, <span class="person" id="person-me">{{Auth::user()->last_name;}} {{Auth::user()->first_name;}}</span>. Here you can search algorithms or choose to post one yourself.</p>
     </div>
