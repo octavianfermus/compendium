@@ -45,6 +45,20 @@ $(document).ready(function() {
             });
             $("ul .notifications li[listindex]").remove();
             $("ul .notifications").prepend(toAdd);
+            $("ul .notifications li[listindex] a").click(function(e) {
+                e.preventDefault();
+                var clickedNotification = notifications[$(this).closest("li[listindex]").attr("listindex")];
+                console.log(clickedNotification);
+                jQuery.ajax({
+                    method: 'put',
+                    url: root + "/users/checknotification",
+                    data: {id:clickedNotification.id},
+                    dataType: "json",
+                    success: function (data) {
+                        window.location.href = createURL(root+clickedNotification.url, clickedNotification.reference, clickedNotification.title);
+                    }
+                });
+            });
             if(count > 0) {
                 $("span.messageCount").html((count > 99 ? "99+" : count));
                 $("span.messageCount").removeClass("hidden");
@@ -100,7 +114,12 @@ $(document).ready(function() {
             }
         };
     startAjax();
-    
+    $(".seeNotifs").click(function() {
+        jQuery.ajax({
+            method: 'put',
+            url: root + "/users/seeallnotifications"
+        });
+    });
     setInterval(function() {
         startAjax();
     }, 10000);

@@ -52,7 +52,7 @@
                             </ul>
                         </li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Notifications <span class="messageCount hidden"></span><span class="caret"></span></a>
+                            <a href="#" class="dropdown-toggle seeNotifs" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Notifications <span class="messageCount hidden"></span><span class="caret"></span></a>
                             <ul class="dropdown-menu notifications">
                                 <li role="separator" class="divider"></li>
                                 <li class="text-center">

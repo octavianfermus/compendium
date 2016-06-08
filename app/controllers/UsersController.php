@@ -966,6 +966,15 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive notifications.'));
         }
     }
+    public function putSeeallnotifications() {
+        if(Auth::check()) {
+            $time = date('Y-m-d H:i:s');
+            DB::update('update notifications set seen = 1, updated_at = ? where user_id = ?', array(
+                $time, 
+                Auth::user()->id, 
+            ));
+        }
+    }
     public function putChecknotification() {
         if(Auth::check()) {
             $id = Input::get('id');
