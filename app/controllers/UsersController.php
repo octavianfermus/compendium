@@ -238,20 +238,22 @@ class UsersController extends BaseController implements RemindableInterface {
             ->where('request_id', '=', Input::get('byrequest'))
             ->where('created_at', '=', $time)
             ->get();
-        
-        foreach ($send_to_users as $array) {
-            DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
-                $array->user_id, 
-                Auth::user()->id,
-                '/posts/'.$algorithm_id[0]->id,
-                "Request answered!",
-                "created an algorithm based on your request.",
-                FALSE,
-                $time,
-                $time)
-            );
+        if(Input::get('template') == 0) {
+            foreach ($send_to_users as $array) {
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $array->user_id, 
+                    Auth::user()->id,
+                    '/posts/'.$algorithm_id[0]->id,
+                    "Request answered!",
+                    "created an algorithm based on your request.",
+                    "",
+                    FALSE,
+                    "",
+                    $time,
+                    $time)
+                );
+            }
         }
-        
         return Redirect::to('/')->withErrors(['Algorithm successfully added.']);
     }
     public function postEditalgorithm() {
@@ -267,6 +269,25 @@ class UsersController extends BaseController implements RemindableInterface {
             $time,
             Input::get('algorithm_id')));
         if(Input::get('template') == 0) {
+            
+            $send_to_users = DB::table('algorithm_requests')
+                ->where('id', '=', Input::get('byrequest'))
+                ->where('user_id', '!=', Auth::user()->id)
+                ->get();
+            foreach ($send_to_users as $array) {
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $array->user_id, 
+                    Auth::user()->id,
+                    '/posts/'.Input::get('algorithm_id'),
+                    "Request answered!",
+                    "created an algorithm based on your request.",
+                    "",
+                    FALSE,
+                    "",
+                    $time,
+                    $time)
+                );
+            }
             return Redirect::to('/')->withErrors("Algorithm successfully published.");
         } else {
             return Redirect::to('/users/editalgorithm/'.Input::get('algorithm_id'))->withErrors("Algorithm successfully updated.");
@@ -317,12 +338,35 @@ class UsersController extends BaseController implements RemindableInterface {
                     ->where('id', '=', $algorithmId)
                     ->where('user_id', '=', Auth::user()->id)
                     ->where('template', '=', 1)
+                    ->where('content', '!=', "")
                     ->count();
         if($found==1) {
-            DB::update('update algorithms set template = 0 where user_id = ? and id = ?', array(Auth::user()->id, $algorithmId));
+            $time = date('Y-m-d H:i:s');
+            DB::update('update algorithms set template = 0, updated_at = ? where user_id = ? and id = ?', array($time, Auth::user()->id, $algorithmId));
+            $request_id = DB::select('select * from algorithms where user_id = ? and id = ? and template = 0 and updated_at = ?', array(Auth::user()->id, $algorithmId, $time));
+            $request_id = $request_id[0]->request_id;
+            $send_to_users = DB::table('algorithm_requests')
+                ->where('id', '=', $request_id)
+                ->where('user_id', '!=', Auth::user()->id)
+                ->get();
+            foreach ($send_to_users as $array) {
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $array->user_id, 
+                    Auth::user()->id,
+                    '/posts/'.$algorithmId,
+                    "Request answered!",
+                    "created an algorithm based on your request.",
+                    "",
+                    FALSE,
+                    "",
+                    $time,
+                    $time)
+                );
+               
+            }
             return Response::json(array('state' => 'success', 'message'=>'Algorithm successfuly published.'));
         }
-        return Response::json(array('state' => 'failure', 'message'=>'Algorithm not found.'));
+        return Response::json(array('state' => 'failure', 'message'=>'Algorithm was not found or doesn\'t have any content. Click on the algorithm title to add content before publishing.'));
     }
     
     public function postVotealgorithm() {
@@ -397,16 +441,24 @@ class UsersController extends BaseController implements RemindableInterface {
                 $time,
                 $time)
             );
+            
             $notification_user_id = DB::table('algorithms')->where('id', $algorithm_id)->first();
             $notification_user_id = $notification_user_id->user_id;
+            $comment_id = DB::table('algorithm_discussion')
+                ->where('algorithm_id', $algorithm_id)
+                ->where('created_at', $time)
+                ->where('user_id', Auth::user()->id)
+                ->first();
             if($notification_user_id!=Auth::user()->id) {
-                DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
                     $notification_user_id, 
                     Auth::user()->id,
                     '/posts/'.$algorithm_id,
                     "New comment!",
                     "discussed an algorithm you submitted.",
+                    $comment,
                     FALSE,
+                    $comment_id->id,
                     $time,
                     $time)
                 );
@@ -417,13 +469,15 @@ class UsersController extends BaseController implements RemindableInterface {
                 ->get();
             foreach ($send_to_users as $array) {
                 if($array->user_id != $notification_user_id) { 
-                    DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
                         $array->user_id, 
                         Auth::user()->id,
                         '/posts/'.$algorithm_id,
                         "New comment!",
                         "also discussed an algorithm you commented on.",
+                        $comment,
                         FALSE,
+                        $comment_id->id,
                         $time,
                         $time)
                     );
@@ -483,16 +537,19 @@ class UsersController extends BaseController implements RemindableInterface {
                 $time,
                 $time)
             );
+            
             $notification_user_id = DB::table('algorithms')->where('id', $algorithm_id)->first();
             $notification_user_id = $notification_user_id->user_id;
             if($notification_user_id!=Auth::user()->id) {
-                DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
                     $notification_user_id, 
                     Auth::user()->id,
                     '/posts/'.$algorithm_id,
-                    "New comment!",
+                    "New line comment!",
                     "commented an algorithm you submitted on line ".($line+1).".",
+                    $comment,
                     FALSE,
+                    $line,
                     $time,
                     $time)
                 );
@@ -505,13 +562,15 @@ class UsersController extends BaseController implements RemindableInterface {
             foreach ($send_to_users as $array) {
                 
                 if($array->user_id != $notification_user_id) { 
-                    DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, what_was_said, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
                         $array->user_id, 
                         Auth::user()->id,
                         '/posts/'.$algorithm_id,
-                        "New comment!",
+                        "New line comment!",
                         "commented an algorithm line you also commented on (line ".($line+1).").",
+                        $comment,
                         FALSE,
+                        $line,
                         $time,
                         $time)
                     );
@@ -757,32 +816,43 @@ class UsersController extends BaseController implements RemindableInterface {
             
             $notification_user_id = DB::table('algorithm_discussion')->where('id', $comment_id)->first();
             $notification_user_id = $notification_user_id->user_id;
-            
+            $comment_id_second = DB::table('algorithm_discussion_replies')
+                ->where('algorithm_id', $algorithm_id)
+                ->where('comment_id', $comment_id)
+                ->where('created_at', $time)
+                ->where('user_id', Auth::user()->id)
+                ->first();
+            $comment_id_second = $comment_id_second->id;
             if($notification_user_id != Auth::user()->id) { 
-                    DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
-                        $notification_user_id, 
-                        Auth::user()->id,
-                        '/posts/'.$algorithm_id,
-                        "New reply!",
-                        "replied to something you said.",
-                        FALSE,
-                        $time,
-                        $time)
-                    );     
-                }
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $notification_user_id, 
+                    Auth::user()->id,
+                    '/posts/'.$algorithm_id,
+                    "New reply!",
+                    "replied to something you said.",
+                    $comment,
+                    FALSE,
+                    $comment_id."_".$comment_id_second,
+                    $time,
+                    $time)
+                );     
+            }
+            
             $send_to_users = DB::table('algorithm_discussion_replies')
                 ->where('comment_id', '=', $comment_id)
                 ->where('user_id', '!=', Auth::user()->id)
                 ->get();
             foreach ($send_to_users as $array) {
                 if($array->user_id != Auth::user()->id && $array->user_id != $notification_user_id) { 
-                    DB::insert('insert into notifications (user_id, who_said, url, title, text, seen, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
                         $array->user_id, 
                         Auth::user()->id,
                         '/posts/'.$algorithm_id,
                         "New reply!",
                         "also replied to a comment you replied to.",
+                        $comment,
                         FALSE,
+                        $comment_id."_".$comment_id_second,
                         $time,
                         $time)
                     );
@@ -883,7 +953,9 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["title"] = $array->title;
                 $singular["text"] = $array->text;
                 $singular["seen"] = $array->seen;
+                $singular["what_was_said"] = $array->what_was_said;
                 $singular["checked_out"] = $array->checked_out;
+                $singular["reference"] = $array->reference;
                 $singular["created_at"] = $array->created_at;
                 $name = DB::select('select * from users where id = ?', array($array->who_said));
                 $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
@@ -892,6 +964,25 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json($notifications);
         } else {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive notifications.'));
+        }
+    }
+    public function putChecknotification() {
+        if(Auth::check()) {
+            $id = Input::get('id');
+            $time = date('Y-m-d H:i:s');
+            DB::update('update notifications set checked_out = 1, seen = 1, updated_at = ? where id = ? and user_id = ?', array(
+                $time, 
+                $id,
+                Auth::user()->id
+            ));
+            return Response::json(array('state'=>'success', 'checked_out'=>$id));
+        }
+    }
+    public function deleteDeletenotification() {
+        if(Auth::check()) {
+            $id = Input::get('id');
+            DB::delete('delete from notifications where id = ? and user_id = ?', array($id, Auth::user()->id));
+            return Response::json(array('state'=>'success', 'deleted'=>$id));
         }
     }
 }

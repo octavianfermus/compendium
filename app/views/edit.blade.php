@@ -1,40 +1,34 @@
 @extends('layout')
 
 @section('content')
-    <div class="container application">
-        <div class="row">
-            <div class="col-md-12 main">
-                <div class="boxWrapper">
-                    <div class="text-right">
-                        <a href="javascript:void(0)" id="cancelRequest">Reset progress</a>
-                        <span> | </span>
-                        <a href="javascript:void(0)" id="takeRequestModalOpener">I want to create an algorithm based on a request..</a>
-                    </div>
-                    {{ Form::open(array('url'=>'users/editalgorithm', 'id'=>'post_algorithm_form')) }}
-                        {{ Form::label('algorithm_name', 'Algorithm name') }}
-                        {{ Form::text('algorithm_name', null, array('class'=>'form-control', 'placeholder'=>'algorithm name..')) }}
-                        {{ Form::label('programming_language', 'Programming Language') }}
-                        {{ Form::text('language', null, array('class'=>'form-control')) }}
-                        {{ Form::label('description', 'Description') }}
-                        {{ Form::textarea('algorithm_description', null, array('class'=>'form-control', 'rows'=>'2', 'placeholder'=>'add a short description..')) }}
-                        {{ Form::label('original_link', 'Original Link (optional)') }}
-                        {{ Form::text('original_link', null, array('class'=>'form-control', 'placeholder'=>'original algorithm location..')) }}
-                        <div id="editor"></div>
-                        {{ Form::textarea('algorithm_code', null, array('class'=>'hidden', 'placeholder'=>'add a short description..')) }}
-                        {{ Form::text('template', null, array('class'=>'hidden','id'=>'isItTemplate')) }}
-                        {{ Form::text('algorithm_id', null, array('class'=>'hidden','id'=>'algorithm_id')) }}
-                        {{ Form::text('byrequest', null, array('class'=>'hidden','id'=>'isItByRequest')) }}
-                        {{ Form::submit('Submit changes', array('class'=>'btn hidden', 'id'=>'submit_algorithm'))}}
-                    {{ Form::close() }}
-                        <div class="text-right">
-                            <span class="fader" id="submitFader">You must fill all mandatory fields before publishing an algorithm.</span>
-                            <button class="btn danger" data-toggle="modal" data-target="#confirmationModal">Delete</button>
-                            <button class="btn" id="saveAsTemplate">Save as template</button>
-                            <button class="btn" id="publishAlgorithm">Publish</button>
-                        </div>
-                </div>
-            </div>  
+    <div class="boxWrapper">
+        <div class="text-right">
+            <a href="javascript:void(0)" id="cancelRequest">Reset progress</a>
+            <span> | </span>
+            <a href="javascript:void(0)" id="takeRequestModalOpener">I want to create an algorithm based on a request..</a>
         </div>
+        {{ Form::open(array('url'=>'users/editalgorithm', 'id'=>'post_algorithm_form')) }}
+            {{ Form::label('algorithm_name', 'Algorithm name') }}
+            {{ Form::text('algorithm_name', null, array('class'=>'form-control', 'placeholder'=>'algorithm name..')) }}
+            {{ Form::label('programming_language', 'Programming Language') }}
+            {{ Form::text('language', null, array('class'=>'form-control')) }}
+            {{ Form::label('description', 'Description') }}
+            {{ Form::textarea('algorithm_description', null, array('class'=>'form-control', 'rows'=>'2', 'placeholder'=>'add a short description..')) }}
+            {{ Form::label('original_link', 'Original Link (optional)') }}
+            {{ Form::text('original_link', null, array('class'=>'form-control', 'placeholder'=>'original algorithm location..')) }}
+            <div id="editor"></div>
+            {{ Form::textarea('algorithm_code', null, array('class'=>'hidden', 'placeholder'=>'add a short description..')) }}
+            {{ Form::text('template', null, array('class'=>'hidden','id'=>'isItTemplate')) }}
+            {{ Form::text('algorithm_id', null, array('class'=>'hidden','id'=>'algorithm_id')) }}
+            {{ Form::text('byrequest', null, array('class'=>'hidden','id'=>'isItByRequest')) }}
+            {{ Form::submit('Submit changes', array('class'=>'btn hidden', 'id'=>'submit_algorithm'))}}
+        {{ Form::close() }}
+            <div class="text-right">
+                <span class="fader" id="submitFader">You must fill all mandatory fields before publishing an algorithm.</span>
+                <button class="btn danger" data-toggle="modal" data-target="#confirmationModal">Delete</button>
+                <button class="btn" id="saveAsTemplate">Save as template</button>
+                <button class="btn" id="publishAlgorithm">Publish</button>
+            </div>
     </div>
     <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog">

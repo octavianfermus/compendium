@@ -15,8 +15,10 @@ class CreateNotificationsTable extends Migration {
             $table->string('url');
             $table->string('title');
             $table->string('text');
+            $table->string('what_was_said');
             $table->boolean('seen');
             $table->boolean('checked_out');
+            $table->string('reference');
             $table->timestamps();
         });
 	}

@@ -1,9 +1,10 @@
 $(document).ready(function() {
-    var postId = window.location.href.split("/")[window.location.href.split("/").length-1],
+    var postId = window.location.href.split("#")[0].split("/")[window.location.href.split("/").length-1],
         yourVote = undefined,
         comments = undefined,
         lineComments = undefined,
         currentLineSubmitter = undefined,
+        initiated = 0,
         voteLineCommentAjax = function(vote, comment_id, algorithm_id, tabindex) {
             console.log(vote, comment_id, algorithm_id, tabindex);
             jQuery.ajax({
@@ -89,12 +90,12 @@ $(document).ready(function() {
             var toAppend = "";
             $.each(comments, function(index, value) {
                 value.text = value.text.split("\n").join("<br>");
-                toAppend += '<div class="reply" tabindex="'+index+'" parent="parent">'+
+                toAppend += '<div class="reply" tabindex="'+index+'" parent="parent" id="comment'+value.id+'">'+
                     '<p><span class="person"><a href="../users/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
                     '<p>'+value.text+'</p>' +
                     '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p><hr>';
                 $.each(value.replies, function(secIndex, secValue) {
-                    toAppend +='<div class="reply" sectabindex="'+secIndex+'" parent="noparent">' +
+                    toAppend +='<div class="reply" sectabindex="'+secIndex+'" parent="noparent" id="comment'+value.id+"_"+secValue.id+'">' +
                     '<p><span class="person"><a href="../users/'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
                     secValue.text = secValue.text.split("\n").join("<br>");
                     toAppend += '<p>'+secValue.text+'</p>' +
@@ -159,6 +160,10 @@ $(document).ready(function() {
                     $(".reply[tabindex='"+tabindex+"'] .replyToComment").remove();
                 }
             });
+            if(initiated === 0 && window.location.href.split("#comment").length>1) {
+                window.location.href=window.location.href;
+                initiated = 1;
+            }
         },
         getPostData = function () {
         jQuery.ajax({
@@ -268,6 +273,7 @@ $(document).ready(function() {
                 console.log(window.location.href.split("/")[window.location.href.split("/").length-1]);
             }
         });
+            
     },
     voteAlgorithmAjax = function(vote) {
         jQuery.ajax({

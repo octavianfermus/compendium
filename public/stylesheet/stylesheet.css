@@ -103,6 +103,9 @@ hr {
   margin-top: 1px;
   transition: all, 0.2s;
 }
+.extendedNotification p {
+  margin: 0;
+}
 .extendedNotification:first-of-type {
   margin-top: 20px;
 }

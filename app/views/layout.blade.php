@@ -56,11 +56,7 @@
                             <ul class="dropdown-menu notifications">
                                 <li role="separator" class="divider"></li>
                                 <li class="text-center">
-                                    <p>
-                                        <a href="javascript:void(0)">Mark all as seen</a>
-                                        <span style="color: black"> | </span>
-                                        <a href="{{ URL::to('notifications') }}">See all notifications</a>
-                                    </p>
+                                    <a href="{{ URL::to('notifications') }}">See all <span id="restOfNotif"></span> notifications</a>
                                 </li>
                             </ul>
                         </li>
