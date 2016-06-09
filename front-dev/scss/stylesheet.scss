@@ -345,10 +345,10 @@ table {
 .tab-pane {
     .switcher {
         position: absolute;
-        top: -25px;
-        right: 5px;
+        top: 1px;
+        right: 1px;
         background: orange;
-        padding: 2px 4px;
+        padding: 0px 4px;
         color: black;
         font-weight: 600;
         &:focus, .tab-pane &:hover, .tab-pane &:active {
@@ -396,6 +396,12 @@ p.subtitle {
     font-style: italic;
     font-weight: 700;
     padding-left: 20%;
+    .commend-star {
+        float: initial;
+        span:first-of-type {
+            top: 2px;
+        }
+    }
 }
 
 textarea {

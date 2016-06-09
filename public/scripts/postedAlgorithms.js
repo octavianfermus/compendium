@@ -39,14 +39,13 @@ $(document).ready(function () {
                     '</div>';
                 $(".postedAlgorithms").append(toAppend);
             });
-            
         },
         createTable = function (data) {
             $(".postedAlgorithmsTable tbody").html("");
             $.each(data, function (index, value) {
                 var toAppend = '<tr>' +
-                    (value.template ? '<td><a target="_blank" href="users/editalgorithm?id=' + value.id + '">' + value.name + '</a></td>' : 
-                    '<td><a target="_blank" href="algorithm?id=' + value.id + '">' + value.name + '</a></td>') +
+                    (value.template ? '<td><a target="_blank" href="users/editalgorithm/' + value.id + '">' + value.name + '</a></td>' : 
+                    '<td><a target="_blank" href="posts/' + value.id + '">' + value.name + '</a></td>') +
                     '<td>' + value.language + '</td>' +
                     '<td>' + value.upvotes + '</td>' +
                     '<td>' + value.downvotes + '</td>' +

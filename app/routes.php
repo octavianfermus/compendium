@@ -220,9 +220,9 @@ Route::get('post/postdata', function() {
     $algorithm_id = Request::input('id');
     $returnData = array();
     $found = DB::table('algorithms')
-                ->where('id', '=', $algorithm_id)
-                ->where('template', '=', 0)
-                ->count();
+        ->where('id', '=', $algorithm_id)
+        ->where('template', '=', 0)
+        ->count();
     if($found==1) {
         $unparsedData = DB::select('select * from algorithms where id = ?', array($algorithm_id));
         $returnData["upvotes"] = $unparsedData[0]->upvotes;
@@ -237,6 +237,28 @@ Route::get('post/postdata', function() {
         $returnData["request_id"] = $unparsedData[0]->request_id;
         $name = DB::select('select * from users where id = ?', array($unparsedData[0]->user_id));
         $returnData["username"] = $name[0]->last_name." ".$name[0]->first_name;
+        $returnData["commendations"]["number"] = DB::table('user_commendations')
+            ->where('user_id','=', $unparsedData[0]->user_id)
+            ->count();
+        if(Auth::check()) {
+            $commended = DB::table('user_commendations')
+                ->where('user_id','=', $unparsedData[0]->user_id)
+                ->where('commendator','=', Auth::user()->id)
+                ->count();
+            if($commended == 1) {
+                $returnData["commendations"]["commendedByYou"] = TRUE; 
+            } else {
+                $returnData["commendations"]["commendedByYou"] = FALSE;
+            }
+            if($unparsedData[0]->user_id != Auth::user()->id) {
+                $returnData["commendations"]["youCantCommend"] = FALSE;
+            } else {
+                $returnData["commendations"]["youCantCommend"] = TRUE;
+            }
+        } else {
+            $returnData["commendations"]["commendedByYou"] = FALSE;
+            $returnData["commendations"]["youCantCommend"] = TRUE;
+        }
         $comments_unfiltered = DB::table('algorithm_discussion')->where('algorithm_id', '=', $algorithm_id)->get();
         $comments = array();
         foreach ($comments_unfiltered as $array) {
@@ -317,11 +339,34 @@ Route::post('profiledetails', function() {
             } else {
                 $returnData["userData"]["commendations"]["commendedByYou"] = FALSE;
             }
-            $returnData["userData"]["commendations"]["youCantCommend"] = FALSE;
+            if($id != Auth::user()->id) {
+                $returnData["userData"]["commendations"]["youCantCommend"] = FALSE;
+            } else {
+                $returnData["userData"]["commendations"]["youCantCommend"] = TRUE;
+            }
         } else {
             $returnData["userData"]["commendations"]["commendedByYou"] = FALSE;
             $returnData["userData"]["commendations"]["youCantCommend"] = TRUE;
         }
+        
+        $algorithms_unfiltered = DB::table('algorithms')
+            ->where('user_id', '=', $id)
+            ->where('template','=',0)
+            ->get();
+        $algorithms = array();
+        foreach ($algorithms_unfiltered as $array) {
+            $singular = array();
+            $singular["id"] = $array->id;
+            $singular["name"] = $array->name;
+            $singular["language"] = $array->language;
+            $singular["description"] = $array->description;
+            $singular["template"] = $array->template;
+            $singular["upvotes"] = $array->upvotes;
+            $singular["downvotes"] = $array->downvotes;
+            $singular["views"] = $array->views;
+            $algorithms[]=$singular;
+        }
+        $returnData["algorithms"]=$algorithms;
     } else {
         $returnData["user_found"]=FALSE;
     }

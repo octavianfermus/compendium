@@ -1,12 +1,12 @@
 $(document).ready(function() {
     var postId = window.location.href.split("#")[0].split("/")[window.location.href.split("/").length-1],
+        root = "http://localhost:8080",
         yourVote = undefined,
         comments = undefined,
         lineComments = undefined,
         currentLineSubmitter = undefined,
         initiated = 0,
         voteLineCommentAjax = function(vote, comment_id, algorithm_id, tabindex) {
-            console.log(vote, comment_id, algorithm_id, tabindex);
             jQuery.ajax({
                 method: 'post',
                 url: "../users/voteinlinecomment",
@@ -45,7 +45,7 @@ $(document).ready(function() {
             } else {
                 $.each(lineComments[currentLineSubmitter], function(index,value) {
                     $(".lineComments .conversation").append('<div class="reply" tabindex="'+index+'" parent="parent">'+
-                    '<p><span class="person"><a href="../users/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
+                    '<p><span class="person"><a href="../profile/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
                     '<p>'+value.text+'</p>' +
                     '<p><a href="javascript:void(0)" class="likeLineComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeLineComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p><hr>');
                 });
@@ -91,12 +91,12 @@ $(document).ready(function() {
             $.each(comments, function(index, value) {
                 value.text = value.text.split("\n").join("<br>");
                 toAppend += '<div class="reply" tabindex="'+index+'" parent="parent" id="comment'+value.id+'">'+
-                    '<p><span class="person"><a href="../users/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
+                    '<p><span class="person"><a href="../profile/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
                     '<p>'+value.text+'</p>' +
                     '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p><hr>';
                 $.each(value.replies, function(secIndex, secValue) {
                     toAppend +='<div class="reply" sectabindex="'+secIndex+'" parent="noparent" id="comment'+value.id+"_"+secValue.id+'">' +
-                    '<p><span class="person"><a href="../users/'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
+                    '<p><span class="person"><a href="../profile/'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
                     secValue.text = secValue.text.split("\n").join("<br>");
                     toAppend += '<p>'+secValue.text+'</p>' +
                     
@@ -172,18 +172,49 @@ $(document).ready(function() {
             dataType: "json",
             data: {id: postId},
             success: function (data) {
+                console.log(data);
                 comments = data.comments;
                 setTimeout(function() {
                     parseLineComments(data.inline_comments);
                 }, 2000);
                 populateComments();
+                $(".commend-star #commendationNumber").html(data.commendations.number);
+                if(data.commendations.commendedByYou == true) {
+                    $(".commend-star").addClass("green");
+                }
+                $(".commend-star").unbind().click(function() {
+                    if(data.commendations.youCantCommend == false) {
+                        jQuery.ajax({
+                            method: 'put',
+                            url: root+"/users/commend",
+                            dataType: "json",
+                            data: {id: data.user_id},
+                            success: function (data2) {
+                                if($(".commend-star").hasClass("green")) {
+                                    $(".commend-star").removeClass("green");
+                                } else {
+                                    $(".commend-star").addClass("green");
+                                }
+                                $(".commend-star #commendationNumber").html(data2.number);
+                            },
+                            fail: function(data) {
+                                console.log(data);
+                            }
+                        });
+                    }
+                });
                 $("#creatorUsername").html(data.username);
-                $("#creatorUsername").attr("href","../users/"+data.user_id);
+                $("#creatorUsername").attr("href","../profile/"+data.user_id);
                 $("#upvoteSpan").html(data.upvotes);
                 $("#downvoteSpan").html(data.downvotes);
                 $("#viewSpan").html(data.views);
                 $("#algorithmName").html(data.name);
-                $("#originalLink").attr("href",data.original_link);
+                if(data.original_link=="") {
+                    $("#originalLink").attr("href","javascript:void(0)");
+                    $("#originalLink").html("None provided");
+                } else {
+                    $("#originalLink").attr("href",data.original_link);
+                }
                 $("#algorithmDescription").append(data.description);
                 $("#language").append(data.language);
                 if(data.request_id!=0) {
