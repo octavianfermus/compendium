@@ -84,6 +84,29 @@ hr {
   border-top: 1px solid #F1BB59;
 }
 
+.commend-star {
+  float: right;
+  transition: all, 0.2s;
+  color: #969696;
+  text-decoration: none;
+  margin-top: -2px;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+.commend-star:hover {
+  color: green;
+}
+.commend-star span:first-of-type {
+  top: 4px;
+}
+.commend-star.green {
+  color: green;
+}
+.commend-star.green:hover {
+  color: #969696;
+}
+
 .boxWrapper {
   padding: 10px;
   border: 1px solid #ccc;

@@ -27,14 +27,6 @@ class UsersController extends BaseController implements RemindableInterface {
         Session::flush();
         return Redirect::to('/');
     }
-    public function getProfile() {
-        if(Auth::check()) {
-            return View::make('profile');
-        } else {
-            return View::make('landing');
-        }
-    }
-    
     public function getAdmin() {
         return View::make('admin');
     }
@@ -146,15 +138,15 @@ class UsersController extends BaseController implements RemindableInterface {
             }
             if(count($errors)!=0 || count($updates)!=0) {
                 if(count($errors)>0) {
-                    return Redirect::to('users/profile')->withErrors($errors)->withInput();
+                    return Redirect::to('profile/me')->withErrors($errors)->withInput();
                 } else {
                     DB::table('users')
                         ->where('id', Auth::user()->id)
                         ->update($updates);
-                    return Redirect::to('users/profile');
+                    return Redirect::to('profile/me');
                 }
             } else {
-                return Redirect::to('users/profile');
+                return Redirect::to('profile/me');
             }
         } else {
             return Redirect::to('/');
@@ -992,6 +984,30 @@ class UsersController extends BaseController implements RemindableInterface {
             $id = Input::get('id');
             DB::delete('delete from notifications where id = ? and user_id = ?', array($id, Auth::user()->id));
             return Response::json(array('state'=>'success', 'deleted'=>$id));
+        }
+    }
+    public function putCommend() {
+        $id = Input::get('id');
+        if(Auth::check()) {
+            $time = date('Y-m-d H:i:s');
+            $commended = DB::table('user_commendations')
+                ->where('user_id','=', $id)
+                ->where('commendator','=', Auth::user()->id)
+                ->count();
+            if($commended == 1) {
+                DB::delete('delete from user_commendations where user_id = ? and commendator = ?', array($id, Auth::user()->id));
+            } else {
+                DB::insert('insert into user_commendations (user_id, commendator, created_at, updated_at) values (?, ?, ?, ?)', array(
+                    $id,
+                    Auth::user()->id,
+                    $time,
+                    $time)
+                );
+            }
+            $number = DB::table('user_commendations')
+                ->where('user_id','=', $id)
+                ->count();
+            return Response::json(array('state' => 'success', 'number'=>$number));
         }
     }
 }

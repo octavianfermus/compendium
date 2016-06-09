@@ -13,7 +13,6 @@ $(document).ready(function() {
             });
         },
         createURL = function(url, reference, type) {
-            console.log(url,reference,type);
             switch(type) {
                 case 'New reply!':
                     return url+"#comment"+reference;
@@ -48,7 +47,6 @@ $(document).ready(function() {
             $("ul .notifications li[listindex] a").click(function(e) {
                 e.preventDefault();
                 var clickedNotification = notifications[$(this).closest("li[listindex]").attr("listindex")];
-                console.log(clickedNotification);
                 jQuery.ajax({
                     method: 'put',
                     url: root + "/users/checknotification",

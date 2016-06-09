@@ -12,6 +12,28 @@ hr {
     border-top: 1px solid $main-color;
 }
 
+.commend-star {
+    float: right;
+    transition: all, $transition-speed;
+    color: #969696;
+    text-decoration: none;
+    margin-top: -2px;
+    background: transparent;
+    border: none;
+    outline: none;
+    &:hover {
+        color: green;
+    }
+    span:first-of-type {
+        top: 4px;
+    }
+    &.green {
+        color: green;
+        &:hover {
+            color: #969696;
+        }
+    }
+}
 .boxWrapper {
     padding: 10px;
     border: 1px solid #ccc;

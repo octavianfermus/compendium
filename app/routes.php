@@ -96,6 +96,26 @@ Route::get('posts/{id}', function ($algorithm_id) {
     }
 });
 
+Route::get('profile/me', function() {
+    return View::make('my_profile');
+});
+Route::get('profile/{id}', function($user_id) {
+    if(Auth::check()) {
+        if($user_id == Auth::user()->id) {
+            return Redirect::to('profile/me');
+        } else {
+            $found = DB::table('users')
+                ->where('id','=', $user_id)->count();
+            if($found != 0) {
+                return View::make('profile');
+            }
+            return View::make('profile');
+        }
+    } else {
+        return View::make('profile');
+    }
+});
+
 Route::post('post/searchalgorithm', function() {
     $tags = Request::input('tags');
     $language = Request::input('language');
@@ -272,4 +292,38 @@ Route::get('post/postdata', function() {
         return Response::json($returnData);
     }
     return Response::json(array('data'=>$returnData));
+});
+Route::post('profiledetails', function() {
+    $id = Input::get('id');
+    $returnData = array();
+    $returnData["requested_user_id"]=$id;
+    $found = DB::table('users')
+        ->where('id','=', $id)
+        ->first();
+    if($found) {
+        $returnData["userFound"]=TRUE;
+        $returnData["userData"]["firstName"]=$found->first_name;
+        $returnData["userData"]["lastName"]=$found->last_name;
+        $returnData["userData"]["commendations"]["number"] = DB::table('user_commendations')
+            ->where('user_id','=', $id)
+            ->count();
+        if(Auth::check()) {
+            $commended = DB::table('user_commendations')
+                ->where('user_id','=', $id)
+                ->where('commendator','=', Auth::user()->id)
+                ->count();
+            if($commended == 1) {
+                $returnData["userData"]["commendations"]["commendedByYou"] = TRUE; 
+            } else {
+                $returnData["userData"]["commendations"]["commendedByYou"] = FALSE;
+            }
+            $returnData["userData"]["commendations"]["youCantCommend"] = FALSE;
+        } else {
+            $returnData["userData"]["commendations"]["commendedByYou"] = FALSE;
+            $returnData["userData"]["commendations"]["youCantCommend"] = TRUE;
+        }
+    } else {
+        $returnData["user_found"]=FALSE;
+    }
+    return Response::json($returnData);
 });
