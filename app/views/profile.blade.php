@@ -19,7 +19,7 @@
                             @include('profile_algorithms')
                         </div> 
                         <div role="tabpanel" class="tab-pane fade" id="profile-comments" aria-labelledby="profile-comments-tab"> 
-                            @include('search_algorithm')
+                            @include('profile_comments')
 
                         </div>
                     </div>

@@ -315,6 +315,7 @@ Route::get('post/postdata', function() {
     }
     return Response::json(array('data'=>$returnData));
 });
+
 Route::post('profiledetails', function() {
     $id = Input::get('id');
     $returnData = array();
@@ -348,7 +349,6 @@ Route::post('profiledetails', function() {
             $returnData["userData"]["commendations"]["commendedByYou"] = FALSE;
             $returnData["userData"]["commendations"]["youCantCommend"] = TRUE;
         }
-        
         $algorithms_unfiltered = DB::table('algorithms')
             ->where('user_id', '=', $id)
             ->where('template','=',0)
@@ -367,6 +367,42 @@ Route::post('profiledetails', function() {
             $algorithms[]=$singular;
         }
         $returnData["algorithms"]=$algorithms;
+        
+        $comments_unfiltered = DB::table('profile_discussion')->where('profile_id', '=', $id)->get();
+        $comments = array();
+        foreach ($comments_unfiltered as $array) {
+            $singular = array();
+            $singular["id"] = $array->id;
+            $singular["user_id"] = $array->user_id;
+            $singular["text"] = $array->text;
+            $singular["deleted"] = $array->deleted;
+            $singular["upvotes"] = $array->upvotes;
+            $singular["downvotes"] = $array->downvotes;
+            $singular["created_at"] = $array->created_at;
+            $singular["replies"] = array(); 
+            $reply_comments_unfiltered = DB::table('profile_discussion_replies')
+                ->where('profile_id', '=', $id)
+                ->where('comment_id', '=', $singular["id"])
+                ->get();
+            foreach ($reply_comments_unfiltered as $secondaryArray) {
+                $secondarySingular = array();
+                $secondarySingular["id"] = $secondaryArray->id;
+                $secondarySingular["user_id"] = $secondaryArray->user_id;
+                $secondarySingular["text"] = $secondaryArray->text;
+                $secondarySingular["deleted"] = $secondaryArray->deleted;
+                $secondarySingular["created_at"] = $secondaryArray->created_at;
+                $secondarySingular["upvotes"] = $secondaryArray->upvotes;
+                $secondarySingular["downvotes"] = $secondaryArray->downvotes;
+                $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
+                $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
+                $singular["replies"][] = $secondarySingular;
+            }
+
+            $name = DB::select('select * from users where id = ?', array($array->user_id));
+            $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+            $comments[]=$singular;
+        }
+        $returnData["comments"]=$comments;
     } else {
         $returnData["user_found"]=FALSE;
     }

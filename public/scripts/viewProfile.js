@@ -73,7 +73,7 @@ $(document).ready(function() {
             });
         };
     $(".commend-star").click(function() {
-        if(profileData.userData.commendations.youCantCommend == false) {
+        if(userData.commendations.youCantCommend == false) {
             jQuery.ajax({
                 method: 'put',
                 url: root+"/users/commend",
