@@ -403,6 +403,30 @@ Route::post('profiledetails', function() {
             $comments[]=$singular;
         }
         $returnData["comments"]=$comments;
+        $statistics = array();
+        $statistics["algorithm_comments"] = DB::table('algorithm_discussion') 
+            ->where('user_id','=',$id)
+            ->count();
+        $statistics["algorithm_replies"] = DB::table('algorithm_discussion_replies') 
+            ->where('user_id','=',$id)
+            ->count();
+        $statistics["profile_comments"] = DB::table('profile_discussion') 
+            ->where('user_id','=',$id)
+            ->count();
+        $statistics["profile_replies"] = DB::table('profile_discussion_replies') 
+            ->where('user_id','=',$id)
+            ->count();
+        $statistics["algorithm_likes"] = DB::table('algorithm_votes') 
+            ->where('user_id','=',$id)
+            ->where('vote','=',1)
+            ->count();
+        $statistics["algorithm_requests"] = DB::table('algorithm_requests') 
+            ->where('user_id','=',$id)
+            ->count();
+        $statistics["given_commendations"] = DB::table('user_commendations') 
+            ->where('commendator','=',$id)
+            ->count();
+        $returnData["statistics"]=$statistics;
     } else {
         $returnData["user_found"]=FALSE;
     }

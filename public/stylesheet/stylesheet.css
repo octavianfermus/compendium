@@ -84,6 +84,28 @@ hr {
   border-top: 1px solid #F1BB59;
 }
 
+.statisticsTable {
+  border: none;
+  margin: 0;
+}
+.statisticsTable tr {
+  border: none;
+}
+.statisticsTable td {
+  padding: 0;
+  border: none;
+  width: 50%;
+}
+.statisticsTable td:first-of-type {
+  font-weight: 700;
+  text-align: right;
+  border: none;
+}
+.statisticsTable td:last-of-type {
+  padding-left: 10px;
+  text-align: left;
+}
+
 .commend-star {
   float: right;
   transition: all, 0.2s;

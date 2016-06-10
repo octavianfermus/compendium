@@ -4,6 +4,7 @@ $(document).ready(function() {
         root = "http://localhost:8080",
         algorithms = undefined,
         comments = undefined,
+        statistics = undefined,
         initiated = 0,
         voteProfileReplyAjax = function(vote, comment_id, profile_id, tabindex, sectabindex) {
             jQuery.ajax({
@@ -114,6 +115,15 @@ $(document).ready(function() {
                 initiated = 1;
             }
         },
+        populateStatistics = function() {
+            $("#statistics tbody").append("<tr><td>Algorithm comments:</td><td>"+statistics.algorithm_comments+"</td></tr>");
+            $("#statistics tbody").append("<tr><td>Algorithm likes:</td><td>"+statistics.algorithm_likes+"</td></tr>");
+            $("#statistics tbody").append("<tr><td>Algorithm replies:</td><td>"+statistics.algorithm_replies+"</td></tr>");
+            $("#statistics tbody").append("<tr><td>Created requests:</td><td>"+statistics.algorithm_requests+"</td></tr>");
+            $("#statistics tbody").append("<tr><td>Given Commendations:</td><td>"+statistics.given_commendations+"</td></tr>");
+            $("#statistics tbody").append("<tr><td>Profile comments:</td><td>"+statistics.profile_comments+"</td></tr>");
+            $("#statistics tbody").append("<tr><td>Profile replies:</td><td>"+statistics.profile_replies+"</td></tr>");
+        },
         getApproval = function (upvotes, downvotes) {
             if (upvotes === 0) {
                 return 0;
@@ -166,7 +176,7 @@ $(document).ready(function() {
                 $(".postedAlgorithmsTable").addClass("hidden");
             }
             populateComments();
-            
+            populateStatistics();
         },
         getProfileDetails = function() {
             jQuery.ajax({
@@ -178,6 +188,8 @@ $(document).ready(function() {
                     userData = data.userData;
                     algorithms = data.algorithms;
                     comments = data.comments;
+                    statistics = data.statistics;
+                    console.log(statistics);
                     populate();
                 },
                 fail: function(data) {

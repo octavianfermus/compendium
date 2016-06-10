@@ -12,6 +12,27 @@ hr {
     border-top: 1px solid $main-color;
 }
 
+.statisticsTable {
+    border: none;
+    margin: 0;
+    tr {
+        border: none;
+    }
+    td {
+        padding: 0;
+        border: none;
+        width: 50%;
+        &:first-of-type {
+            font-weight: 700;
+            text-align: right;
+            border: none;
+        }
+        &:last-of-type {
+            padding-left: 10px;
+            text-align: left;
+        }
+    }
+}
 .commend-star {
     float: right;
     transition: all, $transition-speed;
