@@ -1,6 +1,6 @@
 <div class="boxWrapper bg-color">
     <div class="conversation">
-        <div id="algorithmComments">
+        <div id="profileComments">
             <p>No comments yet..</p>
         </div>
         <div class="send-message">

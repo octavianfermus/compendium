@@ -512,7 +512,79 @@ class UsersController extends BaseController implements RemindableInterface {
             }
             return Response::json($comments);
         } 
-        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote an algorithm.'));
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to comment.'));
+    }
+    public function postDiscussprofile() {
+        if(Auth::check()) {
+            $profile_id = Request::input('id');
+            $comment = Request::input('comment');
+            $time = date('Y-m-d H:i:s');
+            DB::insert('insert into profile_discussion (user_id, profile_id, text, deleted, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                Auth::user()->id, 
+                $profile_id,
+                $comment,
+                FALSE,
+                $time,
+                $time)
+            );
+
+            $comment_id = DB::table('profile_discussion')
+                ->where('profile_id', $profile_id)
+                ->where('created_at', $time)
+                ->where('user_id', Auth::user()->id)
+                ->first();
+            if($profile_id!=Auth::user()->id) {
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $profile_id, 
+                    Auth::user()->id,
+                    '/profile/'.$profile_id,
+                    "New comment!",
+                    "commented your profile.",
+                    $comment,
+                    FALSE,
+                    $comment_id->id,
+                    $time,
+                    $time)
+                );
+            }
+            
+            $comments_unfiltered = DB::table('profile_discussion')->where('profile_id', '=', $profile_id)->get();
+            $comments = array();
+            foreach ($comments_unfiltered as $array) {
+                $singular = array();
+                $singular["id"] = $array->id;
+                $singular["user_id"] = $array->user_id;
+                $singular["text"] = $array->text;
+                $singular["deleted"] = $array->deleted;
+                $singular["upvotes"] = $array->upvotes;
+                $singular["downvotes"] = $array->downvotes;
+                $singular["created_at"] = $array->created_at;
+                $singular["replies"] = array(); 
+                $reply_comments_unfiltered = DB::table('profile_discussion_replies')
+                    ->where('profile_id', '=', $profile_id)
+                    ->where('comment_id', '=', $singular["id"])
+                    ->get();
+                foreach ($reply_comments_unfiltered as $secondaryArray) {
+                    $secondarySingular = array();
+                    $secondarySingular["id"] = $secondaryArray->id;
+                    $secondarySingular["user_id"] = $secondaryArray->user_id;
+                    $secondarySingular["text"] = $secondaryArray->text;
+                    $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    $secondarySingular["created_at"] = $secondaryArray->created_at;
+                    $secondarySingular["upvotes"] = $secondaryArray->upvotes;
+                    $secondarySingular["downvotes"] = $secondaryArray->downvotes;
+                    $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
+                    $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
+                    $singular["replies"][] = $secondarySingular;
+                }
+                
+                $name = DB::select('select * from users where id = ?', array($array->user_id));
+                $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                $comments[]=$singular;
+            }
+            return Response::json($comments);
+        } 
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to comment.'));
     }
     public function postCommentline() {
         if(Auth::check()) {
@@ -656,6 +728,74 @@ class UsersController extends BaseController implements RemindableInterface {
         }
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
     }
+    public function postVoteprofilecomment() {
+        if(Auth::check()) {
+            
+            $profile_id = Request::input('profile_id');
+            $comment_id = Request::input('comment_id');
+            $vote = Request::input('vote');
+            $time = date('Y-m-d H:i:s');
+            $found = DB::table('profile_comment_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->count();
+            if($found == 1) {
+                DB::table('profile_comment_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->delete();
+                $downvotes = DB::table('profile_comment_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+                $upvotes = DB::table('profile_comment_votes')
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',1)
+                    ->count(); 
+                DB::update('update profile_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+            }
+            $found = DB::table('profile_comment_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->count();
+            if($found==0) {
+                DB::insert('insert into profile_comment_votes (user_id, comment_id, profile_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                    Auth::user()->id, 
+                    $comment_id,
+                    $profile_id,
+                    $vote,
+                    $time,
+                    $time)
+                );
+            } else {
+                DB::update('update profile_comment_votes set vote = ?, updated_at = ? where user_id = ? and profile_id = ? and comment_id = ?', array($vote, $time,  Auth::user()->id, $profile_id, $comment_id));
+            }
+            
+            $downvotes = DB::table('profile_comment_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+            $upvotes = DB::table('profile_comment_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',1)
+                ->count(); 
+            DB::update('update profile_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+        }
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
+    }
     public function postVotecomment() {
         if(Auth::check()) {
             $algorithm_id = Request::input('algorithm_id');
@@ -719,6 +859,73 @@ class UsersController extends BaseController implements RemindableInterface {
                 ->where('vote','=',1)
                 ->count(); 
             DB::update('update algorithm_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+        }
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
+    }
+    public function postVoteprofilereply() {
+        if(Auth::check()) {
+            $profile_id = Request::input('profile_id');
+            $comment_id = Request::input('comment_id');
+            $vote = Request::input('vote');
+            $time = date('Y-m-d H:i:s');
+            $found = DB::table('profile_reply_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->count();
+            if($found == 1) {
+                DB::table('profile_reply_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->delete();
+                $downvotes = DB::table('profile_reply_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+                $upvotes = DB::table('profile_reply_votes')
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',1)
+                    ->count(); 
+                DB::update('update algorithm_discussion_replies set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+            }
+            $found = DB::table('profile_reply_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->count();
+            if($found==0) {
+                DB::insert('insert into profile_reply_votes (user_id, comment_id, profile_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                    Auth::user()->id, 
+                    $comment_id,
+                    $profile_id,
+                    $vote,
+                    $time,
+                    $time)
+                );
+            } else {
+                DB::update('update profile_reply_votes set vote = ?, updated_at = ? where user_id = ? and profile_id = ? and comment_id = ?', array($vote, $time,  Auth::user()->id, $profile_id, $comment_id));
+            }
+            
+            $downvotes = DB::table('profile_reply_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+            $upvotes = DB::table('profile_reply_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',1)
+                ->count(); 
+            DB::update('update profile_discussion_replies set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
             return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
         }
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
@@ -789,6 +996,103 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
         }
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
+    }
+    public function postRespondtoprofilecomment() {
+        if(Auth::check()) {
+            
+            $profile_id = Request::input('id');
+            $comment = Request::input('comment');
+            $comment_id = Request::input('commentid');
+            $time = date('Y-m-d H:i:s');
+            DB::insert('insert into profile_discussion_replies (user_id, profile_id, comment_id, text, deleted, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?)', array(
+                Auth::user()->id, 
+                $profile_id,
+                $comment_id,
+                $comment,
+                FALSE,
+                $time,
+                $time)
+            );
+            $comment_id_second = DB::table('profile_discussion_replies')
+                ->where('profile_id', $profile_id)
+                ->where('comment_id', $comment_id)
+                ->where('created_at', $time)
+                ->where('user_id', Auth::user()->id)
+                ->first();
+            $comment_id_second = $comment_id_second->id;
+            if($profile_id != Auth::user()->id) { 
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $profile_id, 
+                    Auth::user()->id,
+                    '/profile/'.$profile_id,
+                    "New reply!",
+                    "replied to something you said.",
+                    $comment,
+                    FALSE,
+                    $comment_id."_".$comment_id_second,
+                    $time,
+                    $time)
+                );     
+            }
+            
+            $send_to_users = DB::table('profile_discussion_replies')
+                ->where('comment_id', '=', $comment_id)
+                ->where('user_id', '!=', Auth::user()->id)
+                ->get();
+            foreach ($send_to_users as $array) {
+                if($array->user_id != Auth::user()->id && $array->user_id != $profile_id) { 
+                    DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                        $array->user_id, 
+                        Auth::user()->id,
+                        '/profile/'.$profile_id,
+                        "New reply!",
+                        "also replied to a comment you replied to.",
+                        $comment,
+                        FALSE,
+                        $comment_id."_".$comment_id_second,
+                        $time,
+                        $time)
+                    );
+                    
+                }
+            }
+            $comments_unfiltered = DB::table('profile_discussion')->where('profile_id', '=', $profile_id)->get();
+            $comments = array();
+            foreach ($comments_unfiltered as $array) {
+                $singular = array();
+                $singular["id"] = $array->id;
+                $singular["user_id"] = $array->user_id;
+                $singular["text"] = $array->text;
+                $singular["deleted"] = $array->deleted;
+                $singular["upvotes"] = $array->upvotes;
+                $singular["downvotes"] = $array->downvotes;
+                $singular["created_at"] = $array->created_at;
+                $singular["replies"] = array(); 
+                $reply_comments_unfiltered = DB::table('profile_discussion_replies')
+                    ->where('profile_id', '=', $profile_id)
+                    ->where('comment_id', '=', $singular["id"])
+                    ->get();
+                foreach ($reply_comments_unfiltered as $secondaryArray) {
+                    $secondarySingular = array();
+                    $secondarySingular["id"] = $secondaryArray->id;
+                    $secondarySingular["user_id"] = $secondaryArray->user_id;
+                    $secondarySingular["text"] = $secondaryArray->text;
+                    $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    $secondarySingular["upvotes"] = $secondaryArray->upvotes;
+                    $secondarySingular["downvotes"] = $secondaryArray->downvotes;
+                    $secondarySingular["created_at"] = $secondaryArray->created_at;
+                    $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
+                    $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
+                    $singular["replies"][] = $secondarySingular;
+                }
+                
+                $name = DB::select('select * from users where id = ?', array($array->user_id));
+                $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                $comments[]=$singular;
+            }
+            return Response::json($comments);
+        } 
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to able to respond to a comment.'));
     }
     public function postRespondtocomment() {
         if(Auth::check()) {

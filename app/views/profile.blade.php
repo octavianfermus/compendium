@@ -10,18 +10,18 @@
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <ul class="nav nav-tabs" style="margin-bottom: 25px">
-                        <li role="presentation" class="active"><a id="posts-tab" role="tab" data-toggle="tab" aria-controls="posts" aria-expanded="true" href="#posts">Posts</a></li>
-                        <li role="presentation"><a id="profile-comments-tab" role="tab" data-toggle="tab" aria-controls="search-algorithmsprofile-comments" aria-expanded="false" href="#profile-comments">Profile Comments</a></li>
+                    <ul class="nav nav-tabs" style="margin-bottom: 25px"> 
+                        <li role="presentation" class="active"><a id="profile-comments-tab" role="tab" data-toggle="tab" aria-controls="search-algorithmsprofile-comments" aria-expanded="false" href="#profile-comments">Profile Comments</a></li>
+                        <li role="presentation"><a id="posts-tab" role="tab" data-toggle="tab" aria-controls="posts" aria-expanded="true" href="#posts">Posts</a></li>
+                       
                     </ul>
                     <div class="tab-content">
-                        <div role="tabpanel" class="tab-pane fade active in" id="posts" aria-labelledby="posts-tab" style="position: relative">
+                        <div role="tabpanel" class="tab-pane fade active in" id="profile-comments" aria-labelledby="profile-comments-tab"> 
+                            @include('profile_comments')
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade" id="posts" aria-labelledby="posts-tab" style="position: relative">
                             @include('profile_algorithms')
                         </div> 
-                        <div role="tabpanel" class="tab-pane fade" id="profile-comments" aria-labelledby="profile-comments-tab"> 
-                            @include('profile_comments')
-
-                        </div>
                     </div>
                 </div>
             </div>

@@ -3,6 +3,117 @@ $(document).ready(function() {
         profileData = undefined,
         root = "http://localhost:8080",
         algorithms = undefined,
+        comments = undefined,
+        initiated = 0,
+        voteProfileReplyAjax = function(vote, comment_id, profile_id, tabindex, sectabindex) {
+            jQuery.ajax({
+                method: 'post',
+                url: "../users/voteprofilereply",
+                dataType: "json",
+                data: {comment_id: comment_id, vote: vote, profile_id: profile_id},
+                success: function (data) {
+                    $(".reply[tabindex='"+tabindex+"'] .reply[sectabindex='"+sectabindex+"'] .likeReply .green").html("("+data.upvotes+")");
+                    $(".reply[tabindex='"+tabindex+"']  .reply[sectabindex='"+sectabindex+"'] .dislikeReply .red").html("("+data.downvotes+")");
+                },
+                fail: function(data) {
+                    console.log(data);
+                }
+            });
+        },
+        voteProfileCommentAjax = function(vote, comment_id, profile_id, tabindex) {
+            jQuery.ajax({
+                method: 'post',
+                url: "../users/voteprofilecomment",
+                dataType: "json",
+                data: {comment_id: comment_id, vote: vote, profile_id: profile_id},
+                success: function (data) {
+                    $(".reply[tabindex='"+tabindex+"'] .likeComment .green").html("("+data.upvotes+")");
+                    $(".reply[tabindex='"+tabindex+"'] .dislikeComment .red").html("("+data.downvotes+")");
+                },
+                fail: function(data) {
+                    console.log(data);
+                }
+            });
+        },
+        populateComments = function() {
+            var toAppend = "";
+            $.each(comments, function(index, value) {
+                value.text = value.text.split("\n").join("<br>");
+                toAppend += '<div class="reply" tabindex="'+index+'" parent="parent" id="comment'+value.id+'">'+
+                    '<p><span class="person"><a href="../profile/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
+                    '<p>'+value.text+'</p>' +
+                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p><hr>';
+                $.each(value.replies, function(secIndex, secValue) {
+                    toAppend +='<div class="reply" sectabindex="'+secIndex+'" parent="noparent" id="comment'+value.id+"_"+secValue.id+'">' +
+                    '<p><span class="person"><a href="../profile/'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
+                    secValue.text = secValue.text.split("\n").join("<br>");
+                    toAppend += '<p>'+secValue.text+'</p>' +
+                    
+                    '<p><a href="javascript:void(0)" class="likeReply">Like <span class="green">('+secValue.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeReply">Dislike <span class="red">('+secValue.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p>'+
+                    ' <hr>'+
+                    '</div>';
+                
+                });
+                toAppend+='<p><a href="javascript:void(0)" class="replyComment">Reply to this</a></p></div>';
+            });
+            $("#profileComments").html(toAppend);
+            $(".dislikeComment").click(function() {
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
+                voteProfileCommentAjax(0,comments[tabindex].id, profileId, tabindex);
+            });
+            $(".likeComment").click(function() {
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
+                voteProfileCommentAjax(1,comments[tabindex].id, profileId, tabindex);
+            });
+            $(".dislikeReply").click(function() {
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
+                    sectabindex = $(this).closest(".reply[parent='noparent']").attr("sectabindex");
+                voteProfileReplyAjax(0,comments[tabindex].replies[sectabindex].id, profileId, tabindex, sectabindex);
+            });
+            $(".likeReply").click(function() {
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
+                    sectabindex = $(this).closest(".reply[parent='noparent']").attr("sectabindex");
+                voteProfileReplyAjax(1,comments[tabindex].replies[sectabindex].id, profileId, tabindex, sectabindex);
+            });
+            $(".replyComment").click(function() {
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
+                    toAppend ="";
+                if($(".reply[tabindex='"+tabindex+"'] .replyToComment").length == 0) {
+                    toAppend = '<div class="replyToComment">' +
+                        '<div class="input-group">' +
+                        '<textarea placeholder="Write your message here" aria-describedby="sendButton" class="form-control"></textarea>' +
+                        '<span class="input-group-addon" id="sendButton"><button class="btn">Send</button></span>' +
+                        '</div></div>';
+                    $(".reply[tabindex='"+tabindex+"'][parent='parent']").append(toAppend);
+                    $(".reply[tabindex='"+tabindex+"'][parent='parent'] .btn").click(function() {
+                        var comment = $(".reply[tabindex='"+tabindex+"'][parent='parent'] textarea").val().trim();
+                        if(comment.length>0) {
+                            $(".send-message textarea").val("");
+                            jQuery.ajax({
+                                method: 'post',
+                                url: "../users/respondtoprofilecomment",
+                                dataType: "json",
+                                data: {id: profileId, commentid: comments[tabindex].id, comment: comment},
+                                success: function(data) {
+                                    comments = data;
+                                    populateComments();
+                                    $(".reply[tabindex='"+tabindex+"'] .replyToComment").remove();
+                                },
+                                fail: function(data) {
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    $(".reply[tabindex='"+tabindex+"'] .replyToComment").remove();
+                }
+            });
+            if(initiated === 0 && window.location.href.split("#comment").length>1) {
+                window.location.href=window.location.href;
+                initiated = 1;
+            }
+        },
         getApproval = function (upvotes, downvotes) {
             if (upvotes === 0) {
                 return 0;
@@ -54,6 +165,7 @@ $(document).ready(function() {
                 $(".switcher#postsSwitcher").addClass("hidden");
                 $(".postedAlgorithmsTable").addClass("hidden");
             }
+            populateComments();
             
         },
         getProfileDetails = function() {
@@ -65,6 +177,7 @@ $(document).ready(function() {
                 success: function (data) {
                     userData = data.userData;
                     algorithms = data.algorithms;
+                    comments = data.comments;
                     populate();
                 },
                 fail: function(data) {
@@ -96,7 +209,7 @@ $(document).ready(function() {
             });
         }
     });
-    getProfileDetails();
+    
     $(".switcher#postsSwitcher").click(function() {
         if($(this).siblings("table").hasClass("hidden")) {
             $(this).siblings("table").removeClass("hidden");
@@ -112,4 +225,24 @@ $(document).ready(function() {
             deletePublishModifier($(this).attr("givenId"),"remove");
         });
     });
+    $(".send-message #sendButton .btn").click(function() {
+        var comment = $(".send-message textarea").val().trim();
+        if(comment.length>0) {
+            $(".send-message textarea").val("");
+            jQuery.ajax({
+                method: 'post',
+                url: "../users/discussprofile",
+                dataType: "json",
+                data: {id: profileId, comment: comment},
+                success: function(data) {
+                    comments = data;
+                    populateComments();
+                },
+                fail: function(data) {
+                    
+                }
+            });
+        }
+    });
+    getProfileDetails();
 });
