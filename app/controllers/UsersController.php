@@ -1343,6 +1343,28 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state'=>'success', 'deleted'=>$id));
         }
     }
+    public function postDeleteprofilecomment() {
+        if(Auth::check()) {
+            $id = Input::get('id');
+            $time = date('Y-m-d H:i:s');
+            DB::update('update profile_discussion set deleted = 1, updated_at = ? where id = ?', array(
+            $time, 
+            $id 
+            ));
+            return Response::json(array('state'=>'success', 'deleted'=>$id));
+        }
+    }
+    public function postDeleteprofilereply() {
+        if(Auth::check()) {
+            $id = Input::get('id');
+            $time = date('Y-m-d H:i:s');
+            DB::update('update profile_discussion_replies set deleted = 1, updated_at = ? where id = ?', array(
+            $time, 
+            $id
+            ));
+            return Response::json(array('state'=>'success', 'deleted'=>$id));
+        }
+    }
     public function putCommend() {
         $id = Input::get('id');
         if(Auth::check()) {

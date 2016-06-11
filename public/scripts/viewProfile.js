@@ -42,15 +42,16 @@ $(document).ready(function() {
                 value.text = value.text.split("\n").join("<br>");
                 toAppend += '<div class="reply" tabindex="'+index+'" parent="parent" id="comment'+value.id+'">'+
                     '<p><span class="person"><a href="../profile/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
-                    '<p>'+value.text+'</p>' +
-                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | '+(value.canDelete == 0 ? '<a href="javascript:void(0)">Report</a>' : '<a href="javascript:void(0)" class="deleteComment">Delete</a>')+ '</p><hr>';
+                    '<p>' + (value.deleted == 1 ? '<em>This comment was deleted.</em>' : value.text) + '</p>' +
+                    (value.deleted == 0 ?
+                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | '+(value.canDelete == 0 ? '<a href="javascript:void(0)">Report</a>' : '<a href="javascript:void(0)" class="deleteComment">Delete</a>' )+ '</p><hr>': "");
                 $.each(value.replies, function(secIndex, secValue) {
                     toAppend +='<div class="reply" sectabindex="'+secIndex+'" parent="noparent" id="comment'+value.id+"_"+secValue.id+'">' +
                     '<p><span class="person"><a href="../profile/'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
                     secValue.text = secValue.text.split("\n").join("<br>");
-                    toAppend += '<p>'+secValue.text+'</p>' +
-                    
-                    '<p><a href="javascript:void(0)" class="likeReply">Like <span class="green">('+secValue.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeReply">Dislike <span class="red">('+secValue.downvotes+')</span></a> | '+(secValue.canDelete == 0 ? '<a href="javascript:void(0)">Report</a>' : '<a href="javascript:void(0)" class="deleteReply">Delete</a>')+ '</p>'+
+                    toAppend += '<p>'+(secValue.deleted == 1 ? '<em>This comment was deleted.</em>' : secValue.text ) + '</p>' +
+                    (secValue.deleted == 0 ?
+                    '<p><a href="javascript:void(0)" class="likeReply">Like <span class="green">('+secValue.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeReply">Dislike <span class="red">('+secValue.downvotes+')</span></a> | '+(secValue.canDelete == 0 ? '<a href="javascript:void(0)">Report</a>' :  '<a href="javascript:void(0)" class="deleteReply">Delete</a>' )+ '</p>': "")+
                     ' <hr>'+
                     '</div>';
                 
@@ -58,6 +59,41 @@ $(document).ready(function() {
                 toAppend+='<p><a href="javascript:void(0)" class="replyComment">Reply to this</a></p></div>';
             });
             $("#profileComments").html(toAppend);
+            $(".deleteComment").click(function() {
+                console.log(comments);
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
+                jQuery.ajax({
+                    method: 'post',
+                    url: root+"/users/deleteprofilecomment",
+                    dataType: "json",
+                    data: {id: comments[tabindex].id},
+                    success: function (data) {
+                        comments[tabindex].deleted = 1;
+                        populateComments();
+                    },
+                    fail: function(data) {
+                        console.log(data);
+                    }
+                });
+            });
+            $(".deleteReply").click(function() {
+                console.log(comments);
+                var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex"),
+                    sectabindex = $(this).closest(".reply[parent='noparent']").attr("sectabindex");;
+                jQuery.ajax({
+                    method: 'post',
+                    url: root+"/users/deleteprofilereply",
+                    dataType: "json",
+                    data: {id: comments[tabindex].replies[sectabindex].id},
+                    success: function (data) {
+                        comments[tabindex].replies[sectabindex].deleted = 1;
+                        populateComments();
+                    },
+                    fail: function(data) {
+                        console.log(data);
+                    }
+                });
+            });
             $(".dislikeComment").click(function() {
                 var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
                 voteProfileCommentAjax(0,comments[tabindex].id, profileId, tabindex);
