@@ -7,6 +7,7 @@
                 <div class="col-md-12">
                     <div class="boxWrapper heading">
                         <h1><span id="profileOf"></span>'s Profile <button id="commendPerson" href="javascript:void(0)" class="commend-star"> <span class="glyphicon glyphicon-star"></span><span id="commendationNumber">0</span></button></h1>
+                        <a href="javascript:void(0)" id="sendPrivateMessage">Send private message</a>
                     </div>
                 </div>
                 <div class="col-md-12">
