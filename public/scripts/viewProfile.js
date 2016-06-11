@@ -43,14 +43,14 @@ $(document).ready(function() {
                 toAppend += '<div class="reply" tabindex="'+index+'" parent="parent" id="comment'+value.id+'">'+
                     '<p><span class="person"><a href="../profile/'+value.user_id+'">'+value.name+'</a></span> <span class="created"> on '+value.created_at+'</span></p>'+
                     '<p>'+value.text+'</p>' +
-                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p><hr>';
+                    '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">('+value.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">('+value.downvotes+')</span></a> | '+(value.canDelete == 0 ? '<a href="javascript:void(0)">Report</a>' : '<a href="javascript:void(0)" class="deleteComment">Delete</a>')+ '</p><hr>';
                 $.each(value.replies, function(secIndex, secValue) {
                     toAppend +='<div class="reply" sectabindex="'+secIndex+'" parent="noparent" id="comment'+value.id+"_"+secValue.id+'">' +
                     '<p><span class="person"><a href="../profile/'+secValue.user_id+'">'+secValue.name+'</a></span> <span class="created"> on '+secValue.created_at+'</span></p>';
                     secValue.text = secValue.text.split("\n").join("<br>");
                     toAppend += '<p>'+secValue.text+'</p>' +
                     
-                    '<p><a href="javascript:void(0)" class="likeReply">Like <span class="green">('+secValue.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeReply">Dislike <span class="red">('+secValue.downvotes+')</span></a> | <a href="javascript:void(0)">Report</a> </p>'+
+                    '<p><a href="javascript:void(0)" class="likeReply">Like <span class="green">('+secValue.upvotes+')</span></a> | <a href="javascript:void(0)" class="dislikeReply">Dislike <span class="red">('+secValue.downvotes+')</span></a> | '+(secValue.canDelete == 0 ? '<a href="javascript:void(0)">Report</a>' : '<a href="javascript:void(0)" class="deleteReply">Delete</a>')+ '</p>'+
                     ' <hr>'+
                     '</div>';
                 

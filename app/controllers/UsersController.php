@@ -484,6 +484,11 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["user_id"] = $array->user_id;
                 $singular["text"] = $array->text;
                 $singular["deleted"] = $array->deleted;
+                if($singular["user_id"] == Auth::user()->id) {
+                    $singular["canDelete"] = true;
+                } else {
+                    $singular["canDelete"] = false;
+                }
                 $singular["upvotes"] = $array->upvotes;
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;
@@ -498,6 +503,11 @@ class UsersController extends BaseController implements RemindableInterface {
                     $secondarySingular["user_id"] = $secondaryArray->user_id;
                     $secondarySingular["text"] = $secondaryArray->text;
                     $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    if($secondarySingular["user_id"] == Auth::user()->id) {
+                        $secondarySingular["canDelete"] = true;
+                    } else {
+                        $secondarySingular["canDelete"] = false;
+                    }
                     $secondarySingular["created_at"] = $secondaryArray->created_at;
                     $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                     $secondarySingular["downvotes"] = $secondaryArray->downvotes;
@@ -517,6 +527,9 @@ class UsersController extends BaseController implements RemindableInterface {
     public function postDiscussprofile() {
         if(Auth::check()) {
             $profile_id = Request::input('id');
+            if($profile_id == "me") {
+                $profile_id = Auth::user()->id;
+            }
             $comment = Request::input('comment');
             $time = date('Y-m-d H:i:s');
             DB::insert('insert into profile_discussion (user_id, profile_id, text, deleted, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
@@ -556,6 +569,11 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["user_id"] = $array->user_id;
                 $singular["text"] = $array->text;
                 $singular["deleted"] = $array->deleted;
+                if($singular["user_id"] == Auth::user()->id) {
+                    $singular["canDelete"] = true;
+                } else {
+                    $singular["canDelete"] = false;
+                }
                 $singular["upvotes"] = $array->upvotes;
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;
@@ -570,6 +588,11 @@ class UsersController extends BaseController implements RemindableInterface {
                     $secondarySingular["user_id"] = $secondaryArray->user_id;
                     $secondarySingular["text"] = $secondaryArray->text;
                     $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    if($secondarySingular["user_id"] == Auth::user()->id) {
+                        $secondarySingular["canDelete"] = true;
+                    } else {
+                        $secondarySingular["canDelete"] = false;
+                    }
                     $secondarySingular["created_at"] = $secondaryArray->created_at;
                     $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                     $secondarySingular["downvotes"] = $secondaryArray->downvotes;
@@ -732,6 +755,9 @@ class UsersController extends BaseController implements RemindableInterface {
         if(Auth::check()) {
             
             $profile_id = Request::input('profile_id');
+            if($profile_id == "me") {
+                $profile_id = Auth::user()->id;
+            }
             $comment_id = Request::input('comment_id');
             $vote = Request::input('vote');
             $time = date('Y-m-d H:i:s');
@@ -866,6 +892,9 @@ class UsersController extends BaseController implements RemindableInterface {
     public function postVoteprofilereply() {
         if(Auth::check()) {
             $profile_id = Request::input('profile_id');
+            if($profile_id == "me") {
+                $profile_id = Auth::user()->id;
+            }
             $comment_id = Request::input('comment_id');
             $vote = Request::input('vote');
             $time = date('Y-m-d H:i:s');
@@ -1001,6 +1030,9 @@ class UsersController extends BaseController implements RemindableInterface {
         if(Auth::check()) {
             
             $profile_id = Request::input('id');
+            if($profile_id == "me") {
+                $profile_id = Auth::user()->id;
+            }
             $comment = Request::input('comment');
             $comment_id = Request::input('commentid');
             $time = date('Y-m-d H:i:s');
@@ -1013,6 +1045,7 @@ class UsersController extends BaseController implements RemindableInterface {
                 $time,
                 $time)
             );
+            
             $comment_id_second = DB::table('profile_discussion_replies')
                 ->where('profile_id', $profile_id)
                 ->where('comment_id', $comment_id)
@@ -1064,6 +1097,11 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["user_id"] = $array->user_id;
                 $singular["text"] = $array->text;
                 $singular["deleted"] = $array->deleted;
+                if($singular["user_id"] == Auth::user()->id) {
+                    $singular["canDelete"] = true;
+                } else {
+                    $singular["canDelete"] = false;
+                }
                 $singular["upvotes"] = $array->upvotes;
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;
@@ -1078,6 +1116,11 @@ class UsersController extends BaseController implements RemindableInterface {
                     $secondarySingular["user_id"] = $secondaryArray->user_id;
                     $secondarySingular["text"] = $secondaryArray->text;
                     $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    if($secondarySingular["user_id"] == Auth::user()->id) {
+                        $secondarySingular["canDelete"] = true;
+                    } else {
+                        $secondarySingular["canDelete"] = false;
+                    }
                     $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                     $secondarySingular["downvotes"] = $secondaryArray->downvotes;
                     $secondarySingular["created_at"] = $secondaryArray->created_at;
@@ -1163,6 +1206,11 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["user_id"] = $array->user_id;
                 $singular["text"] = $array->text;
                 $singular["deleted"] = $array->deleted;
+                if($singular["user_id"] == Auth::user()->id) {
+                    $singular["canDelete"] = true;
+                } else {
+                    $singular["canDelete"] = false;
+                }
                 $singular["upvotes"] = $array->upvotes;
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;
@@ -1177,6 +1225,11 @@ class UsersController extends BaseController implements RemindableInterface {
                     $secondarySingular["user_id"] = $secondaryArray->user_id;
                     $secondarySingular["text"] = $secondaryArray->text;
                     $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    if($secondarySingular["user_id"] == Auth::user()->id) {
+                        $secondarySingular["canDelete"] = true;
+                    } else {
+                        $secondarySingular["canDelete"] = false;
+                    }
                     $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                     $secondarySingular["downvotes"] = $secondaryArray->downvotes;
                     $secondarySingular["created_at"] = $secondaryArray->created_at;

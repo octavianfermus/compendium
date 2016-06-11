@@ -267,6 +267,11 @@ Route::get('post/postdata', function() {
             $singular["user_id"] = $array->user_id;
             $singular["text"] = $array->text;
             $singular["deleted"] = $array->deleted;
+            if($singular["user_id"] == Auth::user()->id) {
+                $singular["canDelete"] = true;
+            } else {
+                $singular["canDelete"] = false;
+            }
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
             $singular["created_at"] = $array->created_at;
@@ -281,6 +286,11 @@ Route::get('post/postdata', function() {
                 $secondarySingular["user_id"] = $secondaryArray->user_id;
                 $secondarySingular["text"] = $secondaryArray->text;
                 $secondarySingular["deleted"] = $secondaryArray->deleted;
+                if($secondarySingular["user_id"] == Auth::user()->id) {
+                    $secondarySingular["canDelete"] = true;
+                } else {
+                    $secondarySingular["canDelete"] = false;
+                }
                 $secondarySingular["created_at"] = $secondaryArray->created_at;
                 $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                 $secondarySingular["downvotes"] = $secondaryArray->downvotes;
@@ -318,6 +328,10 @@ Route::get('post/postdata', function() {
 
 Route::post('profiledetails', function() {
     $id = Input::get('id');
+    $profile_id = Request::input('profile_id');
+    if($id == "me") {
+        $id = Auth::user()->id;
+    }
     $returnData = array();
     $returnData["requested_user_id"]=$id;
     $found = DB::table('users')
@@ -376,6 +390,11 @@ Route::post('profiledetails', function() {
             $singular["user_id"] = $array->user_id;
             $singular["text"] = $array->text;
             $singular["deleted"] = $array->deleted;
+            if($singular["user_id"] == Auth::user()->id) {
+                $singular["canDelete"] = true;
+            } else {
+                $singular["canDelete"] = false;
+            }
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
             $singular["created_at"] = $array->created_at;
@@ -390,6 +409,11 @@ Route::post('profiledetails', function() {
                 $secondarySingular["user_id"] = $secondaryArray->user_id;
                 $secondarySingular["text"] = $secondaryArray->text;
                 $secondarySingular["deleted"] = $secondaryArray->deleted;
+                if($secondarySingular["user_id"] == Auth::user()->id) {
+                    $secondarySingular["canDelete"] = true;
+                } else {
+                    $secondarySingular["canDelete"] = false;
+                }
                 $secondarySingular["created_at"] = $secondaryArray->created_at;
                 $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                 $secondarySingular["downvotes"] = $secondaryArray->downvotes;
