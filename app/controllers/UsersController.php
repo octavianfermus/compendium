@@ -1365,6 +1365,40 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state'=>'success', 'deleted'=>$id));
         }
     }
+    public function postDeletecomment() {
+        if(Auth::check()) {
+            $id = Input::get('id');
+            $time = date('Y-m-d H:i:s');
+            DB::update('update algorithm_discussion set deleted = 1, updated_at = ? where id = ?', array(
+            $time, 
+            $id 
+            ));
+            return Response::json(array('state'=>'success', 'deleted'=>$id));
+        }
+    }
+    public function postDeletereply() {
+        if(Auth::check()) {
+            $id = Input::get('id');
+            $time = date('Y-m-d H:i:s');
+            DB::update('update algorithm_discussion_replies set deleted = 1, updated_at = ? where id = ?', array(
+            $time, 
+            $id
+            ));
+            return Response::json(array('state'=>'success', 'deleted'=>$id));
+        }
+    }
+    public function postDeletelinecomment() {
+        if(Auth::check()) {
+            $id = Input::get('id');
+            $time = date('Y-m-d H:i:s');
+            return Response::json(array('state'=>'success', 'deleted'=>$id));
+            DB::update('update inline_algorithm_comments set deleted = 1, updated_at = ? where id = ?', array(
+            $time, 
+            $id
+            ));
+            return Response::json(array('state'=>'success', 'deleted'=>$id));
+        }
+    }
     public function putCommend() {
         $id = Input::get('id');
         if(Auth::check()) {
