@@ -456,3 +456,10 @@ Route::post('profiledetails', function() {
     }
     return Response::json($returnData);
 });
+
+Route::get('messages/{id}', function($id) {
+    return View::make('messages');
+});
+Route::get('messages', function() {
+    return View::make('messages');
+});

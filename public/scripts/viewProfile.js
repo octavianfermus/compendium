@@ -292,4 +292,7 @@ $(document).ready(function() {
         }
     });
     getProfileDetails();
+    if($("#sendPrivateMessage").length > 0) {
+        $("#sendPrivateMessage").attr("href",$("#sendPrivateMessage").attr("href")+profileId);
+    }
 });

@@ -1,30 +1,36 @@
 @extends('layout')
 @section('content')
-    <div class="boxWrapper">
-        <div class="statisticsBox">
-            <p class="upvote"><a href="javascript:void(0)"><span class="glyphicon glyphicon-arrow-up"></span></a> <span id="upvoteSpan"></span> upvotes</p>
-            <p class="downvote"><a href="javascript:void(0)"><span class="glyphicon glyphicon-arrow-down"></span></a> <span id="downvoteSpan"></span> downvotes </p>
-            <p class="views"><span class="glyphicon glyphicon-eye-open"></span> <span id="viewSpan"></span> views </p>
-            <p class="report"><a href="javascript:void(0)" data-toggle="modal" data-target="#reportModal"><span class="glyphicon glyphicon-warning-sign"></span> Report</a></p>
-        </div>
-        <h1 id="algorithmName"></h1>
-        <p id="language"><span>Language: </span></p>
-        <p class="subtitle">By <a href="../profile/" id="creatorUsername"></a><button id="commendPerson" href="javascript:void(0)" class="commend-star"> <span class="glyphicon glyphicon-star"></span><span id="commendationNumber">0</span></button></p>
-        <p><span>Original Link</span>: <a href id="originalLink">Find the original link here</a></p>
-        <p id="algorithmDescription"><span>Description: </span></p>
-        <p id="thisRequest" class="text-right hidden"><em>This algoritm is made by request!</em></p>
-    </div> 
-    <textarea id="postedAlgorithmArea" rows="4" style="width: 100%;"></textarea>
+    <div class="container application">
+        <div class="row main">
+            <div class="col-md-12">
+                <div class="boxWrapper">
+                    <div class="statisticsBox">
+                        <p class="upvote"><a href="javascript:void(0)"><span class="glyphicon glyphicon-arrow-up"></span></a> <span id="upvoteSpan"></span> upvotes</p>
+                        <p class="downvote"><a href="javascript:void(0)"><span class="glyphicon glyphicon-arrow-down"></span></a> <span id="downvoteSpan"></span> downvotes </p>
+                        <p class="views"><span class="glyphicon glyphicon-eye-open"></span> <span id="viewSpan"></span> views </p>
+                        <p class="report"><a href="javascript:void(0)" data-toggle="modal" data-target="#reportModal"><span class="glyphicon glyphicon-warning-sign"></span> Report</a></p>
+                    </div>
+                    <h1 id="algorithmName"></h1>
+                    <p id="language"><span>Language: </span></p>
+                    <p class="subtitle">By <a href="../profile/" id="creatorUsername"></a><button id="commendPerson" href="javascript:void(0)" class="commend-star"> <span class="glyphicon glyphicon-star"></span><span id="commendationNumber">0</span></button></p>
+                    <p><span>Original Link</span>: <a href id="originalLink">Find the original link here</a></p>
+                    <p id="algorithmDescription"><span>Description: </span></p>
+                    <p id="thisRequest" class="text-right hidden"><em>This algoritm is made by request!</em></p>
+                </div> 
+                <textarea id="postedAlgorithmArea" rows="4" style="width: 100%;"></textarea>
 
-    <div class="boxWrapper bg-color">
-        <div class="conversation">
-            <div id="algorithmComments">
+                <div class="boxWrapper bg-color">
+                    <div class="conversation">
+                        <div id="algorithmComments">
 
-            </div>
-            <div class="send-message">
-                <div class="input-group">
-                    <textarea placeholder="Write your message here" aria-describedby="sendButton" class="form-control"></textarea>
-                    <span class="input-group-addon" id="sendButton"><button class="btn">Send</button></span>
+                        </div>
+                        <div class="send-message">
+                            <div class="input-group">
+                                <textarea placeholder="Write your message here" aria-describedby="sendButton" class="form-control"></textarea>
+                                <span class="input-group-addon" id="sendButton"><button class="btn">Send</button></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
