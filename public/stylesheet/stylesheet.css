@@ -304,28 +304,46 @@ a:hover {
   min-height: 500px;
 }
 .application .sidebar {
-  background: #6CB2DF;
+  padding: 0;
+  background: white;
 }
 .application .sidebar a {
-  color: white;
+  color: black;
+  display: block;
+  width: 100%;
+  padding-left: 5px;
+}
+.application .sidebar a span {
+  font-weight: 600;
 }
 .application .sidebar a:hover, .application .sidebar a:active, .application .sidebar a:focus {
-  color: wheat;
+  color: black !important;
+  background: #E9E9E9;
   text-decoration: none;
+}
+.application .sidebar p {
+  margin: 0;
+  font-size: 13px;
 }
 .application .sidebar ul {
   list-style: none;
-  margin: 20px auto;
+  margin: 0;
   padding-left: 0;
-  width: 140px;
+  border: 1px solid #F1BB59;
 }
 .application .sidebar ul li {
-  margin-bottom: 15px;
+  margin-bottom: 0;
+}
+.application .sidebar ul li:not(:first-of-type) {
+  border-top: 1px solid #F1BB59;
+}
+.application .sidebar ul li.selected {
+  background: #F1BB59;
+}
+.application .sidebar ul li.notSeen {
+  background: #bfbfbf;
 }
 
-.conversation {
-  padding: 0 5px;
-}
 .conversation .send-message {
   margin-top: 10px;
 }

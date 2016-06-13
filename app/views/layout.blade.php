@@ -52,7 +52,7 @@
                             </ul>
                         </li>
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle seeNotifs" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Notifications <span class="messageCount hidden"></span><span class="caret"></span></a>
+                            <a href="#" class="dropdown-toggle seeNotifs" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Notifications <span class="messageCount hidden" id="notifCount"></span><span class="caret"></span></a>
                             <ul class="dropdown-menu notifications">
                                 <li role="separator" class="divider"></li>
                                 <li class="text-center">
@@ -60,26 +60,9 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle seeMesag" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Messages <span class="messageCount hidden"></span><span class="caret"></span></a>
-                            <ul class="dropdown-menu messages">
-                                <li role="separator" class="divider"></li>
-                                <li class="text-center">
-                                    <a href="{{ URL::to('messages') }}">See all <span id="restOfMesag"></span> messages</a>
-                                </li>
-                            </ul>
-                        </li>
+                        <li><a href="{{ URL::to('messages') }}">Messages <span class="messageCount hidden" id="messageNotifCount"></span></a>
+                       
                         @endif
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Links <span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">Not</a></li>
-                                <li><a href="#">Yet</a></li>
-                                <li><a href="#">Needed.</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="#">Hi</a></li>
-                            </ul>
-                        </li>
                         <li>{{ HTML::link('about', 'About') }}</li>
                         <li>{{ HTML::link('contact', 'Contact us') }}</li>
                     </ul>

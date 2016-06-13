@@ -1310,7 +1310,14 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
                 $notifications[]=$singular;
             }
-            return Response::json($notifications);
+            $returnData = array();
+            $returnData["notifications"]=$notifications;
+            $crumb_unparsed = DB::table('private_messages')
+                ->where('to_id', '=', Auth::user()->id)
+                ->where('seen', '=', 0)
+                ->count();
+            $returnData["messageCount"] = $crumb_unparsed;
+            return Response::json($returnData);
         } else {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive notifications.'));
         }
@@ -1421,6 +1428,126 @@ class UsersController extends BaseController implements RemindableInterface {
                 ->where('user_id','=', $id)
                 ->count();
             return Response::json(array('state' => 'success', 'number'=>$number));
+        }
+    }
+    public function getMessagehistory() {
+        if(Auth::check()) {
+            $id = Request::input('id');
+            $found = DB::table('users')
+                ->where('id','=',$id);
+            $returnData = array();
+            if($found->count()==0) {
+                $returnData["state"] = 'failure';
+                $returnData["message"] = 'There is no user with the provided id.';
+            } else {
+                $returnData["state"] = 'success';
+                $returnData["message"] = 'User found. Returning message history';
+                $found = DB::table('users')
+                    ->where('id','=',$id)
+                    ->first();
+                $returnData["talkingTo"] = $found->last_name." ".$found->first_name;
+                $history_unparsed = DB::table('private_messages')
+                    ->where('from_id', '=', Auth::user()->id)
+                    ->where('to_id', '=', $id)
+                    ->orWhere(function($query)
+                    {
+                        $query->where('from_id', '=', Request::input('id'))
+                              ->where('to_id', '=', Auth::user()->id);
+                    })
+                    ->get();
+                $history = array();
+                foreach($history_unparsed as $array) {
+                    $singular = array();
+                    $singular["timestamp"] = $array->created_at;
+                    if($array->from_id ==Auth::user()->id) {
+                        $singular["from_me"] = TRUE;
+                    } else {
+                        $singular["from"] = FALSE;
+                    }
+                    $name = DB::select('select * from users where id = ?', array($array->from_id));
+                    $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                    $singular["id"] = $array->from_id;
+                    $singular["message"] = $array->message;
+                    $singular["seen"] = $array->seen;
+                    $history[] = $singular;
+                }
+                $returnData["history"]=$history;
+            }
+            $returnData["timestamp"] = DB::table('private_messages')
+                ->where('from_id', '=', Auth::user()->id)
+                ->orWhere(function($query)
+                {
+                    $query->where('to_id', '=', Auth::user()->id);
+                })
+                 ->orderBy('updated_at', 'desc')
+                ->first()
+                ->updated_at;
+            $crumb_unparsed = DB::table('private_messages')
+                ->where('from_id', '=', Auth::user()->id)
+                ->orWhere(function($query)
+                {
+                    $query->where('to_id', '=', Auth::user()->id);
+                })
+                 ->orderBy('created_at', 'desc')
+                ->get();
+            
+            $crumbs = array();
+            $added = array();
+            foreach($crumb_unparsed as $array) {
+                $singular = array();
+                if($array->to_id == Auth::user()->id) {
+                    if(!in_array($array->from_id,$added)) {
+                        $added[] = $array->from_id;
+                        $singular["link"] = $array->from_id;
+                        $name = DB::select('select * from users where id = ?', array($array->from_id));
+                        $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                        $singular["from"] = $singular["name"];
+                        $singular["message"] = $array->message;
+                        $singular["timestamp"] = $array->updated_at;
+                        $singular["seen"] = $array->seen;
+                        $crumbs[] = $singular;
+                    }
+                } else if($array->from_id == Auth::user()->id) {
+                    if(!in_array($array->to_id,$added)) {
+                        $added[] = $array->to_id;
+                        $singular["link"] = $array->to_id;
+                        $name = DB::select('select * from users where id = ?', array($array->to_id));
+                        $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                        $singular["from"] = "You";
+                        $singular["message"] = $array->message;
+                        $singular["timestamp"] = $array->updated_at;
+                        $singular["seen"] = 1;
+                        $crumbs[] = $singular;
+                    }
+                }
+            }
+            $returnData["crumb"]=$crumbs;
+            return Response::json($returnData);
+        } else {
+            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive messages.'));
+        }
+    }
+    public function postMessageuser() {
+        if(Auth::check()) {
+            
+            $id = Request::input('id');
+            $comment = Request::input('comment');
+            $time = date('Y-m-d H:i:s');
+            DB::insert('insert into private_messages (from_id, to_id, message, created_at, updated_at) values (?, ?, ?, ?, ?)', array(
+                Auth::user()->id,
+                $id,
+                $comment,
+                $time,
+                $time
+            ));
+            DB::update('update private_messages set seen = 1, updated_at = ? where to_id = ? and from_id = ?', array(
+                $time, 
+                Auth::user()->id,
+                $id
+            ));
+            return Response::json(array('state' => 'success', 'message'=>'Message sent.', 'id'=>$id, 'comment'=>$comment, 'time'=>$time));
+        } else {
+            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to send messages.'));
         }
     }
 }

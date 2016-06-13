@@ -6,7 +6,11 @@ $(document).ready(function() {
                 method: 'get',
                 url: root + "/users/notifications",
                 success: function (data) {
-                    notifications = data;
+                    notifications = data.notifications;
+                    if(data.messageCount > 0) {
+                        $("span.messageCount#messageNotifCount").html((data.messageCount > 99 ? "99+" : data.messageCount));
+                        $("span.messageCount#messageNotifCount").removeClass("hidden");
+                    }
                     populateNotificationsBar();
                     populateNotificationsPage();
                 }
@@ -58,8 +62,8 @@ $(document).ready(function() {
                 });
             });
             if(count > 0) {
-                $("span.messageCount").html((count > 99 ? "99+" : count));
-                $("span.messageCount").removeClass("hidden");
+                $("span.messageCount#notifCount").html((count > 99 ? "99+" : count));
+                $("span.messageCount#notifCount").removeClass("hidden");
             }
         },
         populateNotificationsPage = function() {

@@ -225,28 +225,49 @@ a:hover {
         min-height: 500px;
     }
     .sidebar {
-        background: #6CB2DF;
+        padding: 0;
+        background: white;
         a {
-            color: white;
+            color: black;
+            display: block;
+            width: 100%;
+            padding-left: 5px;
+            span {
+                font-weight: 600;
+            }
             &:hover, &:active, &:focus {
-                color: wheat;
+                color: black !important;
+                background: $background-color;
                 text-decoration: none;
             }
         }
+        p {
+            margin: 0;
+            font-size: 13px;
+        }
         ul {
             list-style: none;
-            margin: 20px auto;
+            margin: 0;
             padding-left: 0;
-            width: 140px;
+            border: 1px solid $main-color;
             li {
-                margin-bottom: 15px;
+                &:not(:first-of-type) {
+                    border-top: 1px solid $main-color;
+                }   
+                    
+                margin-bottom: 0;
+                &.selected {
+                    background: $main-color;
+                }
+                &.notSeen {
+                    background: #bfbfbf;
+                }
             }
         }
     }
 }
 
 .conversation {
-    padding: 0 5px;
     .send-message {
         margin-top: 10px;
         .input-group-addon {

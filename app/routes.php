@@ -325,6 +325,21 @@ Route::get('post/postdata', function() {
     }
     return Response::json(array('data'=>$returnData));
 });
+Route::get('userlist', function() {
+    $returnData = array();
+    
+    $unparsed_users = DB::table('users')
+        ->get();
+    foreach($unparsed_users as $array) {
+        $singular = array();
+        $singular["id"] = $array->id;
+        $singular["last_name"]= $array->last_name;
+        $singular["first_name"] = $array->first_name;
+        //$singular["type"]=$array->type;
+        $returnData[]=$singular;
+    }
+    return Response::json($returnData);
+});
 
 Route::post('profiledetails', function() {
     $id = Input::get('id');
@@ -458,7 +473,21 @@ Route::post('profiledetails', function() {
 });
 
 Route::get('messages/{id}', function($id) {
-    return View::make('messages');
+    if(Auth::check()) {
+        $found = DB::table('users')
+            ->where('id','=', $id)->count();
+        if($found != 0) {
+            $time = date('Y-m-d H:i:s');
+            DB::update('update private_messages set seen = 1, updated_at = ? where to_id = ? and from_id = ? and seen = 0', array(
+                $time, 
+                Auth::user()->id,
+                $id
+            ));
+        }
+        return View::make('messages');
+    } else {
+        return View::make('404');
+    }  
 });
 Route::get('messages', function() {
     return View::make('messages');
