@@ -12,7 +12,7 @@ class CreatePrivateMessagesTable extends Migration {
             $table->increments('id');
             $table->integer('from');
             $table->integer('to');
-            $table->text('message');
+            $table->string('message');
             $table->boolean('seen');
             $table->timestamps();
         });

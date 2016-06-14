@@ -60,11 +60,15 @@
                                 </li>
                             </ul>
                         </li>
-                        <li><a href="{{ URL::to('messages') }}">Messages <span class="messageCount hidden" id="messageNotifCount"></span></a>
-                       
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Messages <span class="messageCount hidden" id="messageNotifCount"></span><span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>{{ HTML::link('messages', 'Private messages') }}</li>
+                                <li>{{ HTML::link('groups', 'Groups') }}</li>
+                            </ul>
+                        </li>
                         @endif
                         <li>{{ HTML::link('about', 'About') }}</li>
-                        <li>{{ HTML::link('contact', 'Contact us') }}</li>
                     </ul>
                 </div><!-- /.navbar-collapse -->
             </div><!-- /.container-fluid -->

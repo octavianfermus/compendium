@@ -492,3 +492,25 @@ Route::get('messages/{id}', function($id) {
 Route::get('messages', function() {
     return View::make('messages');
 });
+
+Route::get('groups/{id}', function($id) {
+    if(Auth::check()) {
+        /*
+        $found = DB::table('groups')
+            ->where('id','=', $id)->count();
+        if($found != 0) {
+            $time = date('Y-m-d H:i:s');
+            DB::update('update group_messages set seen = 1, updated_at = ? where to_id = ? and from_id = ? and seen = 0', array(
+                $time, 
+                Auth::user()->id,
+                $id
+            ));
+        }*/
+        return View::make('groups');
+    } else {
+        return View::make('404');
+    }  
+});
+Route::get('groups', function() {
+    return View::make('groups');
+});

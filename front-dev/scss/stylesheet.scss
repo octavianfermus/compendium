@@ -1,5 +1,6 @@
 @import 'global-settings.scss';
 @import 'navigation-bar.scss';
+@import 'side-bar.scss';
 @import 'buttons.scss';
 
 body { 
@@ -224,47 +225,6 @@ a:hover {
     .main {
         min-height: 500px;
     }
-    .sidebar {
-        padding: 0;
-        background: white;
-        a {
-            color: black;
-            display: block;
-            width: 100%;
-            padding-left: 5px;
-            span {
-                font-weight: 600;
-            }
-            &:hover, &:active, &:focus {
-                color: black !important;
-                background: $background-color;
-                text-decoration: none;
-            }
-        }
-        p {
-            margin: 0;
-            font-size: 13px;
-        }
-        ul {
-            list-style: none;
-            margin: 0;
-            padding-left: 0;
-            border: 1px solid $main-color;
-            li {
-                &:not(:first-of-type) {
-                    border-top: 1px solid $main-color;
-                }   
-                    
-                margin-bottom: 0;
-                &.selected {
-                    background: $main-color;
-                }
-                &.notSeen {
-                    background: #bfbfbf;
-                }
-            }
-        }
-    }
 }
 
 .conversation {
@@ -409,7 +369,7 @@ table {
 .main p>span {
     font-weight: 700;
 }
-.postedAlgorithm, .requested-box {
+.postedAlgorithm, .requested-box, .groupManager {
     h2 {
         border-bottom: 1px solid orange;
         background-color: white;

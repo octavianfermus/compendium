@@ -1550,6 +1550,75 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to send messages.'));
         }
     }
+    public function getGetmygroups() {
+        if(Auth::check()) {
+            $unparsed_groups = DB::table('groups')
+                ->join('group_members', function($join)
+                {
+                    $join->on('groups.id', '=', 'group_members.group_id')
+                         ->where('group_members.member_id', '=', Auth::user()->id);
+                })
+                ->select(
+                    'groups.id as group_id', 
+                    'groups.group_name as group_name',
+                    'groups.description as group_description',
+                    'groups.leader as leader_id', 
+                    'group_members.accepted as accepted',
+                    'group_members.updated_at as since',
+                    'groups.private as private',
+                    'group_members.is_leader as leader_me')
+                ->get();
+            $returnData = array();
+            foreach($unparsed_groups as $array) {
+                $singular = array();
+                $memberCount = DB::table('group_members')
+                    ->where('group_id','=',$array->group_id)
+                    ->count();
+                $name = DB::table('users')
+                    ->where('id','=',$array->leader_id)
+                    ->first();
+                $array->leader_name = $name->last_name." ".$name->first_name;
+                $array->memberCount = $memberCount;
+             }
+            $returnData = $unparsed_groups;
+            return Response::json($returnData);
+        } else {
+            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive data about your groups.'));
+        }
+    }
+    public function postCreategroup() {
+        if(Auth::check()) {
+            $name = Request::input('name');
+            $description = Request::input('description');
+            $type = Request::input('type');
+            $time = date('Y-m-d H:i:s');
+            DB::insert('insert into groups (group_name, description, private, leader, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                $name,
+                $description,
+                $type,
+                Auth::user()->id,
+                $time,
+                $time
+            ));
+            $returnId = DB::table('groups') 
+                ->where('group_name','=',$name)
+                ->where('private','=',$type)
+                ->where('created_at','=',$time)
+                ->where('updated_at','=',$time)
+                ->where('description','=',$description)
+                ->where('leader','=',Auth::user()->id)
+                ->first()->id;
+            DB::insert('insert into group_members (group_id, member_id, accepted, is_leader, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                $returnId,
+                Auth::user()->id,
+                TRUE,
+                TRUE,
+                $time,
+                $time
+            ));
+            return Response::json(array('state' => 'success', 'message'=>'Group created.', 'id'=>$returnId));
+        }
+    }
 }
 
 ?>
