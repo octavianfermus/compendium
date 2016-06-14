@@ -351,6 +351,10 @@ a:hover {
   min-height: 500px;
 }
 
+ul.tagit {
+  margin-bottom: 0;
+}
+
 .conversation .send-message {
   margin-top: 10px;
 }

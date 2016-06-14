@@ -152,6 +152,7 @@ class UsersController extends BaseController implements RemindableInterface {
             return Redirect::to('/');
         }
     }
+    
     public function putDeletealgorithm() {
         $algorithmId = Request::input('data.id');
         $found = DB::table('algorithms')
@@ -1548,6 +1549,38 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'success', 'message'=>'Message sent.', 'id'=>$id, 'comment'=>$comment, 'time'=>$time));
         } else {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to send messages.'));
+        }
+    }
+    public function postSearchgroup() {
+        if(Auth::check()) {
+            $value = Request::input('search');
+            if(strlen($value)>0) {
+                $unparsedReturnData = DB::table('groups')
+                    ->where('group_name','like','%'.$value.'%')
+                    ->orWhere('description','like','%'.$value.'%')
+                    ->get();
+            } else {
+                $unparsedReturnData = DB::table('groups')
+                    ->get();
+            }
+            $returnData = array();
+            foreach($unparsedReturnData as $array) {
+                $name = DB::table('users')
+                    ->where('id','=',$array->leader)
+                    ->first();
+                if($array->leader == Auth::user()->id) {
+                    $array->leader_me = 1;
+                } else {
+                    $array->leader_me = 0;
+                }
+                $array->leader_name = $name->last_name." ".$name->first_name;
+                $array->ownData = DB::table('group_members')
+                    ->where('group_id','=',$array->id)
+                    ->where('member_id','=',Auth::user()->id)
+                    ->first();
+                $returnData[]=$array;
+            }
+            return Response::json($returnData);
         }
     }
     public function getGetmygroups() {

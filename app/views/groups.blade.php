@@ -51,7 +51,7 @@
                         <div role="tabpanel" class="tab-pane fade" id="search-groups" aria-labelledby="search-groups-tab"> 
                             <div class="search-groups boxWrapper">
                                 <div class="input-group">
-                                    <input type="text" placeholder="search by name.." class="form-control">
+                                    <input type="text" class="form-control" id="searchKeywords" placeholder="search groups by name.. leaving this field empty will return all the existing groups..">
                                     <span class="input-group-addon" id="searchGroupsButton" style="border: none; padding: 0;"><button class="btn">Search</button></span>
                                 </div>
                             </div>
