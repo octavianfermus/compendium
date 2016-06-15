@@ -355,6 +355,21 @@ ul.tagit {
   margin-bottom: 0;
 }
 
+button.transparent, a.transparent {
+  padding: 0 5px;
+  color: black;
+  cursor: pointer;
+  line-height: 19px;
+  margin-left: 7px;
+  background: transparent;
+  border: 1px solid #cecece;
+  transition: all, 0.2s;
+  outline: none;
+}
+button.transparent:hover, a.transparent:hover {
+  background: #cecece;
+}
+
 .conversation .send-message {
   margin-top: 10px;
 }
@@ -490,7 +505,7 @@ table th {
   font-weight: 700;
 }
 
-.postedAlgorithm h2, .requested-box h2, .groupManager h2 {
+.postedAlgorithm h2, .requested-box h2, .groupManager h2, .styled-list-member h2 {
   border-bottom: 1px solid orange;
   background-color: white;
   margin-bottom: 5px;
@@ -499,14 +514,14 @@ table th {
   font-size: 25px;
   margin-top: 0;
 }
-.postedAlgorithm p, .requested-box p, .groupManager p {
+.postedAlgorithm p, .requested-box p, .groupManager p, .styled-list-member p {
   padding-left: 15px;
   margin-bottom: 1px;
 }
-.postedAlgorithm p span, .requested-box p span, .groupManager p span {
+.postedAlgorithm p span, .requested-box p span, .groupManager p span, .styled-list-member p span {
   font-weight: 600;
 }
-.postedAlgorithm .glyphicon-remove, .requested-box .glyphicon-remove, .groupManager .glyphicon-remove {
+.postedAlgorithm .glyphicon-remove, .requested-box .glyphicon-remove, .groupManager .glyphicon-remove, .styled-list-member .glyphicon-remove {
   color: red;
   top: 2px;
 }

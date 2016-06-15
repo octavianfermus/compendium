@@ -12,10 +12,12 @@
             </div>
             <div class="col-md-9 main">
                 <div class="conversation hidden" id="conversation">
-                    <h3 id="talkingTo"></h3>
-                    <div class="boxWrapper" style="height: 385px; overflow: auto">
+                    <div class="boxWrapper heading">
+                        <h1 id="groupName"></h1>
                     </div>
-                    <div class="send-message">
+                    <div class="boxWrapper" id="messages" style="height: 385px; overflow: auto">
+                    </div>
+                    <div class="send-message" style="margin-bottom: 10px">
                         <div class="input-group">
                                 <input type="text" class="form-control" placeholder="Write your message here" aria-describedby="sendButton">
                                 <span class="input-group-addon" id="sendButton"><button class="btn">Send</button></span>

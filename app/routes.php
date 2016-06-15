@@ -495,18 +495,32 @@ Route::get('messages', function() {
 
 Route::get('groups/{id}', function($id) {
     if(Auth::check()) {
-        /*
         $found = DB::table('groups')
-            ->where('id','=', $id)->count();
-        if($found != 0) {
-            $time = date('Y-m-d H:i:s');
+            ->where('id','=', $id)
+            ->where('visible','=',1)
+            ->count();
+        if($found == 1) {
+            $member_me = DB::table('group_members')
+                ->where('group_id','=',$id)
+                ->where('member_id','=',Auth::user()->id)
+                ->where('accepted','=',1)
+                ->count();
+            if($member_me==1) {
+                return View::make('groupchat');
+            } else {
+                //TODO: join group page
+                return View::make('404');
+            }
+            /*$time = date('Y-m-d H:i:s');
             DB::update('update group_messages set seen = 1, updated_at = ? where to_id = ? and from_id = ? and seen = 0', array(
                 $time, 
                 Auth::user()->id,
                 $id
-            ));
-        }*/
-        return View::make('groups');
+            ));*/
+            return View::make('groupchat');
+        } else {
+            return View::make('404');
+        }
     } else {
         return View::make('404');
     }  

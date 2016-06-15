@@ -13,6 +13,7 @@ class CreateGroupMembersTable extends Migration {
             $table->integer('group_id');
             $table->integer('member_id');
             $table->boolean('accepted');
+            $table->boolean('read_last_message');
             $table->boolean('is_leader');
             $table->timestamps();
         });

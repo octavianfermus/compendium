@@ -14,6 +14,7 @@ class CreateGroupsTable extends Migration {
             $table->string('description');
             $table->integer('leader');
             $table->boolean('private');
+            $table->boolean('visible');
             $table->timestamps();
         });
 	}

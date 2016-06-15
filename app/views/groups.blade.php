@@ -35,8 +35,8 @@
                                 <textarea class="form-control" id="createGroupDescription" placeholder="short description.."></textarea>
                                 <label>Group type</label>
                                 <select class="form-control" id="createGroupType">
-                                    <option value="public">Public group</option>
-                                    <option value="private">Private group</option>
+                                    <option value="0">Public group</option>
+                                    <option value="1">Private group</option>
                                 </select>
                                 <div class="text-right" style="margin-top: 10px">
                                     <span class="fader" id="submitFader">You must fill all mandatory fields before creating a group.</span>

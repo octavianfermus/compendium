@@ -45,7 +45,7 @@ $(document).ready(function() {
                     '<p>'+value.message+'</p>';
                 fromMe = value.from_me;
             });
-            $(".conversation .boxWrapper").html(toAppend);
+            $(".conversation .boxWrapper#messages").html(toAppend);
             if(initiated == false) {
                 $(".boxWrapper p")[$(".boxWrapper p").length-1].scrollIntoView();
                 initiated = true;

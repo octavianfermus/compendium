@@ -36,14 +36,12 @@ $(document).ready(function() {
                     count += 1;
                 }
                 if (index<5) {
-                    if(value.title === "New line comment!" || value.title === "New comment!" || value.title === "New reply!" || value.title ==="Request answered!") {
-                        toAdd += 
-                            "<li listindex='"+index+"'"+(value.checked_out == 0 ? " class='unread'" :"")+">"+
-                            "<a href='"+createURL(root+value.url,value.reference,value.title)+"'><strong>"+value.title + "</strong> <span style='float:right'>"+value.created_at+"</span>"+
-                            "<hr><strong>"+ value.name + "</strong> " + value.text +
-                            "</a>" +
-                            "</li>";
-                    }
+                    toAdd += 
+                        "<li listindex='"+index+"'"+(value.checked_out == 0 ? " class='unread'" :"")+">"+
+                        "<a href='"+createURL(root+value.url,value.reference,value.title)+"'><strong>"+value.title + "</strong> <span style='float:right'>"+value.created_at+"</span>"+
+                        "<hr><strong>"+ value.name + "</strong> " + value.text +
+                        "</a>" +
+                        "</li>";
                 }
             });
             $("ul .notifications li[listindex]").remove();
@@ -70,22 +68,20 @@ $(document).ready(function() {
             if($(".allNotifications").length > 0) {
                 var toAdd = "";
                 $.each(notifications, function (index, value) {
-                    if(value.title === "New line comment!" || value.title === "New comment!" || value.title === "New reply!" || value.title ==="Request answered!") {
-                        toAdd += 
-                            "<div listindex='"+index+"'class='boxWrapper extendedNotification "+(value.checked_out == 0 ? "unread" :"")+"'>"+
-                            "<p><strong>"+value.title + "</strong> <span style='float:right'>"+value.created_at+"</span>"+
-                            "<hr><strong><a href='"+root+value.url+"/users/"+value.user_id+"'>"+ value.name + "</a></strong> " + value.text +
-                            "<span class='buttons'>"+
-                                "<a href='javascript:void(0)' class='removeNotif'><span class='glyphicon glyphicon-remove'></a>"+
-                                "<a href='javascript:void(0)' class='toLink'><span class='glyphicon glyphicon-link'></a>" +
-                            "</span>" +
-                            (value.what_was_said == "" ?
-                             "" :
-                             "<p><em>&#8222;"+value.what_was_said+"&#8220;</em></p>")+
-                            
-                            "</p>" +
-                            "</div>";
-                    }
+                    toAdd += 
+                        "<div listindex='"+index+"'class='boxWrapper extendedNotification "+(value.checked_out == 0 ? "unread" :"")+"'>"+
+                        "<p><strong>"+value.title + "</strong> <span style='float:right'>"+value.created_at+"</span>"+
+                        "<hr><strong><a href='"+root+value.url+"/users/"+value.user_id+"'>"+ value.name + "</a></strong> " + value.text +
+                        "<span class='buttons'>"+
+                            "<a href='javascript:void(0)' class='removeNotif'><span class='glyphicon glyphicon-remove'></a>"+
+                            "<a href='javascript:void(0)' class='toLink'><span class='glyphicon glyphicon-link'></a>" +
+                        "</span>" +
+                        (value.what_was_said == "" ?
+                         "" :
+                         "<p><em>&#8222;"+value.what_was_said+"&#8220;</em></p>")+
+
+                        "</p>" +
+                        "</div>";
                 });
                 $(".allNotifications").html(toAdd);
                 $(".removeNotif").click(function() {
