@@ -136,6 +136,12 @@ Route::post('post/searchalgorithm', function() {
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
             $singular["views"] = $array->views;
+            $singular["reported"] = DB::table('reports')
+                ->where('user_id','=',Auth::user()->id)
+                ->where('tbl','=','algorithms')
+                ->where('reported_id','=',$array->id)
+                ->where('reported_user_id','=',$array->user_id)
+                ->count();
             $name = DB::select('select * from users where id = ?', array($array->user_id));
             $singular["username"] = $name[0]->last_name." ".$name[0]->first_name;
             $algorithms["data"][]=$singular;
@@ -190,11 +196,15 @@ Route::post('post/searchalgorithm', function() {
             $singular["views"] = $array->views;
             $name = DB::select('select * from users where id = ?', array($array->user_id));
             $singular["username"] = $name[0]->last_name." ".$name[0]->first_name;
+            $singular["reported"] = DB::table('reports')
+                ->where('user_id','=',Auth::user()->id)
+                ->where('tbl','=','algorithms')
+                ->where('reported_id','=',$array->id)
+                ->where('reported_user_id','=',$array->user_id)
+                ->count();
             if(strlen($tags)) {
                 $tagArray = explode(",", $tags);
                 $inIt = false;
-                
-                
                 foreach($tagArray as $tag) {
                     if($inIt == false) {
                         if (
@@ -207,8 +217,7 @@ Route::post('post/searchalgorithm', function() {
                             $inIt = true;
                         }
                     }
-                }
-                
+                }        
             } else {
                 $algorithms["data"][]=$singular;
             }

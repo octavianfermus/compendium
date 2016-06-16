@@ -5,6 +5,7 @@
         {{ Form::label('programming_language', 'Programming Language') }}
         {{ Form::text('language', null, array('class'=>'form-control', 'placeholder'=>'algorithm language..')) }}
         <label class="checkbox-inline">{{ Form::checkbox('ratio', 'positive') }}Positive like/dislike ratio</label>
+        <label class="checkbox-inline">{{ Form::checkbox('owned', 'positive') }}Don't include my own algorithms</label>
         <p><a href data-toggle="modal" data-target="#requestModal">Can't find what you are searching for? Submit a request</a></p>
         <div class="text-right">
         {{ Form::submit('Search', array('class'=>'btn', 'id'=>'submit'))}}
@@ -14,25 +15,36 @@
 </div>
 <div style="position: relative; margin-top: 25px">
     <p class="hidden" id="searchErrorMessage"></p>
-    <a href="javascript:void(0)" class="switcher hidden" id="searchPostsSwitcher">Switch View Mode</a>
     <div class="hidden searchedAlgorithms">
         
     </div>
-    <table class="hidden searchedAlgorithmsTable">
-        <thead>
-            <th>Name</th>
-            <th>Language</th>
-            <th>Upvotes</th>
-            <th>Downvotes</th>
-            <th>Approval</th>
-            <th>Views</th>
-            <th>Comments</th>
-            <th class="text-center">Publisher</th>
-        </thead>
-        <tbody></tbody>
-    </table>
 </div>
 
+<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Report this page</h4>
+            </div>
+        <div class="modal-body">
+            <label>Describe your problem with this algorithm. (optional)</label>
+            <textarea class="form-control" placeholder="short problem description.."></textarea>
+            <label>Why are you reporting this page?</label>
+            <select class="form-control">
+                <option>Indecency</option>
+                <option>Copied content without source</option>
+                <option>Duplicate</option>
+                <option>Other</option>
+            </select>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="submitReport">Submit Report</button>
+        </div>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="requestModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

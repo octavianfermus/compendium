@@ -1276,15 +1276,36 @@ class UsersController extends BaseController implements RemindableInterface {
             foreach ($unparsedData as $array) {
                 $singular = array();
                 $singular["id"] = $array->id;
+                $singular["user_id"] = $array->user_id;
+                $name = DB::select('select * from users where id = ?', array($array->user_id));
+                $singular["username"] = $name[0]->last_name." ".$name[0]->first_name;
                 $singular["name"] = $array->name;
                 $singular["language"] = $array->language;
                 $singular["description"] = $array->description;
                 $singular["upvotes"] = $array->upvotes;
                 $found = DB::table('algorithm_request_votes')->where('request_id','=',$array->id)->where('user_id','=',Auth::user()->id)->count();
                 $singular["userVote"]=$found;
+                
+                $singular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','requests')   
+                    ->where('reported_id','=',$array->id)
+                    ->where('reported_user_id','=',$array->user_id)
+                    ->count();
                 $requests["data"][]=$singular;
             }
             return Response::json($requests);
+        }
+    }
+    public function getUserdata() {
+        if(Auth::check()) {
+            $returnData = DB::table('users')
+                ->where('id','=',Auth::user()->id)
+                ->select('id','first_name','last_name','user_type')
+                ->first();
+            return Response::json(array('state' => 'success', 'message'=>'User data retrieved.','data'=>$returnData));    
+        } else {
+            return Response::json(array('state' => 'failure', 'message'=>'You are not logged in.'));
         }
     }
     public function getNotifications() {
@@ -2149,6 +2170,42 @@ class UsersController extends BaseController implements RemindableInterface {
             ));
             return Response::json(array('state' => 'success', 'message'=>'Group created.', 'id'=>$returnId));
         }
+    }
+    public function postReport() {
+        if(Auth::check()) {
+            
+            $user_id = Request::input('user_id');
+            $reported_id = Request::input('reported_id');
+            $tbl = Request::input('table');
+            $reported_user_id = Request::input('reported_user_id');
+            $user_reason = Request::input('user_reason');
+            $user_description = Request::input('user_description');
+            $time = date('Y-m-d H:i:s');
+            
+            $count = DB::table('reports')
+                ->where('user_id','=',$user_id)
+                ->where('reported_id','=',$reported_id)
+                ->count();
+            
+            if($count == 0) {
+                
+                DB::insert('insert into reports (user_id, reported_id, tbl, reported_user_id, user_reason, user_description, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $user_id,
+                    $reported_id,
+                    $tbl,
+                    $reported_user_id,
+                    $user_reason,
+                    $user_description,
+                    $time,
+                    $time
+                ));
+                
+            }
+            
+            return Response::json(array('state' => 'success', 'message'=>$count));
+            
+        }
+        return Response::json(array('state' => 'failure', 'message'=>'Insuficient priviledges.'));
     }
 }
 

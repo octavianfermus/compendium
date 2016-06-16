@@ -15,6 +15,7 @@
         <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
         <script src="{{ URL::to('scripts/jquery-2.2.3.min.js') }}"></script>
         <script src="{{ URL::to('scripts/bootstrap.min.js') }}"></script>
+        <script src="{{ URL::to('scripts/globalSettings.js') }}"></script>
         <script src="{{ URL::to('scripts/select-dropdowns.js') }}"></script>
         <script src="{{ URL::to('scripts/searchAlgorithms.js') }}"></script>
         <script src="{{ URL::to('scripts/jquery-ui.min.js') }}"></script>
@@ -46,7 +47,7 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Profile <span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li>{{ HTML::link('profile/me', 'Profile') }}</li>
-                                <li>@if(Auth::user()->user_type!=1) {{ HTML::link('users/admin', 'Admin Page') }} @endif</li>
+                                <li>@if(Auth::user()->user_type==2 || Auth::user()->user_type==3) {{ HTML::link('users/admin', 'Admin Page') }} @endif</li>
                                 <li role="separator" class="divider"></li>
                                 <li>{{ HTML::link('users/logout', 'Logout') }}</li>
                             </ul>
