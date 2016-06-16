@@ -1318,9 +1318,37 @@ class UsersController extends BaseController implements RemindableInterface {
                 ->where('seen', '=', 0)
                 ->count();
             $returnData["messageCount"] = $crumb_unparsed;
+            $crumb_unparsed = DB::table('group_members')
+                ->where('member_id', '=', Auth::user()->id)
+                ->where('read_last_message', '=', 0)
+                ->where('accepted','=',1)
+                ->count();
+            $returnData["groupCount"] = $crumb_unparsed;
             return Response::json($returnData);
         } else {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive notifications.'));
+        }
+    }
+    public function getGroupcrumb() {
+        if(Auth::check()) {
+            $returnData = array();
+            $memberGroups = DB::table('groups')
+                ->join('group_members', function($join)
+                {
+                    $join->on('groups.id', '=', 'group_members.group_id')
+                         ->where('group_members.accepted', '=', 1)
+                         ->where('group_members.member_id', '=', Auth::user()->id);
+                })
+                ->select(
+                    'groups.id as group_id', 
+                    'groups.group_name as group_name',
+                    'group_members.read_last_message as read'
+                )
+                ->get();
+            $returnData["crumb"] = $memberGroups;
+            return Response::json($returnData);
+        } else {
+            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive this data.'));
         }
     }
     public function putSeeallnotifications() {
@@ -1739,12 +1767,54 @@ class UsersController extends BaseController implements RemindableInterface {
             $found = DB::table('group_members')
                 ->where('group_id','=',$id)
                 ->where('member_id','=',Auth::user()->id)
+                ->where('accepted','=',1)
                 ->count();
             $returnData = array();
             
             if($found ==0) {
-                $returnData["state"] = 'failure';
-                $returnData["message"] = 'There is no group with the provided id or you are not in the group.';
+                $found = DB::table('groups')
+                ->where('id','=',$id)
+                ->count();
+                if($found == 0) {
+                    $returnData["state"] = 'failure';
+                    $returnData["message"] = 'No group with the provided id exists.';
+                } else {
+                    $returnData["state"] = 'success';
+                    $returnData["message"] = 'Group found. You are not in the group. Returning available data.';
+                    $found = DB::table('groups')
+                        ->where('id','=',$id)
+                        ->first();
+                    $returnData["requested"] = DB::table('group_members')
+                        ->where('accepted','=',0)
+                        ->where('member_id','=',Auth::user()->id)
+                        ->where('group_id','=',$id)
+                        ->count();
+                       // 
+                        //
+                    $returnData["groupName"] = $found->group_name;
+                    $returnData["description"] = $found->description;
+                    $returnData["privateGroup"] = $found->private;
+                    $returnData["leader_id"] = $found->leader;
+                    $found = DB::table('users')
+                        ->where('id','=',$found->leader)
+                        ->first();
+                    $returnData["leader_name"] = $found->last_name." ".$found->first_name;
+                    $returnData["members"] = DB::table('group_members')
+                        ->where('group_id','=',$id)
+                        ->where('accepted','=',1)
+                        ->join('users', function($join)
+                            {
+                                $join->on('group_members.member_id', '=', 'users.id');
+                            })
+                        ->select(
+                            'users.first_name as first_name',
+                            'users.last_name as last_name',
+                            'users.id as id',
+                            'group_members.updated_at as since'
+                        )
+                        ->get();
+
+                }
             } else {
                 $returnData["state"] = 'success';
                 $returnData["message"] = 'Group found. Returning message history';
@@ -1765,9 +1835,6 @@ class UsersController extends BaseController implements RemindableInterface {
                     ->where('id','=',$found->leader)
                     ->first();
                 $returnData["leader_name"] = $found->last_name." ".$found->first_name;
-                $history_unparsed = DB::table('group_messages')
-                    ->where('group_id', '=', $id)
-                    ->get();
                 $returnData["members"] = DB::table('group_members')
                     ->where('group_id','=',$id)
                     ->where('accepted','=',1)
@@ -1798,15 +1865,13 @@ class UsersController extends BaseController implements RemindableInterface {
                         )
                         ->get();
                 }
+                $history_unparsed = DB::table('group_messages')
+                    ->where('group_id', '=', $id)
+                    ->get();
                 $history = array();
                 foreach($history_unparsed as $array) {
                     $singular = array();
                     $singular["timestamp"] = $array->created_at;
-                    if($array->user_id ==Auth::user()->id) {
-                        $singular["from_me"] = TRUE;
-                    } else {
-                        $singular["from_me"] = FALSE;
-                    }
                     $name = DB::select('select * from users where id = ?', array($array->user_id));
                     $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
                     $singular["id"] = $array->user_id;
@@ -1818,54 +1883,62 @@ class UsersController extends BaseController implements RemindableInterface {
             
             $returnData["timestamp"] = DB::table('group_messages')
                 ->where('group_id', '=', $id)
-                 ->orderBy('updated_at', 'desc')
-                ->first();
-                //->updated_at;
-            /*
-            $crumb_unparsed = DB::table('private_messages')
-                ->where('from_id', '=', Auth::user()->id)
-                ->orWhere(function($query)
-                {
-                    $query->where('to_id', '=', Auth::user()->id);
-                })
-                 ->orderBy('created_at', 'desc')
-                ->get();
-            
-            $crumbs = array();
-            $added = array();
-            foreach($crumb_unparsed as $array) {
-                $singular = array();
-                if($array->to_id == Auth::user()->id) {
-                    if(!in_array($array->from_id,$added)) {
-                        $added[] = $array->from_id;
-                        $singular["link"] = $array->from_id;
-                        $name = DB::select('select * from users where id = ?', array($array->from_id));
-                        $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
-                        $singular["from"] = $singular["name"];
-                        $singular["message"] = $array->message;
-                        $singular["timestamp"] = $array->updated_at;
-                        $singular["seen"] = $array->seen;
-                        $crumbs[] = $singular;
-                    }
-                } else if($array->from_id == Auth::user()->id) {
-                    if(!in_array($array->to_id,$added)) {
-                        $added[] = $array->to_id;
-                        $singular["link"] = $array->to_id;
-                        $name = DB::select('select * from users where id = ?', array($array->to_id));
-                        $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
-                        $singular["from"] = "You";
-                        $singular["message"] = $array->message;
-                        $singular["timestamp"] = $array->updated_at;
-                        $singular["seen"] = 1;
-                        $crumbs[] = $singular;
-                    }
-                }
+                ->count();
+            if($returnData["timestamp"] > 0) {
+                $returnData["timestamp"] = DB::table('group_messages')
+                ->where('group_id', '=', $id)
+                ->orderBy('updated_at', 'desc')
+                ->first()
+                ->updated_at;
             }
-            $returnData["crumb"]=$crumbs;
-            */
+            $memberGroups = DB::table('groups')
+                ->join('group_members', function($join)
+                {
+                    $join->on('groups.id', '=', 'group_members.group_id')
+                         ->where('group_members.accepted', '=', 1)
+                         ->where('group_members.member_id', '=', Auth::user()->id);
+                })
+                ->select(
+                    'groups.id as group_id', 
+                    'groups.group_name as group_name',
+                    'group_members.read_last_message as read'
+                )
+                ->get();
+            $returnData["crumb"] = $memberGroups;
             return Response::json($returnData);
         } else {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive messages.'));
+        }
+    }
+    public function postMessagegroup() {
+        if(Auth::check()) {
+            $id = Request::input('id');
+            $comment = Request::input('comment');
+            $time = date('Y-m-d H:i:s');
+            
+            $memberCheck = DB::table('group_members')
+                ->where('group_id','=',$id)
+                ->where('member_id','=',Auth::user()->id)
+                ->where('accepted','=',1)
+                ->count();
+            if($memberCheck==1) {
+                DB::insert('insert into group_messages (group_id, user_id, message, created_at, updated_at) values (?, ?, ?, ?, ?)', array(
+                    $id,
+                    Auth::user()->id,
+                    $comment,
+                    $time,
+                    $time
+                ));
+                DB::update('update group_members set read_last_message = 0, updated_at = ? where group_id = ? and accepted = 1 and member_id <> ?', array(
+                    $time, 
+                    $id,
+                    Auth::user()->id
+                ));
+                return Response::json(array('state' => 'success', 'message'=>'Message sent.', 'id'=>$id, 'comment'=>$comment, 'time'=>$time));
+            } 
+            return Response::json(array('state' => 'failure', 'message'=>'You must be a member of the group in order to send messages.'));
+        } else {
+            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to send messages.'));
         }
     }
     public function postMessageuser() {

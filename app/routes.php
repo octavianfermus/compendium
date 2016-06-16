@@ -506,18 +506,16 @@ Route::get('groups/{id}', function($id) {
                 ->where('accepted','=',1)
                 ->count();
             if($member_me==1) {
+                $time = date('Y-m-d H:i:s');
+                DB::update('update group_members set read_last_message = 1, updated_at = ? where group_id = ? and member_id = ? and accepted = 1 and read_last_message = 0', array(
+                    $time,
+                    $id,
+                    Auth::user()->id
+                ));
                 return View::make('groupchat');
             } else {
-                //TODO: join group page
-                return View::make('404');
+                return View::make('joingroup');
             }
-            /*$time = date('Y-m-d H:i:s');
-            DB::update('update group_messages set seen = 1, updated_at = ? where to_id = ? and from_id = ? and seen = 0', array(
-                $time, 
-                Auth::user()->id,
-                $id
-            ));*/
-            return View::make('groupchat');
         } else {
             return View::make('404');
         }

@@ -11,6 +11,10 @@ $(document).ready(function() {
                         $("span.messageCount#messageNotifCount").html((data.messageCount > 99 ? "99+" : data.messageCount));
                         $("span.messageCount#messageNotifCount").removeClass("hidden");
                     }
+                    if(data.groupCount > 0) {
+                        $("span.messageCount#groupNotifCount").html((data.messageCount > 99 ? "99+" : data.messageCount));
+                        $("span.messageCount#groupNotifCount").removeClass("hidden");
+                    }
                     populateNotificationsBar();
                     populateNotificationsPage();
                 }

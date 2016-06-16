@@ -3,7 +3,26 @@ $(document).ready(function() {
         root = "http://localhost:8080",
         members = [],
         requests = [],
+        timestamp = undefined,
+        messageHistory = [],
+        initiated = false,
+        leader_id,
         me,
+        crumbs = undefined,
+        populateCrumbs = function(data) {
+            var toAppend ="";
+            crumbs = data;
+            $.each(crumbs, function(index, value) {
+
+                toAppend +='<li '+(value.group_id == groupID ? 'class="selected"':(value.read == 0 ? 'class="notSeen"': ""))+'>'+
+                    '<a href="'+root+'/groups/'+value.group_id +'">'+
+                    '<span>'+value.group_name+'</span>'+
+                    '<span style="float:right; margin-right: 4px" class="newSpan">'+(value.read == 0 ? 'New!' : "")+'</span>' +
+                    '</a>'+
+                    '</li>';
+            });
+            $(".sidebar ul.messageList").html(toAppend);
+        },
         createRequestList = function() {
             var toAppend ="";
             $.each(requests,function(index,value) {
@@ -75,11 +94,9 @@ $(document).ready(function() {
         createMemberList = function(leader) {
             var toAppend = "";
             $.each(members,function(index,value) {
-                
-            console.log(value.id, me);
                 toAppend += '<div class="styled-list-member" listindex="'+index+'">' +
                     '<h2>'+
-                        '<a href="'+root+'/profile/'+value.id+'">'+value.last_name + " " +value.first_name+ (value.id == leader ? ' (you)':"")+'</a>'+
+                        '<a href="'+root+'/profile/'+value.id+'">'+value.last_name + " " +value.first_name+ (value.id == leader_id ? ' (leader)':"")+'</a>'+
                         '<span style="float: right; font-size: 14px; font-weight: 600; line-height: 28px;">Member since '+value.since.split(" ")[0]+'</span>'+
                     '</h2>' +
                     '<p>'+
@@ -168,131 +185,6 @@ $(document).ready(function() {
                 });
             });
         },
-        getPostData = function () {
-            jQuery.ajax({
-                method: 'get',
-                url: root+"/users/groupinitialdata?id="+groupID,
-                success: function (data) {
-                    console.log(data);
-                    $("#groupName").html(data.groupName);
-                    if(data.groupDescription) {
-                        $("#groupDescription").removeClass("hidden").html(description);
-                    }
-                    $("#groupLeader").html("<span>Leader: </span><a href='"+root+"/profile/"+data.leader_id+"'>" + data.leader_name + (data.leader_me == true ? " (You)</a>" : "</a>"));
-                    if(data.privateGroup == 1) {
-                        $("#groupType").html("<span>Group type: </span>Private");
-                        $(".convertToPublicGroup").removeClass("hidden");
-                        $(".convertToPrivateGroup").remove();
-                        $(".convertToPublicGroup").click(function() {
-                            $(this).addClass("hidden");
-                            $(".confirmConvert").removeClass("hidden");
-                            $(".cancelConvert").removeClass("hidden");
-                        });
-                        $(".cancelConvert").click(function() {
-                            $(this).addClass("hidden");
-                            $(".confirmConvert").addClass("hidden");
-                            $(".convertToPublicGroup").removeClass("hidden");
-                        });
-                        $(".confirmConvert").click(function() {
-                            $.ajax({
-                                method: 'post',
-                                url: root+'/users/convertgrouppublic',
-                                dataType:"json",
-                                data: {id:groupID},
-                                success: function(data) {
-                                    location.reload();
-                                }
-                            });
-                        });
-                    } else {
-                        $("#groupType").html("<span>Group type: </span>Public");
-                        $(".convertToPrivateGroup").removeClass("hidden");
-                        $(".convertToPublicGroup").remove();
-                        $(".convertToPrivateGroup").click(function() {
-                            $(this).addClass("hidden");
-                            $(".confirmConvert").removeClass("hidden");
-                            $(".cancelConvert").removeClass("hidden");
-                        });
-                        $(".cancelConvert").click(function() {
-                            $(this).addClass("hidden");
-                            $(".confirmConvert").addClass("hidden");
-                            $(".convertToPrivateGroup").removeClass("hidden");
-                        });
-                        
-                        $(".confirmConvert").click(function() {
-                            $.ajax({
-                                method: 'post',
-                                url: root+'/users/convertgroupprivate',
-                                dataType:"json",
-                                data: {id:groupID},
-                                success: function(data) {
-                                    location.reload();
-                                }
-                            });
-                        });
-                    }
-                    if(data.leader_me == true && data.privateGroup == 1) {
-                        requests = data.active_requests;
-                        $("#seeActiveRequests").removeClass("hidden");
-                        createRequestList();
-                    }
-                    me = data.me;
-                    members = data.members;
-                    createMemberList(data.leader_me);
-                    /*
-                    if(timestamp!== data.timestamp) {
-                        timestamp = data.timestamp;
-                        if(data.history) {
-                            $("#talkingTo").html("<a href='"+root+"/profile/"+conversationID+"'>"+data.talkingTo+"</a>");
-                            messageHistory = data.history;
-                            $(".main .conversation").removeClass("hidden"); 
-                            populateMessages();
-                            $(".closeConversation").removeClass("hidden");
-                        } else {
-                            if($(".main .conversation").length>0) {
-                                $(".main .conversation").remove(); 
-                                $("#allMessagesBox").removeClass("hidden");
-                                $.ajax({
-                                    method: 'get',
-                                    url: root+'/userlist',
-                                    success: function(data) {
-                                       userlist = data;
-                                    }
-                                });
-                                    
-                            };
-                        }
-                        populateCrumbs(data.crumb);
-                    }*/
-                },
-                error: function (data) {
-                    console.log("error");
-                }
-            });
-        };
-    getPostData();
-    /*
-    
-        messageHistory = undefined,
-        crumbs = undefined,
-        initiated = false,
-        timestamp = undefined,
-        userlist = undefined,
-        populateCrumbs = function(data) {
-            var toAppend ="";
-                crumbs = data;
-                $.each(crumbs, function(index, value) {
-
-                    toAppend +='<li '+(value.link == conversationID ? 'class="selected"':(value.seen == 0 ? 'class="notSeen"': ""))+'>'+
-                        '<a href="'+root+'/messages/'+value.link +'">'+
-                        '<span>'+value.name+'</span>'+
-                        '<span style="float:right; margin-right: 4px" class="newSpan">'+(value.seen == 0 ? 'New!' : "")+'</span>' +
-                        '<p>'+value.from + ": " + value.message+'</p>'+
-                        '</a>'+
-                        '</li>';
-                });
-                $(".sidebar ul.messageList").html(toAppend);
-        },
         populateMessages = function() {
             var toAppend = "",
                 fromMe = null,
@@ -309,13 +201,13 @@ $(document).ready(function() {
                         toAppend += '</div><p class="text-center" style="border-bottom: 1px solid #f1bb59; margin: 4px;"><strong>'+day+'</strong></p>';
                     }
                 }
-                if(fromMe !== value.from_me) {
+                if(fromMe !== value.id) {
                     toAppend += '</div><div class="reply">';
                     
                 } 
-                toAppend += '<p>'+(fromMe === null || fromMe !== value.from_me ? '<a href="'+root+'/profile/'+value.id+'">'+value.name+'</a>' : '')+'<span style="float: right">'+value.timestamp.split(" ")[1]+'</span></p>' + 
+                toAppend += '<p>'+(fromMe === null || fromMe !== value.id ? '<a href="'+root+'/profile/'+value.id+'">'+value.name+'</a>' : '')+'<span style="float: right">'+value.timestamp.split(" ")[1]+'</span></p>' + 
                     '<p>'+value.message+'</p>';
-                fromMe = value.from_me;
+                fromMe = value.id;
             });
             $(".conversation .boxWrapper#messages").html(toAppend);
             if(initiated == false) {
@@ -323,28 +215,117 @@ $(document).ready(function() {
                 initiated = true;
             }
         },
-        
+        getPostData = function () {
+            jQuery.ajax({
+                method: 'get',
+                url: root+"/users/groupinitialdata?id="+groupID,
+                success: function (data) {
+                    leader_id = data.leader_id;
+                    $("#groupName").html(data.groupName);
+                    if(data.groupDescription) {
+                        $("#groupDescription").removeClass("hidden").html(description);
+                    }
+                    $("#groupLeader").html("<span>Leader: </span><a href='"+root+"/profile/"+data.leader_id+"'>" + data.leader_name + (data.leader_me == true ? " (You)</a>" : "</a>"));
+                    if(data.privateGroup == 1) {
+                        $("#groupType").html("<span>Group type: </span>Private");
+                        if(data.leader_me == true) {
+                            $(".convertToPublicGroup").removeClass("hidden");
+                            $(".convertToPrivateGroup").remove();
+                            $(".convertToPublicGroup").click(function() {
+                                $(this).addClass("hidden");
+                                $(".confirmConvert").removeClass("hidden");
+                                $(".cancelConvert").removeClass("hidden");
+                            });
+                            $(".cancelConvert").click(function() {
+                                $(this).addClass("hidden");
+                                $(".confirmConvert").addClass("hidden");
+                                $(".convertToPublicGroup").removeClass("hidden");
+                            });
+                            $(".confirmConvert").click(function() {
+                                $.ajax({
+                                    method: 'post',
+                                    url: root+'/users/convertgrouppublic',
+                                    dataType:"json",
+                                    data: {id:groupID},
+                                    success: function(data) {
+                                        location.reload();
+                                    }
+                                });
+                            });
+                        }
+                    } else {
+                        $("#groupType").html("<span>Group type: </span>Public");
+                        if(data.leader_me== true) {
+                            $(".convertToPrivateGroup").removeClass("hidden");
+                            $(".convertToPublicGroup").remove();
+                            $(".convertToPrivateGroup").click(function() {
+                                $(this).addClass("hidden");
+                                $(".confirmConvert").removeClass("hidden");
+                                $(".cancelConvert").removeClass("hidden");
+                            });
+                            $(".cancelConvert").click(function() {
+                                $(this).addClass("hidden");
+                                $(".confirmConvert").addClass("hidden");
+                                $(".convertToPrivateGroup").removeClass("hidden");
+                            });
 
-    setInterval(function() {
-        getPostData();
-    }, 2000);
+                            $(".confirmConvert").click(function() {
+                                $.ajax({
+                                    method: 'post',
+                                    url: root+'/users/convertgroupprivate',
+                                    dataType:"json",
+                                    data: {id:groupID},
+                                    success: function(data) {
+                                        location.reload();
+                                    }
+                                });
+                            });
+                        }
+                    }
+                    if(data.leader_me == true && data.privateGroup == 1) {
+                        requests = data.active_requests;
+                        $("#seeActiveRequests").removeClass("hidden");
+                        createRequestList();
+                    }
+                    me = data.me;
+                    members = data.members;
+                    createMemberList(data.leader_me);
+                    if(timestamp!== data.timestamp) {
+                        timestamp = data.timestamp;
+                        if(data.history) {
+                            messageHistory = data.history;
+                            populateMessages();
+                        }
+                     populateCrumbs(data.crumb);
+                    }
+                },
+                error: function (data) {
+                    console.log("error");
+                }
+            });
+        };
+    getPostData();
+    
     $(".send-message #sendButton .btn").click(function() {
         var comment = $(".send-message input").val().trim();
         if(comment.length>0) {
             $(".send-message input").val("");
             jQuery.ajax({
                 method: 'post',
-                url: root+"/users/messageuser",
+                url: root+"/users/messagegroup",
                 dataType: "json",
-                data: {id: conversationID, comment: comment},
+                data: {id: groupID, comment: comment},
                 success: function(data) {
-                   $(".boxWrapper p")[$(".boxWrapper p").length-1].scrollIntoView();
+                    $(".boxWrapper#messages p")[$(".boxWrapper#messages p").length-1].scrollIntoView();
                 },
                 error: function(data) {
-                    
+                    console.log(data);
                 }
             });
         }
     });
-    */
+
+    setInterval(function() {
+        getPostData();
+    }, 1000);
 });

@@ -1,10 +1,37 @@
 $(document).ready(function() {
     var root = "http://localhost:8080",
-        crumbs = undefined,
         groups = undefined,
         lastSearch = "",
         searchResults = undefined,
-        manageFilters = [],
+        manageFilters = [],    
+        crumbs = undefined,
+        populateCrumbs = function(data) {
+            var toAppend ="",
+                groupID = undefined;
+            crumbs = data;
+            $.each(crumbs, function(index, value) {
+
+                toAppend +='<li '+(value.group_id == groupID ? 'class="selected"':(value.read == 0 ? 'class="notSeen"': ""))+'>'+
+                    '<a href="'+root+'/groups/'+value.group_id +'">'+
+                    '<span>'+value.group_name+'</span>'+
+                    '<span style="float:right; margin-right: 4px" class="newSpan">'+(value.read == 0 ? 'New!' : "")+'</span>' +
+                    '</a>'+
+                    '</li>';
+            });
+            $(".sidebar ul.messageList").html(toAppend);
+        },
+        crumbAjax = function() {
+            $.ajax({
+                method: 'get',
+                url: root+'/users/groupcrumb',
+                success: function(data) {
+                    populateCrumbs(data.crumb);
+                },
+                error: function(data) {
+                    console.log(data);
+                }
+            });
+        },
         populateGroups = function(data) {
             var toAppend = "";
             $.each(data, function(index,value) {
@@ -260,6 +287,7 @@ $(document).ready(function() {
             });
         };
     getGroups();
+    
     $("#manageGroupsFilter").keypress(function(event){
         var keycode = (event.keyCode ? event.keyCode : event.which);
         if(keycode == '13') {
@@ -307,4 +335,7 @@ $(document).ready(function() {
         lastSearch = searchValue;
         ajaxSearch();
     });
+    
+    crumbAjax();
+    setInterval(function() {crumbAjax();}, 10000);
 });

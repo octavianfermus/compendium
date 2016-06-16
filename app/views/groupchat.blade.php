@@ -26,10 +26,10 @@
                             <button class="transparent hidden" id="seeActiveRequests" data-toggle="modal" data-target="#requestsModal">See active requests</button>
                         </p>
                     </div>
-                    <div class="boxWrapper" style="height: 385px; overflow: auto">
+                    <div class="boxWrapper" id="messages" style="height: 320px; overflow: auto">
                     </div>
                     <div class="send-message">
-                        <div class="input-group">
+                        <div class="input-group" style="margin-bottom: 10px">
                                 <input type="text" class="form-control" placeholder="Write your message here" aria-describedby="sendButton">
                                 <span class="input-group-addon" id="sendButton"><button class="btn">Send</button></span>
                         </div>
