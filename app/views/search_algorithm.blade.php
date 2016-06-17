@@ -11,7 +11,6 @@
         {{ Form::submit('Search', array('class'=>'btn', 'id'=>'submit'))}}
         </div>
     {{ Form::close() }}
-    
 </div>
 <div style="position: relative; margin-top: 25px">
     <p class="hidden" id="searchErrorMessage"></p>
@@ -25,12 +24,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Report this page</h4>
+                <h4 class="modal-title" id="myModalLabel">Report</h4>
             </div>
         <div class="modal-body">
-            <label>Describe your problem with this algorithm. (optional)</label>
+            <label>Describe your problem. (optional)</label>
             <textarea class="form-control" placeholder="short problem description.."></textarea>
-            <label>Why are you reporting this page?</label>
+            <label>Why are you reporting this?</label>
             <select class="form-control">
                 <option>Indecency</option>
                 <option>Copied content without source</option>
@@ -77,3 +76,5 @@
         </div>
     </div>
 </div>
+
+<script src="{{ URL::to('scripts/searchAlgorithms.js') }}"></script>

@@ -34,7 +34,7 @@ $(document).ready(function () {
                     
                     '<p><span>Description</span>: ' + (value.description.trim().length ? value.description : "None") + '</p>' +
                     (!value.template ? '<p><span>Ratings</span>: ' + value.upvotes + ' upvotes, ' + value.downvotes + ' downvotes with an aproval of ' + getApproval(value.upvotes, value.downvotes) + '%</p>' +
-                    '<p>' + value.views + ' views, 0 comments</p>' :"") +
+                    '<p>' + value.views + ' views, ' + value.comments + ' comments</p>' :"") +
                     '<p>' + publishOrDelete(value.template, value.id) + '</p>' +
                     '</div>';
                 $(".postedAlgorithms").append(toAppend);
@@ -51,7 +51,7 @@ $(document).ready(function () {
                     '<td>' + value.downvotes + '</td>' +
                     '<td>' + getApproval(value.upvotes, value.downvotes) + '% </td>' +
                     '<td>' + value.views + '</td>' +
-                    '<td> 0 </td>' +
+                    '<td>' + value.comments + '</td>' +
                     '<td>' + publishOrDelete(value.template, value.id) + '</td>' +
                     '</tr>';
                 $(".postedAlgorithmsTable tbody").append(toAppend);

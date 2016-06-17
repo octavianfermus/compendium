@@ -249,6 +249,12 @@ Route::get('post/postdata', function() {
         $returnData["commendations"]["number"] = DB::table('user_commendations')
             ->where('user_id','=', $unparsedData[0]->user_id)
             ->count();
+        $returnData["reported"] = DB::table('reports')
+            ->where('user_id','=',Auth::user()->id)
+            ->where('tbl','=','algorithms')
+            ->where('reported_id','=',$algorithm_id)
+            ->where('reported_user_id','=',$unparsedData[0]->user_id)
+            ->count();
         if(Auth::check()) {
             $commended = DB::table('user_commendations')
                 ->where('user_id','=', $unparsedData[0]->user_id)
@@ -268,7 +274,10 @@ Route::get('post/postdata', function() {
             $returnData["commendations"]["commendedByYou"] = FALSE;
             $returnData["commendations"]["youCantCommend"] = TRUE;
         }
-        $comments_unfiltered = DB::table('algorithm_discussion')->where('algorithm_id', '=', $algorithm_id)->get();
+        $comments_unfiltered = DB::table('algorithm_discussion')
+            ->where('algorithm_id', '=', $algorithm_id)
+            ->orderBy('created_at','desc')
+            ->get();
         $comments = array();
         foreach ($comments_unfiltered as $array) {
             $singular = array();
@@ -283,6 +292,12 @@ Route::get('post/postdata', function() {
             }
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
+            $singular["reported"] = DB::table('reports')
+                ->where('user_id','=',Auth::user()->id)
+                ->where('tbl','=','algorithm_discussion')
+                ->where('reported_id','=',$array->id)
+                ->where('reported_user_id','=',$array->user_id)
+                ->count();
             $singular["created_at"] = $array->created_at;
             $singular["replies"] = array(); 
             $reply_comments_unfiltered = DB::table('algorithm_discussion_replies')
@@ -300,6 +315,12 @@ Route::get('post/postdata', function() {
                 } else {
                     $secondarySingular["canDelete"] = false;
                 }
+                $secondarySingular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','algorithm_discussion_replies')
+                    ->where('reported_id','=',$secondaryArray->id)
+                    ->where('reported_user_id','=',$secondaryArray->user_id)
+                    ->count();
                 $secondarySingular["created_at"] = $secondaryArray->created_at;
                 $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                 $secondarySingular["downvotes"] = $secondaryArray->downvotes;
@@ -313,7 +334,10 @@ Route::get('post/postdata', function() {
             $comments[]=$singular;
         }
         $returnData["comments"]=$comments;
-        $comments_unfiltered = DB::table('inline_algorithm_comments')->where('algorithm_id', '=', $algorithm_id)->get();
+        $comments_unfiltered = DB::table('inline_algorithm_comments')
+            ->where('algorithm_id', '=', $algorithm_id)
+            ->orderBy('created_at','desc')
+            ->get();
         $comments = array();
         foreach ($comments_unfiltered as $array) {
             $singular = array();
@@ -325,6 +349,12 @@ Route::get('post/postdata', function() {
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
             $singular["created_at"] = $array->created_at;     
+            $singular["reported"] = DB::table('reports')
+                ->where('user_id','=',Auth::user()->id)
+                ->where('tbl','=','inline_algorithm_comments')
+                ->where('reported_id','=',$array->id)
+                ->where('reported_user_id','=',$array->user_id)
+                ->count();
             $name = DB::select('select * from users where id = ?', array($array->user_id));
             $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
             $comments[]=$singular;

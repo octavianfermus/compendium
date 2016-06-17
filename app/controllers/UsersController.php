@@ -44,6 +44,9 @@ class UsersController extends BaseController implements RemindableInterface {
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
             $singular["views"] = $array->views;
+            $singular["comments"] = DB::table('algorithm_discussion')
+                ->where('algorithm_id','=',$array->id)
+                ->count();
             $algorithms["data"][]=$singular;
         }
         return Response::json($algorithms);
@@ -473,11 +476,13 @@ class UsersController extends BaseController implements RemindableInterface {
                         $comment_id->id,
                         $time,
                         $time)
-                    );
-                    
+                    ); 
                 }
             }
-            $comments_unfiltered = DB::table('algorithm_discussion')->where('algorithm_id', '=', $algorithm_id)->get();
+            $comments_unfiltered = DB::table('algorithm_discussion')
+                ->where('algorithm_id', '=', $algorithm_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
             $comments = array();
             foreach ($comments_unfiltered as $array) {
                 $singular = array();
@@ -494,6 +499,12 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;
                 $singular["replies"] = array(); 
+                $singular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','algorithm_discussion')
+                    ->where('reported_id','=',$array->id)
+                    ->where('reported_user_id','=',$array->user_id)
+                    ->count();
                 $reply_comments_unfiltered = DB::table('algorithm_discussion_replies')
                     ->where('algorithm_id', '=', $algorithm_id)
                     ->where('comment_id', '=', $singular["id"])
@@ -509,6 +520,12 @@ class UsersController extends BaseController implements RemindableInterface {
                     } else {
                         $secondarySingular["canDelete"] = false;
                     }
+                    $singular["reported"] = DB::table('reports')
+                        ->where('user_id','=',Auth::user()->id)
+                        ->where('tbl','=','algorithm_discussion_replies')
+                        ->where('reported_id','=',$array->id)
+                        ->where('reported_user_id','=',$array->user_id)
+                        ->count();
                     $secondarySingular["created_at"] = $secondaryArray->created_at;
                     $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                     $secondarySingular["downvotes"] = $secondaryArray->downvotes;
@@ -562,7 +579,10 @@ class UsersController extends BaseController implements RemindableInterface {
                 );
             }
             
-            $comments_unfiltered = DB::table('profile_discussion')->where('profile_id', '=', $profile_id)->get();
+            $comments_unfiltered = DB::table('profile_discussion')
+                ->where('profile_id', '=', $profile_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
             $comments = array();
             foreach ($comments_unfiltered as $array) {
                 $singular = array();
@@ -575,6 +595,12 @@ class UsersController extends BaseController implements RemindableInterface {
                 } else {
                     $singular["canDelete"] = false;
                 }
+                $singular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','profile_discussion')
+                    ->where('reported_id','=',$array->id)
+                    ->where('reported_user_id','=',$array->user_id)
+                    ->count();
                 $singular["upvotes"] = $array->upvotes;
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;
@@ -594,6 +620,12 @@ class UsersController extends BaseController implements RemindableInterface {
                     } else {
                         $secondarySingular["canDelete"] = false;
                     }
+                    $secondarySingular["reported"] = DB::table('reports')
+                        ->where('user_id','=',Auth::user()->id)
+                        ->where('tbl','=','profile_discussion_replies')
+                        ->where('reported_id','=',$secondaryArray->id)
+                        ->where('reported_user_id','=',$secondaryArray->user_id)
+                        ->count();
                     $secondarySingular["created_at"] = $secondaryArray->created_at;
                     $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                     $secondarySingular["downvotes"] = $secondaryArray->downvotes;
@@ -665,7 +697,10 @@ class UsersController extends BaseController implements RemindableInterface {
                     
                 }
             }
-            $comments_unfiltered = DB::table('inline_algorithm_comments')->where('algorithm_id', '=', $algorithm_id)->get();
+            $comments_unfiltered = DB::table('inline_algorithm_comments')
+                ->where('algorithm_id', '=', $algorithm_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
             $comments = array();
             foreach ($comments_unfiltered as $array) {
                 $singular = array();
@@ -675,6 +710,12 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["text"] = $array->text;
                 $singular["deleted"] = $array->deleted;
                 $singular["upvotes"] = $array->upvotes;
+                $singular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','inline_algorithm_comments')
+                    ->where('reported_id','=',$array->id)
+                    ->where('reported_user_id','=',$array->user_id)
+                    ->count();
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;     
                 $name = DB::select('select * from users where id = ?', array($array->user_id));
@@ -1090,7 +1131,10 @@ class UsersController extends BaseController implements RemindableInterface {
                     
                 }
             }
-            $comments_unfiltered = DB::table('profile_discussion')->where('profile_id', '=', $profile_id)->get();
+            $comments_unfiltered = DB::table('profile_discussion')
+                ->where('profile_id', '=', $profile_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
             $comments = array();
             foreach ($comments_unfiltered as $array) {
                 $singular = array();
@@ -1103,6 +1147,12 @@ class UsersController extends BaseController implements RemindableInterface {
                 } else {
                     $singular["canDelete"] = false;
                 }
+                $aingular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','profile_discussion')
+                    ->where('reported_id','=',$array->id)
+                    ->where('reported_user_id','=',$array->user_id)
+                    ->count();
                 $singular["upvotes"] = $array->upvotes;
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;
@@ -1122,6 +1172,12 @@ class UsersController extends BaseController implements RemindableInterface {
                     } else {
                         $secondarySingular["canDelete"] = false;
                     }
+                    $secondarySingular["reported"] = DB::table('reports')
+                        ->where('user_id','=',Auth::user()->id)
+                        ->where('tbl','=','profile_discussion_replies')
+                        ->where('reported_id','=',$secondaryArray->id)
+                        ->where('reported_user_id','=',$secondaryArray->user_id)
+                        ->count();
                     $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                     $secondarySingular["downvotes"] = $secondaryArray->downvotes;
                     $secondarySingular["created_at"] = $secondaryArray->created_at;
@@ -1199,7 +1255,10 @@ class UsersController extends BaseController implements RemindableInterface {
                     
                 }
             }
-            $comments_unfiltered = DB::table('algorithm_discussion')->where('algorithm_id', '=', $algorithm_id)->get();
+            $comments_unfiltered = DB::table('algorithm_discussion')
+                ->where('algorithm_id', '=', $algorithm_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
             $comments = array();
             foreach ($comments_unfiltered as $array) {
                 $singular = array();
@@ -1215,6 +1274,12 @@ class UsersController extends BaseController implements RemindableInterface {
                 $singular["upvotes"] = $array->upvotes;
                 $singular["downvotes"] = $array->downvotes;
                 $singular["created_at"] = $array->created_at;
+                $singular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','algorithm_discussion')
+                    ->where('reported_id','=',$array->id)
+                    ->where('reported_user_id','=',$array->user_id)
+                    ->count();
                 $singular["replies"] = array(); 
                 $reply_comments_unfiltered = DB::table('algorithm_discussion_replies')
                     ->where('algorithm_id', '=', $algorithm_id)
@@ -1226,6 +1291,12 @@ class UsersController extends BaseController implements RemindableInterface {
                     $secondarySingular["user_id"] = $secondaryArray->user_id;
                     $secondarySingular["text"] = $secondaryArray->text;
                     $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    $secondarySingular["reported"] = DB::table('reports')
+                        ->where('user_id','=',Auth::user()->id)
+                        ->where('tbl','=','algorithm_discussion_replies')
+                        ->where('reported_id','=',$secondaryArray->id)
+                        ->where('reported_user_id','=',$secondaryArray->user_id)
+                        ->count();
                     if($secondarySingular["user_id"] == Auth::user()->id) {
                         $secondarySingular["canDelete"] = true;
                     } else {

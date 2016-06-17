@@ -48,7 +48,6 @@ $(document).ready(function () {
             var list = data,
                 toAppend = "";
             $.each(list, function (index, value) {
-                console.log(value);
                 toAppend += "<div class='postedRequest' listindex='" + index + "'>" +
                     "<h2>" +
                         value.name +
@@ -202,7 +201,6 @@ $(document).ready(function () {
                     user_description: $("#reportModal textarea").val()
                 };
         }
-        console.log(data);
         
         $.ajax({
             method: 'post',

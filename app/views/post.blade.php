@@ -3,12 +3,12 @@
     <div class="container application">
         <div class="row main">
             <div class="col-md-12">
-                <div class="boxWrapper">
+                <div class="boxWrapper heading">
                     <div class="statisticsBox">
                         <p class="upvote"><a href="javascript:void(0)"><span class="glyphicon glyphicon-arrow-up"></span></a> <span id="upvoteSpan"></span> upvotes</p>
                         <p class="downvote"><a href="javascript:void(0)"><span class="glyphicon glyphicon-arrow-down"></span></a> <span id="downvoteSpan"></span> downvotes </p>
                         <p class="views"><span class="glyphicon glyphicon-eye-open"></span> <span id="viewSpan"></span> views </p>
-                        <p class="report"><a href="javascript:void(0)" data-toggle="modal" data-target="#reportModal"><span class="glyphicon glyphicon-warning-sign"></span> Report</a></p>
+                        
                     </div>
                     <h1 id="algorithmName"></h1>
                     <p id="language"><span>Language: </span></p>
@@ -21,45 +21,45 @@
 
                 <div class="boxWrapper bg-color">
                     <div class="conversation">
-                        <div id="algorithmComments">
-
-                        </div>
-                        <div class="send-message">
+                        <div class="send-message" style="margin-bottom: 10px; margin-top: 0">
                             <div class="input-group">
                                 <textarea placeholder="Write your message here" aria-describedby="sendButton" class="form-control"></textarea>
                                 <span class="input-group-addon" id="sendButton"><button class="btn">Send</button></span>
                             </div>
+                        </div>
+                        <div id="algorithmComments">
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-     <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Report this page</h4>
-          </div>
-          <div class="modal-body">
-            <label>Describe your problem with this page</label>
-            <textarea class="form-control" placeholder="short description"></textarea>
-            <label>Why are you reporting this page?</label>
-            <select class="form-control">
-                <option>Wrong Section</option>
-                <option>Indecency</option>
-                <option>Copied content without source</option>
-                <option>Duplicate</option>
-                <option>Other</option>
-            </select>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary">Submit Request</button>
-          </div>
+     
+    <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Report</h4>
+                </div>
+            <div class="modal-body">
+                <label>Describe your problem. (optional)</label>
+                <textarea class="form-control" placeholder="short problem description.."></textarea>
+                <label>Why are you reporting this?</label>
+                <select class="form-control">
+                    <option>Indecent content</option>
+                    <option>Offensive content</option>
+                    <option>Irrelevant content</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitReport">Submit Report</button>
+            </div>
+            </div>
         </div>
-      </div>
     </div>
     <script src="{{ URL::to('scripts/ace/ace.js') }}"></script>
     <script src="{{ URL::to('scripts/ace/mode-ruby.js') }}"></script>

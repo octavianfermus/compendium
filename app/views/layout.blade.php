@@ -17,7 +17,6 @@
         <script src="{{ URL::to('scripts/bootstrap.min.js') }}"></script>
         <script src="{{ URL::to('scripts/globalSettings.js') }}"></script>
         <script src="{{ URL::to('scripts/select-dropdowns.js') }}"></script>
-        <script src="{{ URL::to('scripts/searchAlgorithms.js') }}"></script>
         <script src="{{ URL::to('scripts/jquery-ui.min.js') }}"></script>
         <script src="{{ URL::to('scripts/tag-it.min.js') }}"></script>
         @if(Auth::check())
