@@ -395,6 +395,12 @@ Route::post('profiledetails', function() {
         $returnData["userFound"]=TRUE;
         $returnData["userData"]["firstName"]=$found->first_name;
         $returnData["userData"]["lastName"]=$found->last_name;
+        $returnData["userData"]["reported"] = DB::table('reports')
+                ->where('user_id','=',Auth::user()->id)
+                ->where('tbl','=','users')
+                ->where('reported_id','=',$id)
+                ->where('reported_user_id','=',$id)
+                ->count();
         $returnData["userData"]["commendations"]["number"] = DB::table('user_commendations')
             ->where('user_id','=', $id)
             ->count();
@@ -431,7 +437,16 @@ Route::post('profiledetails', function() {
             $singular["template"] = $array->template;
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
+            $singular["reported"] = DB::table('reports')
+                ->where('user_id','=',Auth::user()->id)
+                ->where('tbl','=','algorithms')
+                ->where('reported_id','=',$array->id)
+                ->where('reported_user_id','=',$array->user_id)
+                ->count();
             $singular["views"] = $array->views;
+            $singular["comments"] = DB::table('algorithm_discussion')
+                ->where('algorithm_id','=',$array->id)
+                ->count();
             $algorithms[]=$singular;
         }
         $returnData["algorithms"]=$algorithms;
@@ -451,6 +466,12 @@ Route::post('profiledetails', function() {
             }
             $singular["upvotes"] = $array->upvotes;
             $singular["downvotes"] = $array->downvotes;
+            $singular["reported"] = DB::table('reports')
+                ->where('user_id','=',Auth::user()->id)
+                ->where('tbl','=','profile_discussion')
+                ->where('reported_id','=',$array->id)
+                ->where('reported_user_id','=',$array->user_id)
+                ->count();
             $singular["created_at"] = $array->created_at;
             $singular["replies"] = array(); 
             $reply_comments_unfiltered = DB::table('profile_discussion_replies')
@@ -471,6 +492,12 @@ Route::post('profiledetails', function() {
                 $secondarySingular["created_at"] = $secondaryArray->created_at;
                 $secondarySingular["upvotes"] = $secondaryArray->upvotes;
                 $secondarySingular["downvotes"] = $secondaryArray->downvotes;
+                $secondarySingular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','profile_discussion_replies')
+                    ->where('reported_id','=',$secondaryArray->id)
+                    ->where('reported_user_id','=',$secondaryArray->user_id)
+                    ->count();
                 $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
                 $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
                 $singular["replies"][] = $secondarySingular;

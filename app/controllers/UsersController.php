@@ -2254,7 +2254,9 @@ class UsersController extends BaseController implements RemindableInterface {
             $time = date('Y-m-d H:i:s');
             
             $count = DB::table('reports')
+                ->where('tbl','=',$tbl)
                 ->where('user_id','=',$user_id)
+                ->where('reported_user_id','=',$reported_user_id)
                 ->where('reported_id','=',$reported_id)
                 ->count();
             

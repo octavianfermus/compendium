@@ -13,6 +13,7 @@
             <th>Approval</th>
             <th>Views</th>
             <th>Comments</th>
+            <th>Report</th>
         </thead>
         <tbody></tbody>
     </table>
