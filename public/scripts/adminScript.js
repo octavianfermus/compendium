@@ -97,27 +97,73 @@ $(document).ready(function () {
         setAsAnsweredButton = function () {
             return '<button class="transparent setAsAnswered">Set as answered</button>';
         },
-        warnUsersButton = function () {
-            return '<button class="transparent warnReportedUser">Warn reported</button>' +
-                '<button class="transparent warnReporter">Warn reporter</button>' +
-                '<button class="transparent warnBoth">Warn both users</button>';
+        warnUsersButton = function (value) {
+            var toReturn = "";
+            if (value.reported_warned === 0) {
+                toReturn += '<button class="transparent warnReportedUser">Warn reported</button>';
+            }
+            if (value.reporter_warned === 0) {
+                toReturn += '<button class="transparent warnReporter">Warn reporter</button>';
+            }
+            if (value.reporter_warned === 0 && value.reported_warned === 0) {
+                toReturn += '<button class="transparent warnBoth">Warn both users</button>';
+            }
+            return toReturn;
         },
-        banUsersButton = function () {
-            return '<button class="transparent banReportedUser">Ban reported</button>' +
-                '<button class="transparent banReporter">Ban reporter</button>' +
-                '<button class="transparent banBoth">Ban both users</button>';
+        banUsersButton = function (value) {
+            var toReturn = "";
+            if (value.reported_type !== 0) {
+                toReturn += '<button class="transparent banReportedUser">Ban reported</button>';
+            }
+            if (value.reporter_type !== 0) {
+                toReturn += '<button class="transparent banReporter">Ban reporter</button>';
+            }
+            if (value.reporter_type !== 0 && value.reported_type !== 0) {
+                toReturn += '<button class="transparent banBoth">Ban both users</button>';
+            }
+            return toReturn;
         },
         deleteContentButton = function () {
             return '<button class="transparent deleteContent">Delete content</button>';
         },
         createUnansweredReportListButtons = function (value) {
-            return warnUsersButton() + banUsersButton() + deleteContentButton() + setAsAnsweredButton() + confirmCancelButtons();
+            return warnUsersButton(value) + banUsersButton(value) + deleteContentButton() + setAsAnsweredButton() + confirmCancelButtons();
         },
         createUnansweredReportListEvents = function () {
             $(".styled-list-member .cancelAction").click(function () {
                 $(".styled-list-member .transparent").removeClass("hidden");
                 $(".styled-list-member .transparent.cancelAction").addClass("hidden");
                 $(".styled-list-member .transparent.confirmAction").addClass("hidden");
+            });
+            $(".styled-list-member .banReportedUser").click(function () {
+                reportsActionTarget = $(this).closest(".styled-list-member").attr("listindex");
+                reportsActionName = "banReportedUser";
+                $(".styled-list-member .transparent").removeClass("hidden");
+                $(".styled-list-member .transparent.cancelAction").addClass("hidden");
+                $(".styled-list-member .transparent.confirmAction").addClass("hidden");
+                $(".styled-list-member[listindex='" + reportsActionTarget + "'] .transparent").addClass("hidden");
+                $(".styled-list-member[listindex='" + reportsActionTarget + "'] .transparent.cancelAction").removeClass("hidden");
+                $(".styled-list-member[listindex='" + reportsActionTarget + "'] .transparent.confirmAction").removeClass("hidden");
+            });
+            $(".styled-list-member .banReporter").click(function () {
+                reportsActionTarget = $(this).closest(".styled-list-member").attr("listindex");
+                reportsActionName = "banReporter";
+                $(".styled-list-member .transparent").removeClass("hidden");
+                $(".styled-list-member .transparent.cancelAction").addClass("hidden");
+                $(".styled-list-member .transparent.confirmAction").addClass("hidden");
+                $(".styled-list-member[listindex='" + reportsActionTarget + "'] .transparent").addClass("hidden");
+                $(".styled-list-member[listindex='" + reportsActionTarget + "'] .transparent.cancelAction").removeClass("hidden");
+                $(".styled-list-member[listindex='" + reportsActionTarget + "'] .transparent.confirmAction").removeClass("hidden");
+            });
+            $(".styled-list-member .banBoth").click(function () {
+                reportsActionTarget = $(this).closest(".styled-list-member").attr("listindex");
+                reportsActionName = "banBoth";
+                $(".styled-list-member .transparent").removeClass("hidden");
+                $(".styled-list-member .transparent.cancelAction").addClass("hidden");
+                $(".styled-list-member .transparent.confirmAction").addClass("hidden");
+                $(".styled-list-member[listindex='" + reportsActionTarget + "'] .transparent").addClass("hidden");
+                $(".styled-list-member[listindex='" + reportsActionTarget + "'] .transparent.cancelAction").removeClass("hidden");
+                $(".styled-list-member[listindex='" + reportsActionTarget + "'] .transparent.confirmAction").removeClass("hidden");
             });
             $(".styled-list-member .warnReportedUser").click(function () {
                 reportsActionTarget = $(this).closest(".styled-list-member").attr("listindex");
@@ -166,7 +212,7 @@ $(document).ready(function () {
                     $.ajax({
                         method: 'put',
                         url: root + '/users/banuser',
-                        data: {id: reports[reportsActionTarget].reported_user_id},
+                        data: {id: reports[reportsActionTarget].reported_id},
                         success: function (data) {
                             getAdminData();
                         }
@@ -186,7 +232,7 @@ $(document).ready(function () {
                     $.ajax({
                         method: 'put',
                         url: root + '/users/banuser',
-                        data: {id: reports[reportsActionTarget].reported_user_id},
+                        data: {id: reports[reportsActionTarget].reported_id},
                         success: function (data) {
                             $.ajax({
                                 method: 'put',
@@ -203,7 +249,7 @@ $(document).ready(function () {
                     $.ajax({
                         method: 'put',
                         url: root + '/users/warn',
-                        data: {id: reports[reportsActionTarget].id, warn_id: reports[reportsActionTarget].reported_user_id},
+                        data: {id: reports[reportsActionTarget].id, warn_id: reports[reportsActionTarget].reported_id},
                         success: function (data) {
                             getAdminData();
                         }
@@ -223,7 +269,7 @@ $(document).ready(function () {
                     $.ajax({
                         method: 'put',
                         url: root + '/users/warn',
-                        data: {id: reports[reportsActionTarget].id, warn_id: reports[reportsActionTarget].reported_user_id},
+                        data: {id: reports[reportsActionTarget].id, warn_id: reports[reportsActionTarget].reported_id},
                         success: function (data) {
                             $.ajax({
                                 method: 'put',
@@ -248,6 +294,30 @@ $(document).ready(function () {
                     break;
                 }
             });
+        },
+        otherInformation = function(value) {
+            var toReturn = "";
+            if(value.reported_type == 0 || value.reporter_type == 0 || value.reporter_warns > 0 || value.reported_warns > 0) {
+                toReturn += '<p><span>Other information</span><br>';
+                if(value.reported_type ==0) {
+                    toReturn+= value.reported_name + ' is currently banned.<br>';
+                } else {
+                    if(value.reported_warns) {
+                    toReturn+= value.reported_name + ' currently has ' + value.reported_warns + ' warnings.<br>';    
+                    }
+                }
+                if(value.reporter_type ==0) {
+                    toReturn+= value.reporter_name + ' is currently banned.<br>';
+                } else {
+                    if(value.reporter_warns) {
+                    toReturn+= value.reporter_name + ' currently has ' + value.reporter_warns + ' warnings.<br>';    
+                    }
+                }
+                toReturn+='</p>';
+                return toReturn;
+            } else {
+                return "";
+            }
         },
         showUnansweredReports = function () {
             var toAppend = '';
@@ -299,6 +369,7 @@ $(document).ready(function () {
                                 '<div style="border: 1px solid gray;padding: 0;margin: 0 0 0 15px;">' +
                                     reportDetail(value) +
                                 '</div>' +
+                                otherInformation(value) +
                                 '<div style="text-align: right; padding: 0;margin: 5px 0 0px 8px;">' +
                                     createUnansweredReportListButtons(value) +
                                 '</div>' +
@@ -456,6 +527,7 @@ $(document).ready(function () {
                         '<tr listindex="' + index + '">' +
                         '<td><strong><a href="'+root+'/profile/'+value.id+'">' + value.last_name + ' ' + value.first_name + '</a></strong></td>' +
                         '<td><em>' + convertUserType(value.user_type) + '</em></td>' +
+                        '<td>' + value.warnCount + ' warnings</td>' +
                         '<td>' +
                             (createUserListButtons(value)) +
                         '</td>' +

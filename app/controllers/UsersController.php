@@ -72,7 +72,13 @@ class UsersController extends BaseController implements RemindableInterface {
     }
     public function postSignin() {
         if (Auth::attempt(array('email'=>Input::get('email'), 'password'=>Input::get('password')))) {
-            return Redirect::to('/');
+            if(Auth::check() && Auth::user()->user_type == 0) {
+                Session::flush();
+                return Redirect::to('/')
+                    ->withErrors(["This account is currently banned."]);
+            } else {
+                return Redirect::to('/');
+            }
         } else {
             //Failure
             return Redirect::to('/')
@@ -2242,11 +2248,175 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'success', 'message'=>'Group created.', 'id'=>$returnId));
         }
     }
+    public function putWarn() {
+    //data: {id: reports[reportsActionTarget].id, warn_id: reports[reportsActionTarget].reported_id},
+        if(Auth::check() && Auth::user()->user_type >1) {
+            $id = Request::input('id');
+            $warn_id = Request::input('warn_id');
+            $count = DB::table('warnings')
+                ->where('user_id','=',$warn_id)
+                ->where('report_id','=',$id)
+                ->count();
+            if($count == 0) {
+                $time = date('Y-m-d H:i:s');
+                    DB::insert('insert into warnings (user_id, report_id, created_at, updated_at) values (?, ?, ?, ?)', array(
+                    $warn_id, 
+                    $id,
+                    $time,
+                    $time));
+                $fetchReport = DB::table('reports')
+                    ->where('id',$id)
+                    ->first();
+                switch($fetchReport->tbl) {
+                        case "algorithms":
+                            DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                                $warn_id, 
+                                Auth::user()->id,
+                                "/posts/".$fetchReport->reported_id,
+                                "Algorithm Warn!",
+                                "warned you.",
+                                "",
+                                FALSE,
+                                "",
+                                $time,
+                                $time)
+                            );
+                            break;
+                        case "requests":
+                            DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                                $warn_id, 
+                                Auth::user()->id,
+                                "/",
+                                "Algorithm Request Warn!",
+                                "warned you.",
+                                "",
+                                FALSE,
+                                "",
+                                $time,
+                                $time)
+                            );
+                            break;
+                        case "inline_algorithm_comments":
+                            $getCommentData = DB::table('inline_algorithm_comments')
+                                ->where('id','=',$fetchReport->reported_id)
+                                ->first();
+                            DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                                $warn_id, 
+                                Auth::user()->id,
+                                "/posts/".$getCommentData->algorithm_id,
+                                "Line Comment Warn!",
+                                "warned you.",
+                                "",
+                                FALSE,
+                                "",
+                                $time,
+                                $time)
+                            );
+                            break;
+                        case "algorithm_discussion":
+                            $getCommentData = DB::table('algorithm_discussion')
+                                ->where('id','=',$fetchReport->reported_id)
+                                ->first();
+                            DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                                $warn_id, 
+                                Auth::user()->id,
+                                "/posts/".$getCommentData->algorithm_id."#comment".$fetchReport->reported_id,
+                                "Algorithm Comment Warn!",
+                                "warned you.",
+                                "",
+                                FALSE,
+                                "",
+                                $time,
+                                $time)
+                            );
+                        case "algorithm_discussion_replies":
+                            $getCommentData = DB::table('algorithm_discussion_replies')
+                                ->where('id','=',$fetchReport->reported_id)
+                                ->first();
+                            DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                                $warn_id, 
+                                Auth::user()->id,
+                                "/posts/".$getCommentData->algorithm_id."#comment".$getCommentData->comment_id."_".$fetchReport->reported_id,
+                                "Algorithm Reply Warn!",
+                                "warned you.",
+                                "",
+                                FALSE,
+                                "",
+                                $time,
+                                $time)
+                            );
+                            break;
+                        case "profile_discussion":
+                            $getCommentData = DB::table('profile_discussion')
+                                ->where('id','=',$fetchReport->reported_id)
+                                ->first();
+                            DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                                $warn_id, 
+                                Auth::user()->id,
+                                "/profile/".$getCommentData->profile_id."#comment".$fetchReport->reported_id,
+                                "Profile Comment Warn!",
+                                "warned you.",
+                                "",
+                                FALSE,
+                                "",
+                                $time,
+                                $time)
+                            );
+                            
+                            break;
+                        case "users":
+                            DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                                $warn_id, 
+                                Auth::user()->id,
+                                "/profile/".$fetchReport->reported_id,
+                                "Profile Warn!",
+                                "warned you.",
+                                "",
+                                FALSE,
+                                "",
+                                $time,
+                                $time)
+                            );
+                            
+                        case "profile_discussion_replies":
+                            $getCommentData = DB::table('profile_discussion_replies')
+                                ->where('id','=',$fetchReport->reported_id)
+                                ->first();
+                            DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                                $warn_id, 
+                                Auth::user()->id,
+                                "/profile/".$getCommentData->profile_id."#comment".$getCommentData->comment_id."_".$fetchReport->reported_id,
+                                "Profile Reply Warn!",
+                                "warned you.",
+                                "",
+                                FALSE,
+                                "",
+                                $time,
+                                $time)
+                            );
+                            break;
+
+                    }
+                    
+                return Response::json(array("state"=>"success","message"=>"User was issued a warning."));
+            }
+            return Response::json(array("state"=>"failure","message"=>"This warning already exists."));
+        
+        }
+        return Response::json(array("state"=>"failure","message"=>"Insuficient priviledges."));
+    }
     public function getAdmindata() {
         if(Auth::check() && Auth::user()->user_type >1) {
             $returnData = array();
-            $returnData["userlist"] = DB::table('users')
+            $userlistUnfiltered = DB::table('users')
                 ->get();
+            foreach($userlistUnfiltered as $array) {
+                
+                $array->warnCount = DB::table('warnings')
+                    ->where('user_id','=',$array->id)
+                    ->count();
+                $returnData["userlist"][] = $array;
+            }
             $reportsUnfiltered = DB::table('reports')
                 ->get();
             $returnData["reports"] = array();
@@ -2260,11 +2430,28 @@ class UsersController extends BaseController implements RemindableInterface {
                     $reporter = DB::table('users')
                         ->where('id','=',$array->user_id)
                         ->first();
+                    $singular["reporter_type"]=$reporter->user_type;
+                    $singular["reporter_warns"]=DB::table('warnings')
+                        ->where('user_id','=',$array->user_id)
+                        ->count();
+                    $singular["reporter_warned"]=DB::table('warnings')
+                        ->where('user_id','=',$array->user_id)
+                        ->where('report_id','=',$array->id)
+                        ->count();
                     $singular["reporter_name"]=$reporter->last_name." ".$reporter->first_name;
                     $singular["reported_id"] = $array->reported_user_id;
+                    $singular["reported_warns"]=DB::table('warnings')
+                        ->where('user_id','=',$array->reported_user_id)
+                        ->count();
                     $reporter = DB::table('users')
                         ->where('id','=',$array->reported_user_id)
                         ->first();
+                    
+                    $singular["reported_warned"]=DB::table('warnings')
+                        ->where('user_id','=',$array->reported_user_id)
+                        ->where('report_id','=',$array->id)
+                        ->count();
+                    $singular["reported_type"]=$reporter->user_type;
                     $singular["reported_name"]=$reporter->last_name." ".$reporter->first_name;
                     $singular["reason"] = $array->user_reason;
                     $singular["description"] = $array->user_description;
