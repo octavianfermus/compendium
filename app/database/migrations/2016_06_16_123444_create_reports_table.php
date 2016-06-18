@@ -16,10 +16,8 @@ class CreateReportsTable extends Migration {
             $table->integer('reported_user_id');
             $table->boolean('answered');
             $table->integer('answered_by');
-            $table->integer('guilty_id');
             $table->string('user_reason');
             $table->string('user_description');
-            $table->string('admin_message');
             $table->string('action');
             $table->timestamps();
         });

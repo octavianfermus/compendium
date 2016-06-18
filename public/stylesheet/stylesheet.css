@@ -44,7 +44,7 @@
 .top-navbar.navbar-default .navbar-toggle:hover .icon-bar {
   background-color: #F1BB59;
 }
-.top-navbar .container {
+.top-navbar .container, .top-navbar .container-fluid {
   background: #F1BB59;
 }
 
@@ -127,12 +127,22 @@ button.transparent, a.transparent {
   cursor: pointer;
   line-height: 19px;
   margin-left: 7px;
+  margin-bottom: 5px;
   background: transparent;
   border: 1px solid #cecece;
   transition: all, 0.2s;
   outline: none;
 }
+button.transparent.noHover:hover, a.transparent.noHover:hover {
+  background: transparent;
+}
+button.transparent.checked.noHover:hover, a.transparent.checked.noHover:hover {
+  background: #cecece;
+}
 button.transparent:hover, a.transparent:hover {
+  background: #cecece;
+}
+button.transparent.checked, a.transparent.checked {
   background: #cecece;
 }
 
@@ -368,6 +378,16 @@ a:hover {
 
 ul.tagit {
   margin-bottom: 0;
+}
+
+.invisi-table {
+  border: none;
+}
+.invisi-table tr {
+  border: none;
+}
+.invisi-table td:not(:last-of-type) {
+  border-right: 1px solid gray;
 }
 
 .conversation .send-message {

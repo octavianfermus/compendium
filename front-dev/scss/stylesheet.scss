@@ -231,6 +231,15 @@ ul.tagit {
     margin-bottom: 0; 
 }
 
+.invisi-table {
+    border: none;
+    tr {
+        border: none;
+    }
+    td:not(:last-of-type) {
+        border-right: 1px solid gray;
+    }
+}
 .conversation {
     .send-message {
         margin-top: 10px;

@@ -15,11 +15,21 @@ button.transparent, a.transparent {
     cursor: pointer;
     line-height: 19px;
     margin-left: 7px;
+    margin-bottom: 5px;
     background: transparent;
     border: 1px solid #cecece;
     transition: all, $transition-speed;
     outline: none;
+    &.noHover:hover {
+        background: transparent;
+    }
+    &.checked.noHover:hover {
+        background: #cecece;
+    }
     &:hover {
+        background: #cecece;
+    }
+    &.checked {
         background: #cecece;
     }
 }

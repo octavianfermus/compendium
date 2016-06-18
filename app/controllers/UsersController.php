@@ -12,7 +12,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return View::make('landing');
     }
     public function getEditalgorithm($algorithmId) {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $found = DB::table('algorithms')
                 ->where('user_id', '=', Auth::user()->id)
                 ->where('id', '=', $algorithmId)
@@ -82,7 +82,7 @@ class UsersController extends BaseController implements RemindableInterface {
     }
     
     public function postChangeinformation() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $errors = array();
             $updates = array();
             $first_name = Input::get('first_name');
@@ -290,7 +290,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postSubmitrequest() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             
             $algorithm_name = Input::get('algorithm_name');
             $algorithm_description = Input::get('algorithm_description');
@@ -366,7 +366,7 @@ class UsersController extends BaseController implements RemindableInterface {
     }
     
     public function postVotealgorithm() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('id');
             $vote = Request::input('vote');
             $time = date('Y-m-d H:i:s');
@@ -425,7 +425,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote an algorithm.'));
     }
     public function postDiscussalgorithm() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('id');
             $comment = Request::input('comment');
             $time = date('Y-m-d H:i:s');
@@ -543,7 +543,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to comment.'));
     }
     public function postDiscussprofile() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $profile_id = Request::input('id');
             if($profile_id == "me") {
                 $profile_id = Auth::user()->id;
@@ -643,7 +643,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to comment.'));
     }
     public function postCommentline() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('id');
             $line = Request::input('line');
             $comment = Request::input('comment');
@@ -727,7 +727,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote an algorithm.'));
     }
     public function postVoteinlinecomment() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('algorithm_id');
             $comment_id = Request::input('comment_id');
             $vote = Request::input('vote');
@@ -794,7 +794,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
     }
     public function postVoteprofilecomment() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             
             $profile_id = Request::input('profile_id');
             if($profile_id == "me") {
@@ -865,7 +865,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
     }
     public function postVotecomment() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('algorithm_id');
             $comment_id = Request::input('comment_id');
             $vote = Request::input('vote');
@@ -932,7 +932,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
     }
     public function postVoteprofilereply() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $profile_id = Request::input('profile_id');
             if($profile_id == "me") {
                 $profile_id = Auth::user()->id;
@@ -1002,7 +1002,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
     }
     public function postVotereply() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('algorithm_id');
             $comment_id = Request::input('comment_id');
             $vote = Request::input('vote');
@@ -1069,7 +1069,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
     }
     public function postRespondtoprofilecomment() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             
             $profile_id = Request::input('id');
             if($profile_id == "me") {
@@ -1195,7 +1195,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to able to respond to a comment.'));
     }
     public function postRespondtocomment() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('id');
             $comment = Request::input('comment');
             $comment_id = Request::input('commentid');
@@ -1340,7 +1340,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('data'=>$found));
     }
     public function getViewrequests() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $unparsedData = DB::select('select * from algorithm_requests');
             $requests = array();
             $requests["data"]=array();
@@ -1369,7 +1369,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function getUserdata() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $returnData = DB::table('users')
                 ->where('id','=',Auth::user()->id)
                 ->select('id','first_name','last_name','user_type')
@@ -1380,7 +1380,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function getNotifications() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $notifications_unfiltered = DB::table('notifications')
                 ->where('user_id', '=', Auth::user()->id)
                 ->orderBy('id', 'desc')
@@ -1422,7 +1422,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function getGroupcrumb() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $returnData = array();
             $memberGroups = DB::table('groups')
                 ->join('group_members', function($join)
@@ -1444,7 +1444,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function putSeeallnotifications() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $time = date('Y-m-d H:i:s');
             DB::update('update notifications set seen = 1, updated_at = ? where user_id = ?', array(
                 $time, 
@@ -1453,7 +1453,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function putChecknotification() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');
             $time = date('Y-m-d H:i:s');
             DB::update('update notifications set checked_out = 1, seen = 1, updated_at = ? where id = ? and user_id = ?', array(
@@ -1465,14 +1465,14 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function deleteDeletenotification() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');
             DB::delete('delete from notifications where id = ? and user_id = ?', array($id, Auth::user()->id));
             return Response::json(array('state'=>'success', 'deleted'=>$id));
         }
     }
     public function postDeleteprofilecomment() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');
             $time = date('Y-m-d H:i:s');
             DB::update('update profile_discussion set deleted = 1, updated_at = ? where id = ?', array(
@@ -1483,7 +1483,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postDeleteprofilereply() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');
             $time = date('Y-m-d H:i:s');
             DB::update('update profile_discussion_replies set deleted = 1, updated_at = ? where id = ?', array(
@@ -1494,7 +1494,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postDeletecomment() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');
             $time = date('Y-m-d H:i:s');
             DB::update('update algorithm_discussion set deleted = 1, updated_at = ? where id = ?', array(
@@ -1505,7 +1505,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postDeletereply() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');
             $time = date('Y-m-d H:i:s');
             DB::update('update algorithm_discussion_replies set deleted = 1, updated_at = ? where id = ?', array(
@@ -1516,7 +1516,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postDeletelinecomment() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');
             $time = date('Y-m-d H:i:s');
             return Response::json(array('state'=>'success', 'deleted'=>$id));
@@ -1529,7 +1529,7 @@ class UsersController extends BaseController implements RemindableInterface {
     }
     public function putCommend() {
         $id = Input::get('id');
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $time = date('Y-m-d H:i:s');
             $commended = DB::table('user_commendations')
                 ->where('user_id','=', $id)
@@ -1552,7 +1552,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function getMessagehistory() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Request::input('id');
             $found = DB::table('users')
                 ->where('id','=',$id);
@@ -1650,7 +1650,7 @@ class UsersController extends BaseController implements RemindableInterface {
     }
     public function postKickfromgroup() {
         //{id:groupID, userid: userid},
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $groupId = Request::input('id');
             $userId = Request::input('userid');
             $time = date('Y-m-d H:i:s');
@@ -1686,7 +1686,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postAcceptgrouprequest() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $groupId = Request::input('id');
             $userId = Request::input('userid');
             $time = date('Y-m-d H:i:s');
@@ -1721,7 +1721,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to accept join requests.'));
     }
     public function postConvertgroupprivate() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $groupId = Request::input('id');
             $time = date('Y-m-d H:i:s');
             $count = DB::table('groups')
@@ -1739,7 +1739,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in convert.'));
     }
     public function postConvertgrouppublic() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $groupId = Request::input('id');
             $time = date('Y-m-d H:i:s');
             $count = DB::table('groups')
@@ -1782,7 +1782,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in convert.'));
     }
     public function postPromotetoleader() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $groupId = Request::input('id');
             $userId = Request::input('userid');
             $time = date('Y-m-d H:i:s');
@@ -1819,7 +1819,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to accept join requests.'));
     }
     public function postDenygrouprequest() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $groupId = Request::input('id');
             $userId = Request::input('userid');
             $time = date('Y-m-d H:i:s');
@@ -1854,7 +1854,7 @@ class UsersController extends BaseController implements RemindableInterface {
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to accept join requests.'));
     }
     public function getGroupinitialdata() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Request::input('id');
             $found = DB::table('group_members')
                 ->where('group_id','=',$id)
@@ -2003,7 +2003,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postMessagegroup() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Request::input('id');
             $comment = Request::input('comment');
             $time = date('Y-m-d H:i:s');
@@ -2034,7 +2034,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postMessageuser() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             
             $id = Request::input('id');
             $comment = Request::input('comment');
@@ -2057,7 +2057,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postSearchgroup() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $value = Request::input('search');
             if(strlen($value)>0) {
                 $unparsedReturnData = DB::table('groups')
@@ -2095,7 +2095,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postLeavegroup() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Request::input('id');
             $time = date('Y-m-d H:i:s');
             DB::delete('delete from group_members where group_id = ? and member_id = ?', array($id, Auth::user()->id));
@@ -2130,7 +2130,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function getGetmygroups() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $unparsed_groups = DB::table('groups')
                 ->join('group_members', function($join)
                 {
@@ -2167,14 +2167,14 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postCancelrequest() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Request::input('id');
             DB::delete('delete from group_members where group_id = ? and member_id = ?', array($id, Auth::user()->id));
             return Response::json(array('state' => 'success', 'message'=>'canceled request'));
         }
     }
     public function postJoingroup() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Request::input('id');
             $time = date('Y-m-d H:i:s');
             $getType = DB::table('groups')
@@ -2209,7 +2209,7 @@ class UsersController extends BaseController implements RemindableInterface {
         }
     }
     public function postCreategroup() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             $name = Request::input('name');
             $description = Request::input('description');
             $type = Request::input('type');
@@ -2242,8 +2242,240 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'success', 'message'=>'Group created.', 'id'=>$returnId));
         }
     }
+    public function getAdmindata() {
+        if(Auth::check() && Auth::user()->user_type >1) {
+            $returnData = array();
+            $returnData["userlist"] = DB::table('users')
+                ->get();
+            $reportsUnfiltered = DB::table('reports')
+                ->get();
+            $returnData["reports"] = array();
+            foreach($reportsUnfiltered as $array) {
+                if($array->answered == 0) {
+                    $singular = array();
+                    $singular["id"] = $array->id;
+                    $singular["created_at"] = $array->created_at;
+                    $singular["answered"] = $array->answered;
+                    $singular["reporter_id"] = $array->user_id;
+                    $reporter = DB::table('users')
+                        ->where('id','=',$array->user_id)
+                        ->first();
+                    $singular["reporter_name"]=$reporter->last_name." ".$reporter->first_name;
+                    $singular["reported_id"] = $array->reported_user_id;
+                    $reporter = DB::table('users')
+                        ->where('id','=',$array->reported_user_id)
+                        ->first();
+                    $singular["reported_name"]=$reporter->last_name." ".$reporter->first_name;
+                    $singular["reason"] = $array->user_reason;
+                    $singular["description"] = $array->user_description;
+                    switch($array->tbl) {
+                        case "algorithms":
+                            $singular["reportedType"] = "Algorithm";
+                            $singular["linkTo"] = "/posts/".$array->reported_id;
+                            $singular["linkName"] = DB::table('algorithms')
+                                ->where('id','=',$array->reported_id)
+                                ->first()
+                                ->name;
+                            break;
+                        case "requests":
+                            $singular["reportedType"] = "Request";
+                            $fetchData = DB::table('algorithm_requests')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["requestName"] = $fetchData->name;
+                            $singular["requestLanguage"] = $fetchData->language;
+                            $singular["requestDescription"] = $fetchData->description;
+                            break;
+                        case "inline_algorithm_comments":
+                            $singular["reportedType"] = "Line Comment";
+                            $fetchData = DB::table('inline_algorithm_comments')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/posts/".$fetchData->algorithm_id;
+                            $singular["linkName"] = DB::table('algorithms')
+                                ->where("id","=",$fetchData->algorithm_id)
+                                ->first()
+                                ->name;
+                            $singular["line"] = $fetchData->line;
+                            $singular["text"] = $fetchData->text;
+                            break;
+                        case "algorithm_discussion":
+                            $singular["reportedType"] = "Algorithm Comment";
+                            $fetchData = DB::table('algorithm_discussion')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/posts/".$fetchData->algorithm_id."#comment".$fetchData->id;
+                            $singular["linkName"] = DB::table('algorithms')
+                                ->where("id","=",$fetchData->algorithm_id)
+                                ->first()
+                                ->name;
+                            $singular["text"] = $fetchData->text;
+                            break;
+                        case "algorithm_discussion_replies":
+                            $singular["reportedType"] = "Algorithm Reply";
+                            $fetchData = DB::table('algorithm_discussion_replies')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/posts/".$fetchData->algorithm_id."#comment".$fetchData->comment_id."_".$fetchData->id;
+                            $singular["linkName"] = DB::table('algorithms')
+                                ->where("id","=",$fetchData->algorithm_id)
+                                ->first()
+                                ->name;
+                            $singular["text"] = $fetchData->text;
+                            break;
+                        case "profile_discussion":
+                            $singular["reportedType"] = "Profile Comment";
+                            $fetchData = DB::table('profile_discussion')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/profile/".$fetchData->profile_id."#comment".$fetchData->id;
+                            $singular["linkName"] = $singular["reported_name"];
+                            $singular["text"] = $fetchData->text;
+                            break;
+                        case "users":
+                            $singular["reportedType"] = "Profile";
+                            $singular["linkTo"] = "/profile/".$singular["reported_id"];
+                            $singular["linkName"] = $singular["reported_name"];
+                            break;
+                        case "profile_discussion_replies":
+                            $singular["reportedType"] = "Profile Reply";
+                            $fetchData = DB::table('profile_discussion_replies')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/profile/".$fetchData->profile_id."#comment".$fetchData->comment_id."_".$fetchData->id;
+                            $singular["linkName"] = $singular["reported_name"];
+                            $singular["text"] = $fetchData->text;
+                            break;
+
+                    }
+                    $returnData["reports"][] = $singular;
+                }
+            }
+            return Response::json(array("state"=>"success", "message"=>"Data successfully loaded", "data"=> $returnData));
+        }
+        return Response::json(array("state"=>"failure","message"=>"Insuficient priviledges."));
+    }
+    public function putSetasanswered() {
+        if(Auth::check() && Auth::user()->user_type >1) {
+            $id = Request::input('id');
+            $time = date('Y-m-d H:i:s');
+            DB::update('update reports set answered = 1, updated_at = ?, answered_by = ? where id = ?', array(
+                $time, 
+                Auth::user()->id,
+                $id 
+            ));
+            return Response::json(array("state"=>"success", "message"=>"Report set as answered."));
+        }
+        return Response::json(array("state"=>"failure","message"=>"Insuficient priviledges."));
+    }
+    public function putUnbanuser() {
+        if(Auth::check() && Auth::user()->user_type >1) {
+            $id = Request::input('id');
+            $time = date('Y-m-d H:i:s');
+            DB::update('update users set user_type = 1, updated_at = ? where id = ?', array(
+                $time, 
+                $id 
+            ));
+            DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                $id, 
+                Auth::user()->id,
+                '/',
+                "Unbanned!",
+                "unbanned you.",
+                "",
+                FALSE,
+                "",
+                $time,
+                $time)
+            );
+
+            return Response::json(array("state"=>"success", "message"=>"User successfully unbanned."));
+        }
+        return Response::json(array("state"=>"failure","message"=>"Insuficient priviledges."));
+    }
+    public function putPromoteuser() {
+        if(Auth::check() && Auth::user()->user_type > 1) {
+            $id = Request::input('id');
+            $userType = DB::table('users')
+                ->where('id','=',$id)
+                ->select('user_type')
+                ->first();
+            $time = date('Y-m-d H:i:s');
+            if($userType->user_type == 1) {
+                DB::update('update users set user_type = 2, updated_at = ? where id = ?', array(
+                    $time, 
+                    $id 
+                ));
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $id,
+                    Auth::user()->id,
+                    '/users/admin/',
+                    "Moderator promotion!",
+                    "promoted you to moderator status.",
+                    "",
+                    FALSE,
+                    "",
+                    $time,
+                    $time)
+                );
+                return Response::json(array("state"=>"success", "message"=>"User successfully promoted to moderator status."));
+            }
+            return Response::json(array("state"=>"failure", "message"=>"Insuficient priviledges."));
+        }
+        return Response::json(array("state"=>"failure","message"=>"Insuficient priviledges."));
+    }
+    public function putDemoteuser() {
+        if(Auth::check() && Auth::user()->user_type === 3) {
+            $id = Request::input('id');
+            $userType = DB::table('users')
+                ->where('id','=',$id)
+                ->select('user_type')
+                ->first();
+            $time = date('Y-m-d H:i:s');
+            if($userType->user_type == 2) {
+                DB::update('update users set user_type = 1, updated_at = ? where id = ?', array(
+                    $time, 
+                    $id 
+                ));
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $id,
+                    Auth::user()->id,
+                    '/',
+                    "Demotion!",
+                    "demoted you to normal user status.",
+                    "",
+                    FALSE,
+                    "",
+                    $time,
+                    $time)
+                );
+                return Response::json(array("state"=>"success", "message"=>"User successfully promoted to moderator status."));
+            }
+            return Response::json(array("state"=>"failure", "message"=>"Insuficient priviledges."));
+        }
+        return Response::json(array("state"=>"failure","message"=>"Insuficient priviledges."));
+    }
+    public function putBanuser() {
+        if(Auth::check() && Auth::user()->user_type >1) {
+            $id = Request::input('id');
+            $userType = DB::table('users')
+                ->where('id','=',$id)
+                ->select('user_type')
+                ->first();
+            $time = date('Y-m-d H:i:s');
+            if($userType->user_type < Auth::user()->user_type) {
+                DB::update('update users set user_type = 0, updated_at = ? where id = ?', array(
+                    $time, 
+                    $id 
+                ));
+                return Response::json(array("state"=>"success", "message"=>"User successfully banned."));
+            }
+            return Response::json(array("state"=>"failure", "message"=>"Insuficient priviledges."));
+        }
+        return Response::json(array("state"=>"failure","message"=>"Insuficient priviledges."));
+    }
     public function postReport() {
-        if(Auth::check()) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
             
             $user_id = Request::input('user_id');
             $reported_id = Request::input('reported_id');

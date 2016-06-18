@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
     var conversationID = window.location.href.split("#")[0].split("/")[window.location.href.split("/").length-1],
         root = "http://localhost:8080",
         messageHistory = undefined,
