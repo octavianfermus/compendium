@@ -68,6 +68,16 @@
                 </div><!-- /.navbar-collapse -->
             </div><!-- /.container-fluid -->
         </nav>
+        <noscript>
+            <style type="text/css">
+                .application {display:none;}
+            </style>
+            <div class="noscriptmsg" style="background: white; text-align: center; padding: 20px; font-size: 20px; font-weight: 700; color: red">
+                <div class="boxWrapper">
+                    <p>You don't have Javascript enabled. Enable it to be able to browse this site.<br> We are sorry for the inconvenience.</p>
+                </div>
+            </div>
+        </noscript>
         @yield('content')
         <div class="container footer-side">
             <div class="row">
