@@ -14,12 +14,114 @@ $(document).ready(function () {
         yourVote,
         reportType,
         comments,
+        content,
         lineComments,
         currentLineSubmitter,
+        currentTabIndex,
         initiated = 0,
         lastReportIndex,
         lastReportSecIndex,
         creatorId,
+        x = null,
+        y = null,
+        decorator,
+        editor,
+        createEditor = function() {
+            $('#postedAlgorithmArea').ace({
+                theme: 'monokai',
+                height: 400
+            });
+
+
+            decorator = $('#postedAlgorithmArea').data('ace');
+            editor = decorator.editor.ace;
+
+            editor.setReadOnly(true);
+            editor.setValue(content);
+            
+            setTimeout(function() {
+                $.each($(".ace_gutter-cell"), function (index, value) {
+                    $(value).attr("tabindex", index);
+                });
+                $.each(lineComments, function (index, value) {
+                    if (value !== undefined) {
+                        $(".ace_gutter-cell[tabindex='" + index + "']").html("<span class='commentSection' style='position: absolute; left: 5px'>" + value.length + " comments </span>" + (index + 1));
+                    }
+                });
+                $(".ace_gutter-cell").unbind().click(function () {
+                    currentLineSubmitter = $(this).attr("tabindex");
+                    gutterCellFunction();
+                });
+            }, 750);
+        },
+        recreate = function() {
+            $.each($(".ace_gutter-cell"), function (index, value) {
+                $(value).attr("tabindex", index);
+            });
+            $.each(lineComments, function (index, value) {
+                if (value !== undefined) {
+                    $(".ace_gutter-cell[tabindex='" + index + "']").html("<span class='commentSection' style='position: absolute; left: 5px'>" + value.length + " comments </span>" + (index + 1));
+                }
+            });
+            
+            $(".ace_gutter-cell").unbind().click(function () {
+                currentLineSubmitter = $(this).attr("tabindex");
+                gutterCellFunction();
+            });
+        },
+        gutterCellFunction = function() {
+            $(".lineComments").remove();
+            $("body").append('<div class="lineComments"></div>');
+            $(".lineComments").css({
+                position: 'absolute',
+                top: getMouseY() + 10,
+                left: getMouseX() + 10,
+                width: "40%",
+                "max-height": "70%",
+                'z-index': 1000,
+                border: '1px solid #ccc',
+                background: 'white',
+                padding: '0 10px',
+                'overflow-y': 'scroll',
+                'resize': 'both'
+            });
+            $(".lineComments").append('<div class="boxWrapper"><label>Your Message</label><textarea class="form-control"></textarea><div class="text-right"><button class="btn" id="commentCloser" style="margin-top: 10px; margin-right: 3px">Close</button><button class="btn" id="submitInline" style="margin-top: 10px">Submit</button></div></div>');
+            $(".lineComments").append('<div class="conversation"></div>');
+            populateInlineUI();
+            $(".lineComments").draggable();
+            $("#submitInline").click(function () {
+                var comment = $(".lineComments textarea").val().trim();
+                if (comment.length > 0) {
+                    $(".lineComments textarea").val("");
+                    $.ajax({
+                        method: 'post',
+                        url: "../users/commentline",
+                        dataType: "json",
+                        data: {id: postId, line: currentLineSubmitter, comment: comment},
+                        success: function (data) {
+                            parseLineComments(data);
+                            populateInlineUI();
+                        },
+                        fail: function (data) {
+
+                        }
+                    });
+                }
+            });
+            $("#commentCloser").click(function () {
+                $(".lineComments").remove();
+            });
+        },
+        onMouseUpdate = function (e) {
+            x = e.pageX;
+            y = e.pageY;
+        },
+        getMouseX = function () {
+            return x;
+        },
+        getMouseY = function () {
+            return y;
+        },
         voteLineCommentAjax = function (vote, comment_id, algorithm_id, tabindex) {
             $.ajax({
                 method: 'post',
@@ -58,11 +160,14 @@ $(document).ready(function () {
                 $(".lineComments .conversation").append("<p>No other comments on this line yet..</p>");
             } else {
                 $.each(lineComments[currentLineSubmitter], function (index, value) {
-                    value.text = value.text.split("\n");
-                    $.each(value.text,function(index,singular) {
-                        value.text[index] = globalSettings.htmlEncode(singular);
-                    });
-                    value.text = value.text.join("<br>");
+                    if(!value.done) {
+                        value.done = true;
+                        value.text = value.text.split("\n");
+                        $.each(value.text,function(index,singular) {
+                            value.text[index] = globalSettings.htmlEncode(singular);
+                        });
+                        value.text = value.text.join("<br>");
+                    }
                     $(".lineComments .conversation").append('<div class="reply" tabindex="' + index + '" parent="parent">' +
                         '<p><span class="person"><a href="../profile/' + value.user_id + '">' + value.name + '</a></span> <span class="created"> on ' + value.created_at + '</span></p>' +
                         '<p>' + (parseInt(value.deleted, 10) === 1 ? '<em>This comment was deleted.</em>' : value.text) + '</p>' +
@@ -82,7 +187,6 @@ $(document).ready(function () {
                         dataType: "json",
                         data: {id: lineComments[currentLineSubmitter][tabindex].id},
                         success: function (data) {
-                            console.log(lineComments[currentLineSubmitter][tabindex].id, data);
                             lineComments[currentLineSubmitter][tabindex].deleted = 1;
                             populateInlineUI();
                         },
@@ -106,11 +210,6 @@ $(document).ready(function () {
             $.each(data, function (index, value) {
                 lineComments[value.line] = lineComments[value.line] || [];
                 lineComments[value.line].push(value);
-            });
-            $.each(lineComments, function (index, value) {
-                if (value !== undefined) {
-                    $(".ace_gutter-cell[tabindex='" + index + "']").html("<span class='commentSection' style='position: absolute; left: 5px'>" + value.length + " comments </span>" + (index + 1));
-                }
             });
         },
         voteReplyAjax = function (vote, comment_id, algorithm_id, tabindex, sectabindex) {
@@ -267,11 +366,9 @@ $(document).ready(function () {
                 dataType: "json",
                 data: {id: postId},
                 success: function (data) {
-                    console.log(data);
                     comments = data.comments;
-                    setTimeout(function () {
-                        parseLineComments(data.inline_comments);
-                    }, 2000);
+                    content = data.content;
+                    parseLineComments(data.inline_comments);
                     populateComments();
                     $(".commend-star #commendationNumber").html(data.commendations.number);
                     if (data.commendations.commendedByYou === true) {
@@ -299,12 +396,12 @@ $(document).ready(function () {
                         }
                     });
                     creatorId = data.user_id;
-                    $("#creatorUsername").html(data.username);
+                    $("#creatorUsername").html(globalSettings.htmlEncode(data.username));
                     $("#creatorUsername").attr("href", "../profile/" + data.user_id);
                     $("#upvoteSpan").html(data.upvotes);
                     $("#downvoteSpan").html(data.downvotes);
                     $("#viewSpan").html(data.views);
-                    $("#algorithmName").html(data.name);
+                    $("#algorithmName").html(globalSettings.htmlEncode(data.name));
                     if (creatorId !== globalSettings.getUserData().id) {
                         if (data.reported === 0) {
                             $(".boxWrapper.heading").append('<p class="report text-right"><button class="transparent reportAlgorithm">Report this algorithm</button></p>');
@@ -323,93 +420,12 @@ $(document).ready(function () {
                     } else {
                         $("#originalLink").attr("href", data.original_link);
                     }
-                    $("#algorithmDescription").append(data.description);
-                    $("#language").append(data.language);
+                    $("#algorithmDescription").append(globalSettings.htmlEncode(data.description));
+                    $("#language").append(globalSettings.htmlEncode(data.language));
                     if (parseInt(data.request_id, 10) !== 0) {
                         $("#thisRequest").removeClass("hidden");
                     }
-                    $('#postedAlgorithmArea').ace({
-                        theme: 'monokai',
-                        height: 400
-                    });
-
-                    var x = null,
-                        y = null,
-                        decorator,
-                        editor;
-
-                    function onMouseUpdate(e) {
-                        x = e.pageX;
-                        y = e.pageY;
-                    }
-
-                    document.addEventListener('mousemove', onMouseUpdate, false);
-                    document.addEventListener('mouseenter', onMouseUpdate, false);
-
-                    
-                    function getMouseX() {
-                        return x;
-                    }
-
-                    function getMouseY() {
-                        return y;
-                    }
-
-                    decorator = $('#postedAlgorithmArea').data('ace');
-                    editor = decorator.editor.ace;
-
-                    editor.setReadOnly(true);
-                    editor.setValue(data.content);
-                    setTimeout(function () {
-                        $.each($(".ace_gutter-cell"), function (index, value) {
-                            $(value).attr("tabindex", index);
-                        });
-                        $(".ace_gutter-cell").click(function () {
-                            currentLineSubmitter = $(this).attr("tabindex");
-                            $(".lineComments").remove();
-                            $("body").append('<div class="lineComments"></div>');
-                            $(".lineComments").css({
-                                position: 'absolute',
-                                top: getMouseY() + 10,
-                                left: getMouseX() + 10,
-                                width: "40%",
-                                "max-height": "70%",
-                                'z-index': 1000,
-                                border: '1px solid #ccc',
-                                background: 'white',
-                                padding: '0 10px',
-                                'overflow-y': 'scroll',
-                                'resize': 'both'
-                            });
-                            $(".lineComments").append('<div class="boxWrapper"><label>Your Message</label><textarea class="form-control"></textarea><div class="text-right"><button class="btn" id="commentCloser" style="margin-top: 10px; margin-right: 3px">Close</button><button class="btn" id="submitInline" style="margin-top: 10px">Submit</button></div></div>');
-                            $(".lineComments").append('<div class="conversation"></div>');
-                            populateInlineUI();
-                            $(".lineComments").draggable();
-                            $("#submitInline").click(function () {
-                                var comment = $(".lineComments textarea").val().trim();
-                                if (comment.length > 0) {
-                                    $(".lineComments textarea").val("");
-                                    $.ajax({
-                                        method: 'post',
-                                        url: "../users/commentline",
-                                        dataType: "json",
-                                        data: {id: postId, line: currentLineSubmitter, comment: comment},
-                                        success: function (data) {
-                                            parseLineComments(data);
-                                            populateInlineUI();
-                                        },
-                                        fail: function (data) {
-
-                                        }
-                                    });
-                                }
-                            });
-                            $("#commentCloser").click(function () {
-                                $(".lineComments").remove();
-                            });
-                        });
-
-                    }, 1000);
+                    createEditor();
                 },
                 error: function (data) {
                     console.log(window.location.href.split("/")[window.location.href.split("/").length - 1]);
@@ -431,6 +447,18 @@ $(document).ready(function () {
                 }
             });
         };
+    document.addEventListener('mousemove', onMouseUpdate, false);
+    document.addEventListener('mouseenter', onMouseUpdate, false);
+    $(window).resize( function() {
+        var newWidth = $(".col-md-12").width();
+        $(".ace_editor").width(newWidth);
+        setTimeout(function() {
+            recreate();
+        }, 0);
+    });
+    $(window).on('scroll', function() {
+        recreate();
+    });
     getPostData();
     $(".upvote a").click(function () {
         voteAlgorithmAjax(1);
@@ -502,9 +530,6 @@ $(document).ready(function () {
             };
         }
         
-        console.log(lastReportIndex);
-        console.log(data);
-        
         $.ajax({
             method: 'post',
             url: globalSettings.getRoot() + "/users/report",
@@ -532,4 +557,5 @@ $(document).ready(function () {
             }
         });
     });
+    
 });
