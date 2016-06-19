@@ -7,6 +7,7 @@ $(document).ready(function () {
     'use strict';
     var userlist,
         reports,
+        answered,
         actionTarget,
         actionName,
         reportsActionTarget,
@@ -24,16 +25,6 @@ $(document).ready(function () {
             case 3:
                 return "<span>Administrator</span>";
             }
-        },
-        showAnsweredReports = function () {
-            var toAppend = '<table class="invisi-table">';
-            $.each(reports, function (index, value) {
-                if (value.answered === 1) {
-                    console.log(value);
-                }
-            });
-            toAppend += '</table>';
-            //$(".tab-pane#user-list .content").html(toAppend);
         },
         reportDetail = function (value) {
             switch (value.reportedType) {
@@ -123,11 +114,8 @@ $(document).ready(function () {
             }
             return toReturn;
         },
-        deleteContentButton = function () {
-            return '<button class="transparent deleteContent">Delete content</button>';
-        },
         createUnansweredReportListButtons = function (value) {
-            return warnUsersButton(value) + banUsersButton(value) + deleteContentButton() + setAsAnsweredButton() + confirmCancelButtons();
+            return warnUsersButton(value) + banUsersButton(value) + setAsAnsweredButton() + confirmCancelButtons();
         },
         createUnansweredReportListEvents = function () {
             $(".styled-list-member .cancelAction").click(function () {
@@ -297,27 +285,91 @@ $(document).ready(function () {
         },
         otherInformation = function(value) {
             var toReturn = "";
-            if(value.reported_type == 0 || value.reporter_type == 0 || value.reporter_warns > 0 || value.reported_warns > 0) {
+            if(value.reported_type == 0 || value.reporter_type == 0 || value.reporter_warns > 0 || value.reported_warns > 0 || value.reporter_warned > 0 || value.reported_warned > 0) {
                 toReturn += '<p><span>Other information</span><br>';
                 if(value.reported_type ==0) {
                     toReturn+= value.reported_name + ' is currently banned.<br>';
                 } else {
                     if(value.reported_warns) {
-                    toReturn+= value.reported_name + ' currently has ' + value.reported_warns + ' warnings.<br>';    
+                        toReturn+= value.reported_name + ' currently has ' + value.reported_warns + ' warnings.<br>';
+                        if(value.reported_warned) {
+                            toReturn+= value.reported_name + ' got warned.<br>';
+                        }
                     }
                 }
                 if(value.reporter_type ==0) {
                     toReturn+= value.reporter_name + ' is currently banned.<br>';
                 } else {
                     if(value.reporter_warns) {
-                    toReturn+= value.reporter_name + ' currently has ' + value.reporter_warns + ' warnings.<br>';    
+                        toReturn+= value.reporter_name + ' currently has ' + value.reporter_warns + ' warnings.<br>';    
                     }
+                    if(value.reporter_warned) {
+                            toReturn+= value.reporter_name + ' got warned.<br>';
+                        }
                 }
                 toReturn+='</p>';
                 return toReturn;
             } else {
                 return "";
             }
+        },
+        showAnsweredReports = function () {
+            var toAppend = '';
+            $.each(answered, function (index, value) {
+                if (value.answered === 1) {
+                    var appendChecker = true;
+                    if (!$("#answered-reports [button-filter='Algorithm']").hasClass("checked") && value.reportedType === "Algorithm") {
+                        appendChecker = false;
+                    }
+                    if (!$("#answered-reports [button-filter='Line Comment']").hasClass("checked") && value.reportedType === "Line Comment") {
+                        appendChecker = false;
+                    }
+                    if (!$("#answered-reports [button-filter='Request']").hasClass("checked") && value.reportedType === "Request") {
+                        appendChecker = false;
+                    }
+                    if (!$("#answered-reports [button-filter='Algorithm Comment']").hasClass("checked") && value.reportedType === "Algorithm Comment") {
+                        appendChecker = false;
+                    }
+                    if (!$("#answered-reports [button-filter='Algorithm Reply']").hasClass("checked") && value.reportedType === "Algorithm Reply") {
+                        appendChecker = false;
+                    }
+                    if (!$("#answered-reports [button-filter='Profile Comment']").hasClass("checked") && value.reportedType === "Profile Comment") {
+                        appendChecker = false;
+                    }
+                    
+                    if (!$("#answered-reports [button-filter='Profile Reply']").hasClass("checked") && value.reportedType === "Profile Reply") {
+                        appendChecker = false;
+                    }
+                    if (!$("#answered-reports [button-filter='Profile']").hasClass("checked") && value.reportedType === "Profile") {
+                        appendChecker = false;
+                    }
+                    if (appendChecker) {
+                        toAppend +=
+                            '<div class="styled-list-member" style="padding-bottom: 15px" listindex="' + index + '">' +
+                                '<h2 style="font-size: 17px; font-weight: 600">' +
+                                    '<a href="' + root + '/profile/' + value.reporter_id + '">' + value.reporter_name + '</a>' +
+                                    '<span> reported </span>' +
+                                    '<a href="' + root + '/profile/' + value.reported_id + '">' + value.reported_name + '</a>' +
+                                    '<span style="float: right">' + value.created_at.split(" ")[0] + '</span>' +
+                                '</h2>' +
+                                '<p>' +
+                                    '<span>Reported content type and reason: </span>' + value.reportedType +
+                                    '<span> for </span>' + value.reason +
+                                '</p>' +
+                                '<p>' +
+                                    '<span>Description: </span>' +
+                                        (value.description.trim() || "None provided") +
+                                '</p>' +
+                                '<div style="border: 1px solid gray;padding: 0;margin: 0 0 0 15px;">' +
+                                    reportDetail(value) +
+                                '</div>' +
+                                otherInformation(value) +
+                            '</div>';
+                    }
+                }
+            });
+            $(".tab-pane#answered-reports .content").html(toAppend || "No answered reports.");
+            createUnansweredReportListEvents();
         },
         showUnansweredReports = function () {
             var toAppend = '';
@@ -554,6 +606,7 @@ $(document).ready(function () {
                     if (data.state === "success") {
                         userlist = data.data.userlist;
                         reports = data.data.reports;
+                        answered = data.data.answered;
                         populate();
                     }
                 }
@@ -587,6 +640,28 @@ $(document).ready(function () {
                 }
             }
             showUnansweredReports();
+        }
+    });
+    $("#answered-reports [button-filter]").click(function () {
+        if($(this).attr("button-filter")==="All") {
+            if (!$(this).hasClass('checked')) {
+                $("#answered-reports [button-filter]").addClass("checked");
+                showAnsweredReports()();
+            } else {
+                $("#answered-reports [button-filter]").removeClass("checked");
+                showAnsweredReports()();
+            }
+        } else {
+            if ($(this).hasClass('checked')) {
+                $("#answered-reports [button-filter='All']").removeClass("checked");
+                $(this).removeClass('checked');
+            } else {
+                $(this).addClass('checked');
+                if($("#answered-reports [button-filter]").length - 1 === $("#answered-reports .checked[button-filter]").length) {
+                    $("#answered-reports [button-filter='All']").addClass("checked");
+                }
+            }
+            showAnsweredReports()();
         }
     });
     getAdminData();

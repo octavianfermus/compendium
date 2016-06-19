@@ -2420,6 +2420,7 @@ class UsersController extends BaseController implements RemindableInterface {
             $reportsUnfiltered = DB::table('reports')
                 ->get();
             $returnData["reports"] = array();
+            $returnData["answered"] = array();
             foreach($reportsUnfiltered as $array) {
                 if($array->answered == 0) {
                     $singular = array();
@@ -2536,6 +2537,114 @@ class UsersController extends BaseController implements RemindableInterface {
 
                     }
                     $returnData["reports"][] = $singular;
+                } else {
+                    $singular = array();
+                    $singular["id"] = $array->id;
+                    $singular["created_at"] = $array->created_at;
+                    $singular["answered"] = $array->answered;
+                    $singular["reporter_id"] = $array->user_id;
+                    $reporter = DB::table('users')
+                        ->where('id','=',$array->user_id)
+                        ->first();
+                    $singular["reporter_type"]=$reporter->user_type;
+                    $singular["reporter_warned"]=DB::table('warnings')
+                        ->where('user_id','=',$array->user_id)
+                        ->where('report_id','=',$array->id)
+                        ->count();
+                    $singular["reporter_name"]=$reporter->last_name." ".$reporter->first_name;
+                    $singular["reported_id"] = $array->reported_user_id;
+                    $reporter = DB::table('users')
+                        ->where('id','=',$array->reported_user_id)
+                        ->first(); 
+                    $singular["reported_warned"]=DB::table('warnings')
+                        ->where('user_id','=',$array->reported_user_id)
+                        ->where('report_id','=',$array->id)
+                        ->count();
+                    $singular["reported_type"]=$reporter->user_type;
+                    $singular["reported_name"]=$reporter->last_name." ".$reporter->first_name;
+                    $singular["reason"] = $array->user_reason;
+                    $singular["description"] = $array->user_description;
+                    switch($array->tbl) {
+                        case "algorithms":
+                            $singular["reportedType"] = "Algorithm";
+                            $singular["linkTo"] = "/posts/".$array->reported_id;
+                            $singular["linkName"] = DB::table('algorithms')
+                                ->where('id','=',$array->reported_id)
+                                ->first()
+                                ->name;
+                            break;
+                        case "requests":
+                            $singular["reportedType"] = "Request";
+                            $fetchData = DB::table('algorithm_requests')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["requestName"] = $fetchData->name;
+                            $singular["requestLanguage"] = $fetchData->language;
+                            $singular["requestDescription"] = $fetchData->description;
+                            break;
+                        case "inline_algorithm_comments":
+                            $singular["reportedType"] = "Line Comment";
+                            $fetchData = DB::table('inline_algorithm_comments')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/posts/".$fetchData->algorithm_id;
+                            $singular["linkName"] = DB::table('algorithms')
+                                ->where("id","=",$fetchData->algorithm_id)
+                                ->first()
+                                ->name;
+                            $singular["line"] = $fetchData->line;
+                            $singular["text"] = $fetchData->text;
+                            break;
+                        case "algorithm_discussion":
+                            $singular["reportedType"] = "Algorithm Comment";
+                            $fetchData = DB::table('algorithm_discussion')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/posts/".$fetchData->algorithm_id."#comment".$fetchData->id;
+                            $singular["linkName"] = DB::table('algorithms')
+                                ->where("id","=",$fetchData->algorithm_id)
+                                ->first()
+                                ->name;
+                            $singular["text"] = $fetchData->text;
+                            break;
+                        case "algorithm_discussion_replies":
+                            $singular["reportedType"] = "Algorithm Reply";
+                            $fetchData = DB::table('algorithm_discussion_replies')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/posts/".$fetchData->algorithm_id."#comment".$fetchData->comment_id."_".$fetchData->id;
+                            $singular["linkName"] = DB::table('algorithms')
+                                ->where("id","=",$fetchData->algorithm_id)
+                                ->first()
+                                ->name;
+                            $singular["text"] = $fetchData->text;
+                            break;
+                        case "profile_discussion":
+                            $singular["reportedType"] = "Profile Comment";
+                            $fetchData = DB::table('profile_discussion')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/profile/".$fetchData->profile_id."#comment".$fetchData->id;
+                            $singular["linkName"] = $singular["reported_name"];
+                            $singular["text"] = $fetchData->text;
+                            break;
+                        case "users":
+                            $singular["reportedType"] = "Profile";
+                            $singular["linkTo"] = "/profile/".$singular["reported_id"];
+                            $singular["linkName"] = $singular["reported_name"];
+                            break;
+                        case "profile_discussion_replies":
+                            $singular["reportedType"] = "Profile Reply";
+                            $fetchData = DB::table('profile_discussion_replies')
+                                ->where('id','=',$array->reported_id)
+                                ->first();
+                            $singular["linkTo"] = "/profile/".$fetchData->profile_id."#comment".$fetchData->comment_id."_".$fetchData->id;
+                            $singular["linkName"] = $singular["reported_name"];
+                            $singular["text"] = $fetchData->text;
+                            break;
+
+                    }
+                    $returnData["answered"][] = $singular;
                 }
             }
             return Response::json(array("state"=>"success", "message"=>"Data successfully loaded", "data"=> $returnData));

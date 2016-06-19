@@ -30,7 +30,17 @@
                     <div class="content" style="margin-top: 15px"></div>
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="answered-reports" aria-labelledby="answered-reports-tab" style="position: relative">
-                        2
+                        <span>Report Filters: </span><br>
+                        <button class='transparent checked noHover' button-filter='All'>All</button>
+                        <button class='transparent checked noHover' button-filter='Algorithm'>Algorithm</button>
+                        <button class='transparent checked noHover' button-filter='Request'>Request</button>
+                        <button class='transparent checked noHover' button-filter='Line Comment'>Line comment</button>
+                        <button class='transparent checked noHover' button-filter='Algorithm Comment'>Algorithm comment</button>
+                        <button class='transparent checked noHover' button-filter='Profile Comment'>Profile comment</button>
+                        <button class='transparent checked noHover' button-filter='Algorithm Reply'>Algorithm reply</button>
+                        <button class='transparent checked noHover' button-filter='Profile Reply'>Profile reply</button>
+                        <button class='transparent checked noHover' button-filter='Profile'>Profile</button>
+                        <div class="content" style="margin-top: 15px"></div>
                     </div> 
                     <div role="tabpanel" class="tab-pane fade" id="user-list" aria-labelledby="user-list-tab" style="position: relative">
                     <span>Filters: </span>
