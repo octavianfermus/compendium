@@ -51,56 +51,81 @@ Route::get('about', function() {
 
 Route::get('notifications', function() {
     if(Auth::check()) {
+        if(Auth::user()->user_type == 0) {
+        Session::flush();
+        return Redirect::to('/')
+            ->withErrors(["This account is currently banned."]);
+        }
         $time = date('Y-m-d H:i:s');
         DB::update('update notifications set seen = 1, updated_at = ? where user_id = ?', array(
             $time, 
             Auth::user()->id, 
         ));
         return View::make('notifications');
-    } else {
-        return View::make('404');
-    }
+    } 
+    return View::make('404')->withErrors(["This page cannot be reached. You are not logged in."]);
 });
 
 Route::get('posts/{id}', function ($algorithm_id) {
-    $found = DB::table('algorithms')
-                ->where('id', '=', $algorithm_id)
-                ->where('template', '=', 0)
-                ->count();
-    if($found==1) {
-        if(Auth::check()) {
-                $found = DB::table('algorithm_views')
-                        ->where('algorithm_id', '=', $algorithm_id)
-                        ->where('user_id', '=', Auth::user()->id)
-                        ->count();
-            if($found==0) {
-                $time = date('Y-m-d H:i:s');
-                DB::insert('insert into algorithm_views (user_id, algorithm_id, created_at, updated_at) values (?, ?, ?, ?)', array(
-                    Auth::user()->id, 
-                    $algorithm_id,
-                    $time,
-                    $time)
-                );
-                $updater = DB::table('algorithm_views')
-                ->where('algorithm_id', '=', $algorithm_id)
-                ->count();
-                DB::update('update algorithms set views = ?, updated_at = ? where id = ?', array(
-                    $updater,
-                    $time, 
-                    $algorithm_id, 
-                ));
-            }
-            return View::make('post');
-        } 
-        return View::make('404');
+    if(Auth::check()) {
+        if(Auth::user()->user_type == 0) {
+        Session::flush();
+        return Redirect::to('/')
+            ->withErrors(["This account is currently banned."]);
+        }
+        $found = DB::table('algorithms')
+                    ->where('id', '=', $algorithm_id)
+                    ->where('template', '=', 0)
+                    ->count();
+        if($found==1) {
+            if(Auth::check()) {
+                    $found = DB::table('algorithm_views')
+                            ->where('algorithm_id', '=', $algorithm_id)
+                            ->where('user_id', '=', Auth::user()->id)
+                            ->count();
+                if($found==0) {
+                    $time = date('Y-m-d H:i:s');
+                    DB::insert('insert into algorithm_views (user_id, algorithm_id, created_at, updated_at) values (?, ?, ?, ?)', array(
+                        Auth::user()->id, 
+                        $algorithm_id,
+                        $time,
+                        $time)
+                    );
+                    $updater = DB::table('algorithm_views')
+                    ->where('algorithm_id', '=', $algorithm_id)
+                    ->count();
+                    DB::update('update algorithms set views = ?, updated_at = ? where id = ?', array(
+                        $updater,
+                        $time, 
+                        $algorithm_id, 
+                    ));
+                }
+                return View::make('post');
+            } 
+            return View::make('404')->withErrors(["This page cannot be reached because this post doesn't exist."]);
+        }
     }
+    return View::make('404')->withErrors(["This page cannot be reached. You are not logged in."]);
 });
 
 Route::get('profile/me', function() {
+    if(Auth::check()) {
+       if(Auth::user()->user_type == 0) {
+        Session::flush();
+        return Redirect::to('/')
+            ->withErrors(["This account is currently banned."]);
+        }
     return View::make('my_profile');
+    }
+    return View::make('404')->withErrors(["This page cannot be reached. You are not logged in."]);
 });
 Route::get('profile/{id}', function($user_id) {
     if(Auth::check()) {
+        if(Auth::user()->user_type == 0) {
+            Session::flush();
+            return Redirect::to('/')
+                ->withErrors(["This account is currently banned."]);
+        }
         if($user_id == Auth::user()->id) {
             return Redirect::to('profile/me');
         } else {
@@ -109,11 +134,10 @@ Route::get('profile/{id}', function($user_id) {
             if($found != 0) {
                 return View::make('profile');
             }
-            return View::make('profile');
+            return View::make('404')->withErrors(["This page cannot be reached because the user doesn't exist."]);
         }
-    } else {
-        return View::make('profile');
     }
+    return View::make('404')->withErrors(["This page cannot be reached. You are not logged in."]);
 });
 
 Route::post('post/searchalgorithm', function() {
@@ -381,6 +405,11 @@ Route::get('userlist', function() {
 });
 
 Route::post('profiledetails', function() {
+    if(Auth::user()->user_type == 0) {
+        Session::flush();
+        return Redirect::to('/')
+            ->withErrors(["This account is currently banned."]);
+    }
     $id = Input::get('id');
     $profile_id = Request::input('profile_id');
     if($id == "me") {
@@ -540,6 +569,11 @@ Route::post('profiledetails', function() {
 
 Route::get('messages/{id}', function($id) {
     if(Auth::check()) {
+        if(Auth::user()->user_type == 0) {
+            Session::flush();
+            return Redirect::to('/')
+                ->withErrors(["This account is currently banned."]);
+        }
         $found = DB::table('users')
             ->where('id','=', $id)->count();
         if($found != 0) {
@@ -550,17 +584,30 @@ Route::get('messages/{id}', function($id) {
                 $id
             ));
         }
-        return View::make('messages');
+        return View::make('404')->withErrors(["This page cannot be reached because the user you are trying to talk to doesn't exist."]);
     } else {
-        return View::make('404');
+        return View::make('404')->withErrors(["This page cannot be reached. You are not logged in."]);
     }  
 });
 Route::get('messages', function() {
-    return View::make('messages');
+    if(Auth::check()) {
+        if(Auth::user()->user_type == 0) {
+            Session::flush();
+            return Redirect::to('/')
+                ->withErrors(["This account is currently banned."]);
+        }
+        return View::make('messages');
+    }
+    return View::make('404')->withErrors(["This page cannot be reached. You are not logged in."]);
 });
 
 Route::get('groups/{id}', function($id) {
     if(Auth::check()) {
+        if(Auth::user()->user_type == 0) {
+            Session::flush();
+            return Redirect::to('/')
+                ->withErrors(["This account is currently banned."]);
+        }
         $found = DB::table('groups')
             ->where('id','=', $id)
             ->where('visible','=',1)
@@ -583,12 +630,20 @@ Route::get('groups/{id}', function($id) {
                 return View::make('joingroup');
             }
         } else {
-            return View::make('404');
+            return View::make('404')->withErrors(["This page cannot be reached because the group doesn't exist."]);
         }
     } else {
-        return View::make('404');
+        return View::make('404')->withErrors(["This page cannot be reached. You are not logged in."]);
     }  
 });
 Route::get('groups', function() {
-    return View::make('groups');
+    if(Auth::check()) {
+        if(Auth::user()->user_type == 0) {
+            Session::flush();
+            return Redirect::to('/')
+                ->withErrors(["This account is currently banned."]);
+        }
+        return View::make('groups');
+    } 
+    return View::make('404')->withErrors(["This page cannot be reached. You are not logged in."]);
 });

@@ -27,6 +27,9 @@ var globalSettings = (function globalSettings() {
         getUserData : function () {
             var toReturn = $.extend({}, user_data);
             return toReturn;
+        },
+        htmlEncode: function(value) {
+          return $('<div/>').text(value).html();
         }
     };
     

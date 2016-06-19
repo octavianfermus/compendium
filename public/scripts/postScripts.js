@@ -58,7 +58,11 @@ $(document).ready(function () {
                 $(".lineComments .conversation").append("<p>No other comments on this line yet..</p>");
             } else {
                 $.each(lineComments[currentLineSubmitter], function (index, value) {
-                    value.text = value.text.split("/n").join("<br>");
+                    value.text = value.text.split("\n");
+                    $.each(value.text,function(index,singular) {
+                        value.text[index] = globalSettings.htmlEncode(singular);
+                    });
+                    value.text = value.text.join("<br>");
                     $(".lineComments .conversation").append('<div class="reply" tabindex="' + index + '" parent="parent">' +
                         '<p><span class="person"><a href="../profile/' + value.user_id + '">' + value.name + '</a></span> <span class="created"> on ' + value.created_at + '</span></p>' +
                         '<p>' + (parseInt(value.deleted, 10) === 1 ? '<em>This comment was deleted.</em>' : value.text) + '</p>' +
@@ -127,16 +131,24 @@ $(document).ready(function () {
         populateComments = function () {
             var toAppend = "";
             $.each(comments, function (index, value) {
-                value.text = value.text.split("\n").join("<br>");
+                value.text = value.text.split("\n");
+                $.each(value.text,function(index,singular) {
+                    value.text[index] = globalSettings.htmlEncode(singular);
+                });
+                value.text = value.text.join("<br>");
                 toAppend += '<div class="reply" tabindex="' + index + '" parent="parent" id="comment' + value.id + '">' +
                     '<p><span class="person"><a href="../profile/' + value.user_id + '">' + value.name + '</a></span> <span class="created"> on ' + value.created_at + '</span></p>' +
                     '<p>' + (parseInt(value.deleted, 10) === 1 ? '<em>This comment was deleted.</em>' : value.text) + '</p>' +
                     (parseInt(value.deleted, 10) === 0 ?
                             '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">(' + value.upvotes + ')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">(' + value.downvotes + ')</span></a>' + (value.canDelete === false ? (value.reported === 0 ? '| <a href="javascript:void(0)" class="reportComment">Report</a>' : "<p><strong><em>Your report was successfully submitted. Thank you!</em></strong></p>") : '| <a href="javascript:void(0)" class="deleteComment">Delete</a>') + ' </p><hr>' : "<hr>");
                 $.each(value.replies, function (secIndex, secValue) {
+                    secValue.text = secValue.text.split("\n");
+                    $.each(secValue.text,function(index,singular) {
+                        secValue.text[index] = globalSettings.htmlEncode(singular);
+                    });
+                    secValue.text = secValue.text.join("<br>");
                     toAppend += '<div class="reply" sectabindex="' + secIndex + '" parent="noparent" id="comment' + value.id + "_" + secValue.id + '">' +
                         '<p><span class="person"><a href="../profile/' + secValue.user_id + '">' + secValue.name + '</a></span> <span class="created"> on ' + secValue.created_at + '</span></p>';
-                    secValue.text = secValue.text.split("\n").join("<br>");
                     toAppend += '<p>' + (parseInt(secValue.deleted, 10) === 1 ? '<em>This comment was deleted.</em>' : secValue.text) + '</p>' +
                         (parseInt(secValue.deleted, 10) === 0 ?
                                 '<p><a href="javascript:void(0)" class="likeReply">Like <span class="green">(' + secValue.upvotes + ')</span></a> | <a href="javascript:void(0)" class="dislikeReply">Dislike <span class="red">(' + secValue.downvotes + ')</span></a> |' + (secValue.canDelete === false ? (secValue.reported === 0 ? '| <a href="javascript:void(0)" class="reportReply">Report</a>' : "<p><strong><em>Your report was successfully submitted. Thank you!</em></strong></p>") : '<a href="javascript:void(0)" class="deleteReply">Delete</a>') + '</p>' : "") +
