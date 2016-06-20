@@ -5,8 +5,8 @@
         <div class="row">
             <div class="col-md-7">
                 <h2>Start using Algorithm Compendium!</h2>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <p>This application takes example from many types of websites that are directed to programmers, but it’s unique in its design, taking a bit of each to create a website that gathers data in order to build a collection of algorithms, with feedback for users and discussions revolving said algorithms for further understanding.</p>
+                <p>Algorithm Compendium also has unique features such as private messaging and groups, to increase user interactivity and commenting not only the algorithm as a whole but also sections of it.</p>
             </div> 
 
             <div class="col-md-5">
