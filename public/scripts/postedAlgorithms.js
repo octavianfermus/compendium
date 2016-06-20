@@ -1,6 +1,7 @@
 $(document).ready(function () {
     var givenId = undefined,
         givenAction = undefined,
+        root = globalSettings.getRoot(),
         deletePublishModifier = function(id,action) {
             givenId = id;
             givenAction = action;
@@ -60,7 +61,7 @@ $(document).ready(function () {
         getLists = function () {
             jQuery.ajax({
                 method: 'get',
-                url: "users/postedalgorithms",
+                url: root + "/post/myalgorithms",
                 dataType: "json",
                 success: function (data) {
                     if(data.data.length > 0) {
@@ -89,13 +90,11 @@ $(document).ready(function () {
         },
         deletePost = function(id) {
             var data = {
-                data: {
                     id: id
-                }
             };
             jQuery.ajax({
-                method: 'PUT',
-                url: "users/deletealgorithm",
+                method: 'delete',
+                url: root + "/post/delete",
                 dataType: "json",
                 data: data,
                 success: function (data) {
@@ -115,19 +114,25 @@ $(document).ready(function () {
             };
             jQuery.ajax({
                 method: 'PUT',
-                url: "users/publishalgorithm",
+                url: root + "/post/publish",
                 dataType: "json",
                 data: data,
                 success: function (data) {
-                    console.log("success");
-                    console.log(data);
+                    if(data.state=="failure") {
+                        $("#errorModal .modal-body").html("<p>" + data.message + "</p>");
+                        $("#errorModal").modal("toggle");
+                    } else {
+                        console.log("success");
+                        getLists();
+                        console.log(data);
+                    }
                 },
                 error: function (data) {
                     console.log("error");
                     console.log(data);
                 }
             });
-            getLists();
+            
         };
     $(".switcher#myPostsSwitcher").click(function() {
         if($(this).siblings("table").hasClass("hidden")) {

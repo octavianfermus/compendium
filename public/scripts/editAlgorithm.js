@@ -25,11 +25,9 @@ $(document).ready(function() {
                     height: 140
                 });
 
-               
-
                 codeEditor = ace.edit("editor");
                 codeEditor.setTheme("ace/theme/monokai");
-                codeEditor.getSession().setMode("ace/mode/javascript");
+                //codeEditor.getSession().setMode("ace/mode/php");
                 $(".ace_editor").css({
                     width: "100%",
                     height: 500,

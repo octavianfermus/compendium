@@ -3,54 +3,8 @@
 use Illuminate\Auth\Reminders\RemindableTrait;
 use Illuminate\Auth\Reminders\RemindableInterface;
 
-class UsersController extends BaseController implements RemindableInterface {
-    use RemindableTrait;
-    public function getRegister() {
-        return View::make('landing');
-    }
-    public function getLogin() {
-        return View::make('landing');
-    }
-    public function getEditalgorithm($algorithmId) {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $found = DB::table('algorithms')
-                ->where('user_id', '=', Auth::user()->id)
-                ->where('id', '=', $algorithmId)
-                ->where('template', '=', 1)
-                ->count();
-            if($found==1) {
-                return View::make('edit');
-            }
-        }
-    }
-    public function getLogout() {
-        Session::flush();
-        return Redirect::to('/');
-    }
-    public function getAdmin() {
-        return View::make('admin');
-    }
-    public function getPostedalgorithms() {
-        $algorithms_unfiltered = DB::table('algorithms')->where('user_id', '=', Auth::user()->id)->get();
-        $algorithms = array();
-        $algorithms["data"]=array();
-        foreach ($algorithms_unfiltered as $array) {
-            $singular = array();
-            $singular["id"] = $array->id;
-            $singular["name"] = $array->name;
-            $singular["language"] = $array->language;
-            $singular["description"] = $array->description;
-            $singular["template"] = $array->template;
-            $singular["upvotes"] = $array->upvotes;
-            $singular["downvotes"] = $array->downvotes;
-            $singular["views"] = $array->views;
-            $singular["comments"] = DB::table('algorithm_discussion')
-                ->where('algorithm_id','=',$array->id)
-                ->count();
-            $algorithms["data"][]=$singular;
-        }
-        return Response::json($algorithms);
-    }
+class UsersController extends BaseController {
+    
     public function postCreate() {
         $validator = Validator::make(Input::all(), User::$rules);
         
@@ -66,7 +20,6 @@ class UsersController extends BaseController implements RemindableInterface {
                 return Redirect::to('/');
             }
         } else {
-            //Failure
             return Redirect::to('/')->withErrors($validator)->withInput();
         }
     }
@@ -86,6 +39,28 @@ class UsersController extends BaseController implements RemindableInterface {
                 ->withInput();
         }     
     }
+    
+    public function getEditalgorithm($algorithmId) {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $found = DB::table('algorithms')
+                ->where('user_id', '=', Auth::user()->id)
+                ->where('id', '=', $algorithmId)
+                ->where('template', '=', 1)
+                ->count();
+            if($found==1) {
+                return View::make('edit');
+            }
+        }
+    }
+    public function getLogout() {
+        Session::flush();
+        return Redirect::to('/');
+    }
+    public function getAdmin() {
+        return View::make('admin');
+    }
+    
+    
     
     public function postChangeinformation() {
         if(Auth::check() && Auth::user()->user_type > 0) {
@@ -161,19 +136,6 @@ class UsersController extends BaseController implements RemindableInterface {
             return Redirect::to('/');
         }
     }
-    
-    public function putDeletealgorithm() {
-        $algorithmId = Request::input('data.id');
-        $found = DB::table('algorithms')
-            ->where('id', '=', $algorithmId)
-            ->where('user_id', '=', Auth::user()->id)
-            ->count();
-        if($found==1) {
-            DB::delete('delete from algorithms where id = ?', array($algorithmId));
-            return Response::json(array('state' => 'success', 'message'=>'Algorithm successfuly deleted.'));
-        }
-        return Response::json(array('state' => 'failure', 'message'=>'Algorithm not found.'));
-    }    
     public function putVoterequest() {
         $request_id = Request::input('data.id');
         $time = date('Y-m-d H:i:s');
@@ -215,48 +177,6 @@ class UsersController extends BaseController implements RemindableInterface {
         
         return Response::json(array('state' => 'failure', 'message'=>'Algorithm not found.'));
        
-    }
-    public function postPushalgorithm() {
-        $time = date('Y-m-d H:i:s');
-        DB::insert('insert into algorithms (user_id, name, description, language, original_link, template, content, request_id, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
-            Auth::user()->id, 
-            Input::get('algorithm_name'), 
-            Input::get('algorithm_description'), 
-            Input::get('language'), 
-            Input::get('original_link'), 
-            Input::get('template'), 
-            Input::get('algorithm_code'),
-            Input::get('byrequest'),
-            $time,
-            $time)
-        );
-        $send_to_users = DB::table('algorithm_requests')
-            ->where('id', '=', Input::get('byrequest'))
-            ->where('user_id', '!=', Auth::user()->id)
-            ->get();
-        
-        $algorithm_id = DB::table('algorithms')
-            ->where('user_id', '=', Auth::user()->id)
-            ->where('request_id', '=', Input::get('byrequest'))
-            ->where('created_at', '=', $time)
-            ->get();
-        if(Input::get('template') == 0) {
-            foreach ($send_to_users as $array) {
-                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
-                    $array->user_id, 
-                    Auth::user()->id,
-                    '/posts/'.$algorithm_id[0]->id,
-                    "Request answered!",
-                    "created an algorithm based on your request.",
-                    "",
-                    FALSE,
-                    "",
-                    $time,
-                    $time)
-                );
-            }
-        }
-        return Redirect::to('/')->withErrors(['Algorithm successfully added.']);
     }
     public function postEditalgorithm() {
         $time = date('Y-m-d H:i:s');
@@ -334,43 +254,6 @@ class UsersController extends BaseController implements RemindableInterface {
         }
         
     }
-    public function putPublishalgorithm() {
-        $algorithmId = Request::input('data.id');
-        $found = DB::table('algorithms')
-                    ->where('id', '=', $algorithmId)
-                    ->where('user_id', '=', Auth::user()->id)
-                    ->where('template', '=', 1)
-                    ->where('content', '!=', "")
-                    ->count();
-        if($found==1) {
-            $time = date('Y-m-d H:i:s');
-            DB::update('update algorithms set template = 0, updated_at = ? where user_id = ? and id = ?', array($time, Auth::user()->id, $algorithmId));
-            $request_id = DB::select('select * from algorithms where user_id = ? and id = ? and template = 0 and updated_at = ?', array(Auth::user()->id, $algorithmId, $time));
-            $request_id = $request_id[0]->request_id;
-            $send_to_users = DB::table('algorithm_requests')
-                ->where('id', '=', $request_id)
-                ->where('user_id', '!=', Auth::user()->id)
-                ->get();
-            foreach ($send_to_users as $array) {
-                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
-                    $array->user_id, 
-                    Auth::user()->id,
-                    '/posts/'.$algorithmId,
-                    "Request answered!",
-                    "created an algorithm based on your request.",
-                    "",
-                    FALSE,
-                    "",
-                    $time,
-                    $time)
-                );
-               
-            }
-            return Response::json(array('state' => 'success', 'message'=>'Algorithm successfuly published.'));
-        }
-        return Response::json(array('state' => 'failure', 'message'=>'Algorithm was not found or doesn\'t have any content. Click on the algorithm title to add content before publishing.'));
-    }
-    
     public function postVotealgorithm() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('id');
@@ -1385,48 +1268,6 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'failure', 'message'=>'You are not logged in.'));
         }
     }
-    public function getNotifications() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $notifications_unfiltered = DB::table('notifications')
-                ->where('user_id', '=', Auth::user()->id)
-                ->orderBy('id', 'desc')
-                ->get();
-            $notifications = array();
-            foreach ($notifications_unfiltered as $array) {
-                $singular = array();
-                $singular["id"] = $array->id;
-                $singular["user_id"] = $array->user_id;
-                $singular["who_said"] = $array->who_said;
-                $singular["url"] = $array->url;
-                $singular["title"] = $array->title;
-                $singular["text"] = $array->text;
-                $singular["seen"] = $array->seen;
-                $singular["what_was_said"] = $array->what_was_said;
-                $singular["checked_out"] = $array->checked_out;
-                $singular["reference"] = $array->reference;
-                $singular["created_at"] = $array->created_at;
-                $name = DB::select('select * from users where id = ?', array($array->who_said));
-                $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
-                $notifications[]=$singular;
-            }
-            $returnData = array();
-            $returnData["notifications"]=$notifications;
-            $crumb_unparsed = DB::table('private_messages')
-                ->where('to_id', '=', Auth::user()->id)
-                ->where('seen', '=', 0)
-                ->count();
-            $returnData["messageCount"] = $crumb_unparsed;
-            $crumb_unparsed = DB::table('group_members')
-                ->where('member_id', '=', Auth::user()->id)
-                ->where('read_last_message', '=', 0)
-                ->where('accepted','=',1)
-                ->count();
-            $returnData["groupCount"] = $crumb_unparsed;
-            return Response::json($returnData);
-        } else {
-            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive notifications.'));
-        }
-    }
     public function getGroupcrumb() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $returnData = array();
@@ -1449,34 +1290,7 @@ class UsersController extends BaseController implements RemindableInterface {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive this data.'));
         }
     }
-    public function putSeeallnotifications() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $time = date('Y-m-d H:i:s');
-            DB::update('update notifications set seen = 1, updated_at = ? where user_id = ?', array(
-                $time, 
-                Auth::user()->id, 
-            ));
-        }
-    }
-    public function putChecknotification() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $id = Input::get('id');
-            $time = date('Y-m-d H:i:s');
-            DB::update('update notifications set checked_out = 1, seen = 1, updated_at = ? where id = ? and user_id = ?', array(
-                $time, 
-                $id,
-                Auth::user()->id
-            ));
-            return Response::json(array('state'=>'success', 'checked_out'=>$id));
-        }
-    }
-    public function deleteDeletenotification() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $id = Input::get('id');
-            DB::delete('delete from notifications where id = ? and user_id = ?', array($id, Auth::user()->id));
-            return Response::json(array('state'=>'success', 'deleted'=>$id));
-        }
-    }
+    
     public function postDeleteprofilecomment() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');

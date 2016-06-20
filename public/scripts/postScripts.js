@@ -125,7 +125,7 @@ $(document).ready(function () {
         voteLineCommentAjax = function (vote, comment_id, algorithm_id, tabindex) {
             $.ajax({
                 method: 'post',
-                url: "../users/voteinlinecomment",
+                url: root + "/users/voteinlinecomment",
                 dataType: "json",
                 data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
                 success: function (data) {
@@ -142,7 +142,7 @@ $(document).ready(function () {
         voteCommentAjax = function (vote, comment_id, algorithm_id, tabindex) {
             $.ajax({
                 method: 'post',
-                url: "../users/votecomment",
+                url: root +"/users/votecomment",
                 dataType: "json",
                 data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
                 success: function (data) {
@@ -215,7 +215,7 @@ $(document).ready(function () {
         voteReplyAjax = function (vote, comment_id, algorithm_id, tabindex, sectabindex) {
             $.ajax({
                 method: 'post',
-                url: "../users/votereply",
+                url: root + "/users/votereply",
                 dataType: "json",
                 data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
                 success: function (data) {
@@ -362,7 +362,7 @@ $(document).ready(function () {
         getPostData = function () {
             $.ajax({
                 method: 'get',
-                url: "../post/postdata",
+                url: root + "/post/data",
                 dataType: "json",
                 data: {id: postId},
                 success: function (data) {
@@ -452,13 +452,13 @@ $(document).ready(function () {
     $(window).resize( function() {
         var newWidth = $(".col-md-12").width();
         $(".ace_editor").width(newWidth);
-        setTimeout(function() {
+    });
+    setInterval(function() {
+        if($(".ace_gutter-cell[tabindex]").length == 0) {
+            console.log("recreating");
             recreate();
-        }, 0);
-    });
-    $(window).on('scroll', function() {
-        recreate();
-    });
+        }
+    }, 0);
     getPostData();
     $(".upvote a").click(function () {
         voteAlgorithmAjax(1);

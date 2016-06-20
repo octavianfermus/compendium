@@ -4,7 +4,7 @@ $(document).ready(function() {
         startAjax = function() {
             jQuery.ajax({
                 method: 'get',
-                url: root + "/users/notifications",
+                url: root + "/notifications/all",
                 success: function (data) {
                     notifications = data.notifications;
                     if(data.messageCount > 0) {
@@ -119,7 +119,7 @@ $(document).ready(function() {
     $(".seeNotifs").click(function() {
         jQuery.ajax({
             method: 'put',
-            url: root + "/users/seeallnotifications"
+            url: root + "/notifications/seeall"
         });
     });
     setInterval(function() {

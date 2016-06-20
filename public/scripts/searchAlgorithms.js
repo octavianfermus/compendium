@@ -12,6 +12,7 @@ $(document).ready(function () {
         foundAlgorithmList = [],
         lastReportIndex,
         reportType,
+        root = globalSettings.getRoot(),
         getApproval = function (upvotes, downvotes) {
             if (upvotes === 0) {
                 return 0;
@@ -107,7 +108,7 @@ $(document).ready(function () {
         getRequests = function () {
             $.ajax({
                 method: 'get',
-                url: "users/viewrequests",
+                url: root + "/users/viewrequests",
                 success: function (data) {
                     requests = data.data;
                     getRequestList(requests);
@@ -120,8 +121,8 @@ $(document).ready(function () {
         },
         getLists = function (data) {
             $.ajax({
-                method: 'post',
-                url: "post/searchalgorithm",
+                method: 'get',
+                url: root + "/post/search",
                 dataType: "json",
                 data: data,
                 success: function (data) {
@@ -204,7 +205,7 @@ $(document).ready(function () {
         
         $.ajax({
             method: 'post',
-            url: globalSettings.getRoot() + "/users/report",
+            url: root + "/users/report",
             dataType: "json",
             data: data,
             success: function (data) {

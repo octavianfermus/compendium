@@ -5,7 +5,7 @@
         <a href="javascript:void(0)" id="takeRequestModalOpener">I want to create an algorithm based on a request..</a>
     </div>
     
-    {{ Form::open(array('url'=>'users/pushalgorithm', 'id'=>'post_algorithm_form')) }}
+    {{ Form::open(array('url'=>'post/pushalgorithm', 'id'=>'post_algorithm_form')) }}
         {{ Form::label('algorithm_name', 'Algorithm name') }}
         {{ Form::text('algorithm_name', null, array('class'=>'form-control', 'placeholder'=>'algorithm name..')) }}
         {{ Form::label('language', 'Programming Language') }}
