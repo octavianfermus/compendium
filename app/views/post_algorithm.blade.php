@@ -17,7 +17,6 @@
         {{ Form::textarea('algorithm_code', null, array('class'=>'hidden', 'placeholder'=>'add a short description..')) }}
         {{ Form::text('template', null, array('class'=>'hidden','id'=>'isItTemplate')) }}
         {{ Form::text('byrequest', null, array('class'=>'hidden','id'=>'isItByRequest')) }}
-        {{ Form::submit('Submit changes', array('class'=>'btn hidden', 'id'=>'submit_algorithm'))}}
     {{ Form::close() }}
     <div class="text-right" style="margin-top: 35px;">
         <span class="fader">You cannot continue without filling all the required fields</span>

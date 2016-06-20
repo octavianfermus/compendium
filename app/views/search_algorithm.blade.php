@@ -58,7 +58,7 @@
                     <div class="requested-box"></div>
                     <a href="javascript:void(0)" id="letMeRequest">Can't find it.. I'll make a request</a>
                 </div>
-                {{ Form::open(array('url'=>'users/submitrequest', 'id'=>'submit_algorithm_form')) }}
+                {{ Form::open(array('url'=>'requests/submit', 'id'=>'submit_algorithm_form')) }}
                 {{ Form::label('algorithm_name', 'Algorithm Name') }}
                 {{ Form::text('algorithm_name', null, array('class'=>'form-control', 'placeholder'=>'algorithm name..')) }}
                 {{ Form::label('algorithm_description', 'Algorithm Description') }}
@@ -70,6 +70,7 @@
                 {{ Form::close() }}
             </div>
             <div class="modal-footer">
+                <span class="fader">All the fields are required.</span>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary hidden" id="submitRequest">Submit Request</button>
             </div>

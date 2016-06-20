@@ -30,7 +30,7 @@ $(document).ready(function () {
             $(".postedAlgorithms").html("");
             $.each(data, function (index, value) {
                 var toAppend = '<div class="postedAlgorithm">' +
-                    (value.template ? '<h2><a target="_blank" href="users/editalgorithm/' + value.id + '">' + value.name + '</a> (<span>Language</span>: ' + value.language + ')</h2>': 
+                    (value.template ? '<h2><a target="_blank" href="post/edit/' + value.id + '">' + value.name + '</a> (<span>Language</span>: ' + value.language + ')</h2>': 
                     '<h2><a target="_blank" href="posts/' + value.id + '">' + value.name + '</a> (<span>Language</span>: ' + value.language + ')</h2>') +
                     
                     '<p><span>Description</span>: ' + (value.description.trim().length ? value.description : "None") + '</p>' +
@@ -45,7 +45,7 @@ $(document).ready(function () {
             $(".postedAlgorithmsTable tbody").html("");
             $.each(data, function (index, value) {
                 var toAppend = '<tr>' +
-                    (value.template ? '<td><a target="_blank" href="users/editalgorithm/' + value.id + '">' + value.name + '</a></td>' : 
+                    (value.template ? '<td><a target="_blank" href="post/edit/' + value.id + '">' + value.name + '</a></td>' : 
                     '<td><a target="_blank" href="posts/' + value.id + '">' + value.name + '</a></td>') +
                     '<td>' + value.language + '</td>' +
                     '<td>' + value.upvotes + '</td>' +

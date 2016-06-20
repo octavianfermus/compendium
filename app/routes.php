@@ -23,6 +23,7 @@ Route::get('/', function()
 Route::controller('users', 'UsersController');
 Route::controller('post', 'PostController');
 Route::controller('notifications', 'NotificationsController');
+Route::controller('requests', 'RequestsController');
 
 Route::get('check', function() {
     return View::make('check');

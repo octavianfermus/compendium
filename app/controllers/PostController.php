@@ -5,7 +5,7 @@ use Illuminate\Auth\Reminders\RemindableInterface;
 
 class PostController extends BaseController {
     
-    public function getSearch() {
+    public function postSearch() {
         $tags = Request::input('tags');
         $language = Request::input('language');
         $ratio = Request::input('ratio');
@@ -365,6 +365,25 @@ class PostController extends BaseController {
             return Response::json(array('state' => 'success', 'message'=>'Algorithm successfuly published.'));
         }
         return Response::json(array('state' => 'failure', 'message'=>'Algorithm was not found or doesn\'t have any content. Click on the algorithm title to add content before publishing.'));
+    }
+    public function getEdit($algorithmId) {
+        if(Auth::check()) {
+            if(Auth::user()->user_type == 0) {
+            Session::flush();
+            return Redirect::to('/')
+                ->withErrors(["This account is currently banned."]);
+            }
+            $found = DB::table('algorithms')
+                ->where('user_id', '=', Auth::user()->id)
+                ->where('id', '=', $algorithmId)
+                ->where('template', '=', 1)
+                ->count();
+            if($found==1) {
+                return View::make('edit');
+            } else {
+                return View::make('404')->withErrors(["This page cannot be reached because this post doesn't exist or it isn't owned by you."]);
+            }
+        }
     }
 }
 

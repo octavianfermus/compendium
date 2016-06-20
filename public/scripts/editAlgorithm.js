@@ -4,6 +4,7 @@ $(document).ready(function() {
         algorithm_id = null,
         requestedId = null,
         requests = null,
+        root = globalSettings.getRoot(),
         getPostData = function () {
         jQuery.ajax({
             method: 'get',
@@ -83,7 +84,7 @@ $(document).ready(function() {
         getRequests = function() {
             jQuery.ajax({
                 method: 'get',
-                url: "../../users/viewrequests",
+                url: root + "/requests/all",
                 success: function (data) {
                     requests = data.data;
                     console.log(requests);

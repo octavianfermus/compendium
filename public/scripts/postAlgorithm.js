@@ -5,6 +5,7 @@ $(document).ready(function() {
         requests = null,
         requestedValues = null,
         requestedId = null,
+        root = globalSettings.getRoot(),
         getRequestList = function(data) {
             var data = data,
                     toAppend="";
@@ -43,7 +44,7 @@ $(document).ready(function() {
         getRequests = function() {
             jQuery.ajax({
                 method: 'get',
-                url: "users/viewrequests",
+                url: root + "/requests/all",
                 success: function (data) {
                     requests = data.data;
                     getRequestList(requests);

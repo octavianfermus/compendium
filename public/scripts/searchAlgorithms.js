@@ -75,13 +75,11 @@ $(document).ready(function () {
             
             $("#requestModal .requested-box button.vote").click(function () {
                 var data = {
-                    data: {
                         id: $(this).attr("req_id")
-                    }
                 };
                 $.ajax({
                     method: 'put',
-                    url: "users/voterequest",
+                    url: "requests/vote",
                     dataType: "json",
                     data: data,
                     success: function (data) {
@@ -108,7 +106,9 @@ $(document).ready(function () {
         getRequests = function () {
             $.ajax({
                 method: 'get',
-                url: root + "/users/viewrequests",
+                url: root + "/requests/all",
+                dataType: "json",
+                data: {all_requests:true},
                 success: function (data) {
                     requests = data.data;
                     getRequestList(requests);
@@ -121,7 +121,7 @@ $(document).ready(function () {
         },
         getLists = function (data) {
             $.ajax({
-                method: 'get',
+                method: 'post',
                 url: root + "/post/search",
                 dataType: "json",
                 data: data,
@@ -160,7 +160,33 @@ $(document).ready(function () {
     $("#search_algorithms_form .btn").click();
     
     $("#submitRequest").click(function () {
-        $("#submit_algorithm_form input[type='submit']").click();
+        var requestName = $("#requestModal input[name='algorithm_name']").val().trim(),
+            requestLanguage = $("#requestModal input[name='language']").val().trim(),
+            requestDescription = $("#requestModal textarea[name='algorithm_description']").val().trim(),
+            inputs = {
+                algorithm_name: requestName,
+                language: requestLanguage,
+                algorithm_description: requestDescription
+            };
+        if (requestName && requestLanguage && requestDescription) {
+            $.ajax({
+                method: 'post',
+                url: root + '/requests/submit',
+                dataType: "json",
+                data: inputs,
+                success: function(data) {
+                    $("#searchRequests").val(requestName);
+                    getRequests();
+                    filterRequests();
+                    $("#existentRequests").click();
+                }
+            });
+        } else {
+            $("#requestModal .fader").fadeIn("slow");
+            setTimeout(function(){
+                $(".fader").fadeOut("slow");
+            },3000);
+        }
     });
     $("#letMeRequest").click(function () {
         $(".requestedAlgorithms").slideUp();
