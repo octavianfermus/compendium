@@ -46,7 +46,30 @@ class UsersController extends BaseController {
     public function getAdmin() {
         return View::make('admin');
     }
-    
+    public function putCommend() {
+        $id = Input::get('id');
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $time = date('Y-m-d H:i:s');
+            $commended = DB::table('user_commendations')
+                ->where('user_id','=', $id)
+                ->where('commendator','=', Auth::user()->id)
+                ->count();
+            if($commended == 1) {
+                DB::delete('delete from user_commendations where user_id = ? and commendator = ?', array($id, Auth::user()->id));
+            } else {
+                DB::insert('insert into user_commendations (user_id, commendator, created_at, updated_at) values (?, ?, ?, ?)', array(
+                    $id,
+                    Auth::user()->id,
+                    $time,
+                    $time)
+                );
+            }
+            $number = DB::table('user_commendations')
+                ->where('user_id','=', $id)
+                ->count();
+            return Response::json(array('state' => 'success', 'number'=>$number));
+        }
+    }
     public function postChangeinformation() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $errors = array();
@@ -121,6 +144,407 @@ class UsersController extends BaseController {
             return Redirect::to('/');
         }
     }
+    public function postDiscussprofile() {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $profile_id = Request::input('id');
+            if($profile_id == "me") {
+                $profile_id = Auth::user()->id;
+            }
+            $comment = Request::input('comment');
+            $time = date('Y-m-d H:i:s');
+            DB::insert('insert into profile_discussion (user_id, profile_id, text, deleted, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                Auth::user()->id, 
+                $profile_id,
+                $comment,
+                FALSE,
+                $time,
+                $time)
+            );
+
+            $comment_id = DB::table('profile_discussion')
+                ->where('profile_id', $profile_id)
+                ->where('created_at', $time)
+                ->where('user_id', Auth::user()->id)
+                ->first();
+            if($profile_id!=Auth::user()->id) {
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $profile_id, 
+                    Auth::user()->id,
+                    '/profile/'.$profile_id,
+                    "New comment!",
+                    "commented your profile.",
+                    $comment,
+                    FALSE,
+                    $comment_id->id,
+                    $time,
+                    $time)
+                );
+            }
+            
+            $comments_unfiltered = DB::table('profile_discussion')
+                ->where('profile_id', '=', $profile_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+            $comments = array();
+            foreach ($comments_unfiltered as $array) {
+                $singular = array();
+                $singular["id"] = $array->id;
+                $singular["user_id"] = $array->user_id;
+                $singular["text"] = $array->text;
+                $singular["deleted"] = $array->deleted;
+                if($singular["user_id"] == Auth::user()->id) {
+                    $singular["canDelete"] = true;
+                } else {
+                    $singular["canDelete"] = false;
+                }
+                $singular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','profile_discussion')
+                    ->where('reported_id','=',$array->id)
+                    ->where('reported_user_id','=',$array->user_id)
+                    ->count();
+                $singular["upvotes"] = $array->upvotes;
+                $singular["downvotes"] = $array->downvotes;
+                $singular["created_at"] = $array->created_at;
+                $singular["replies"] = array(); 
+                $reply_comments_unfiltered = DB::table('profile_discussion_replies')
+                    ->where('profile_id', '=', $profile_id)
+                    ->where('comment_id', '=', $singular["id"])
+                    ->get();
+                foreach ($reply_comments_unfiltered as $secondaryArray) {
+                    $secondarySingular = array();
+                    $secondarySingular["id"] = $secondaryArray->id;
+                    $secondarySingular["user_id"] = $secondaryArray->user_id;
+                    $secondarySingular["text"] = $secondaryArray->text;
+                    $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    if($secondarySingular["user_id"] == Auth::user()->id) {
+                        $secondarySingular["canDelete"] = true;
+                    } else {
+                        $secondarySingular["canDelete"] = false;
+                    }
+                    $secondarySingular["reported"] = DB::table('reports')
+                        ->where('user_id','=',Auth::user()->id)
+                        ->where('tbl','=','profile_discussion_replies')
+                        ->where('reported_id','=',$secondaryArray->id)
+                        ->where('reported_user_id','=',$secondaryArray->user_id)
+                        ->count();
+                    $secondarySingular["created_at"] = $secondaryArray->created_at;
+                    $secondarySingular["upvotes"] = $secondaryArray->upvotes;
+                    $secondarySingular["downvotes"] = $secondaryArray->downvotes;
+                    $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
+                    $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
+                    $singular["replies"][] = $secondarySingular;
+                }
+                
+                $name = DB::select('select * from users where id = ?', array($array->user_id));
+                $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                $comments[]=$singular;
+            }
+            return Response::json($comments);
+        } 
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to comment.'));
+    }
+    public function postVoteprofilecomment() {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            
+            $profile_id = Request::input('profile_id');
+            if($profile_id == "me") {
+                $profile_id = Auth::user()->id;
+            }
+            $comment_id = Request::input('comment_id');
+            $vote = Request::input('vote');
+            $time = date('Y-m-d H:i:s');
+            $found = DB::table('profile_comment_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->count();
+            if($found == 1) {
+                DB::table('profile_comment_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->delete();
+                $downvotes = DB::table('profile_comment_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+                $upvotes = DB::table('profile_comment_votes')
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',1)
+                    ->count(); 
+                DB::update('update profile_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+            }
+            $found = DB::table('profile_comment_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->count();
+            if($found==0) {
+                DB::insert('insert into profile_comment_votes (user_id, comment_id, profile_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                    Auth::user()->id, 
+                    $comment_id,
+                    $profile_id,
+                    $vote,
+                    $time,
+                    $time)
+                );
+            } else {
+                DB::update('update profile_comment_votes set vote = ?, updated_at = ? where user_id = ? and profile_id = ? and comment_id = ?', array($vote, $time,  Auth::user()->id, $profile_id, $comment_id));
+            }
+            
+            $downvotes = DB::table('profile_comment_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+            $upvotes = DB::table('profile_comment_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',1)
+                ->count(); 
+            DB::update('update profile_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+        }
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
+    }
+    public function postVoteprofilereply() {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $profile_id = Request::input('profile_id');
+            if($profile_id == "me") {
+                $profile_id = Auth::user()->id;
+            }
+            $comment_id = Request::input('comment_id');
+            $vote = Request::input('vote');
+            $time = date('Y-m-d H:i:s');
+            $found = DB::table('profile_reply_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->count();
+            if($found == 1) {
+                DB::table('profile_reply_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',$vote)
+                    ->delete();
+                $downvotes = DB::table('profile_reply_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+                $upvotes = DB::table('profile_reply_votes')
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->where('vote','=',1)
+                    ->count(); 
+                DB::update('update algorithm_discussion_replies set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+            }
+            $found = DB::table('profile_reply_votes')
+                    ->where('user_id','=', Auth::user()->id)
+                    ->where('profile_id','=',$profile_id)
+                    ->where('comment_id','=',$comment_id)
+                    ->count();
+            if($found==0) {
+                DB::insert('insert into profile_reply_votes (user_id, comment_id, profile_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
+                    Auth::user()->id, 
+                    $comment_id,
+                    $profile_id,
+                    $vote,
+                    $time,
+                    $time)
+                );
+            } else {
+                DB::update('update profile_reply_votes set vote = ?, updated_at = ? where user_id = ? and profile_id = ? and comment_id = ?', array($vote, $time,  Auth::user()->id, $profile_id, $comment_id));
+            }
+            
+            $downvotes = DB::table('profile_reply_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',0)
+                ->count();
+            
+            $upvotes = DB::table('profile_reply_votes')
+                ->where('profile_id','=',$profile_id)
+                ->where('comment_id','=',$comment_id)
+                ->where('vote','=',1)
+                ->count(); 
+            DB::update('update profile_discussion_replies set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
+            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
+        }
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
+    }
+    public function getUserdata() {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $returnData = DB::table('users')
+                ->where('id','=',Auth::user()->id)
+                ->select('id','first_name','last_name','user_type')
+                ->first();
+            return Response::json(array('state' => 'success', 'message'=>'User data retrieved.','data'=>$returnData));    
+        } else {
+            return Response::json(array('state' => 'failure', 'message'=>'You are not logged in.'));
+        }
+    }
+    public function postDeleteprofilecomment() {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $id = Input::get('id');
+            $time = date('Y-m-d H:i:s');
+            DB::update('update profile_discussion set deleted = 1, updated_at = ? where id = ?', array(
+            $time, 
+            $id 
+            ));
+            return Response::json(array('state'=>'success', 'deleted'=>$id));
+        }
+    }
+    public function postDeleteprofilereply() {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $id = Input::get('id');
+            $time = date('Y-m-d H:i:s');
+            DB::update('update profile_discussion_replies set deleted = 1, updated_at = ? where id = ?', array(
+            $time, 
+            $id
+            ));
+            return Response::json(array('state'=>'success', 'deleted'=>$id));
+        }
+    }
+    public function postRespondtoprofilecomment() {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            
+            $profile_id = Request::input('id');
+            if($profile_id == "me") {
+                $profile_id = Auth::user()->id;
+            }
+            $comment = Request::input('comment');
+            $comment_id = Request::input('commentid');
+            $time = date('Y-m-d H:i:s');
+            DB::insert('insert into profile_discussion_replies (user_id, profile_id, comment_id, text, deleted, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?)', array(
+                Auth::user()->id, 
+                $profile_id,
+                $comment_id,
+                $comment,
+                FALSE,
+                $time,
+                $time)
+            );
+            
+            $comment_id_second = DB::table('profile_discussion_replies')
+                ->where('profile_id', $profile_id)
+                ->where('comment_id', $comment_id)
+                ->where('created_at', $time)
+                ->where('user_id', Auth::user()->id)
+                ->first();
+            $comment_id_second = $comment_id_second->id;
+            if($profile_id != Auth::user()->id) { 
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $profile_id, 
+                    Auth::user()->id,
+                    '/profile/'.$profile_id,
+                    "New reply!",
+                    "replied to something you said.",
+                    $comment,
+                    FALSE,
+                    $comment_id."_".$comment_id_second,
+                    $time,
+                    $time)
+                );     
+            }
+            
+            $send_to_users = DB::table('profile_discussion_replies')
+                ->where('comment_id', '=', $comment_id)
+                ->where('user_id', '!=', Auth::user()->id)
+                ->get();
+            foreach ($send_to_users as $array) {
+                if($array->user_id != Auth::user()->id && $array->user_id != $profile_id) { 
+                    DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                        $array->user_id, 
+                        Auth::user()->id,
+                        '/profile/'.$profile_id,
+                        "New reply!",
+                        "also replied to a comment you replied to.",
+                        $comment,
+                        FALSE,
+                        $comment_id."_".$comment_id_second,
+                        $time,
+                        $time)
+                    );
+                    
+                }
+            }
+            $comments_unfiltered = DB::table('profile_discussion')
+                ->where('profile_id', '=', $profile_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+            $comments = array();
+            foreach ($comments_unfiltered as $array) {
+                $singular = array();
+                $singular["id"] = $array->id;
+                $singular["user_id"] = $array->user_id;
+                $singular["text"] = $array->text;
+                $singular["deleted"] = $array->deleted;
+                if($singular["user_id"] == Auth::user()->id) {
+                    $singular["canDelete"] = true;
+                } else {
+                    $singular["canDelete"] = false;
+                }
+                $aingular["reported"] = DB::table('reports')
+                    ->where('user_id','=',Auth::user()->id)
+                    ->where('tbl','=','profile_discussion')
+                    ->where('reported_id','=',$array->id)
+                    ->where('reported_user_id','=',$array->user_id)
+                    ->count();
+                $singular["upvotes"] = $array->upvotes;
+                $singular["downvotes"] = $array->downvotes;
+                $singular["created_at"] = $array->created_at;
+                $singular["replies"] = array(); 
+                $reply_comments_unfiltered = DB::table('profile_discussion_replies')
+                    ->where('profile_id', '=', $profile_id)
+                    ->where('comment_id', '=', $singular["id"])
+                    ->get();
+                foreach ($reply_comments_unfiltered as $secondaryArray) {
+                    $secondarySingular = array();
+                    $secondarySingular["id"] = $secondaryArray->id;
+                    $secondarySingular["user_id"] = $secondaryArray->user_id;
+                    $secondarySingular["text"] = $secondaryArray->text;
+                    $secondarySingular["deleted"] = $secondaryArray->deleted;
+                    if($secondarySingular["user_id"] == Auth::user()->id) {
+                        $secondarySingular["canDelete"] = true;
+                    } else {
+                        $secondarySingular["canDelete"] = false;
+                    }
+                    $secondarySingular["reported"] = DB::table('reports')
+                        ->where('user_id','=',Auth::user()->id)
+                        ->where('tbl','=','profile_discussion_replies')
+                        ->where('reported_id','=',$secondaryArray->id)
+                        ->where('reported_user_id','=',$secondaryArray->user_id)
+                        ->count();
+                    $secondarySingular["upvotes"] = $secondaryArray->upvotes;
+                    $secondarySingular["downvotes"] = $secondaryArray->downvotes;
+                    $secondarySingular["created_at"] = $secondaryArray->created_at;
+                    $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
+                    $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
+                    $singular["replies"][] = $secondarySingular;
+                }
+                
+                $name = DB::select('select * from users where id = ?', array($array->user_id));
+                $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                $comments[]=$singular;
+            }
+            return Response::json($comments);
+        } 
+        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to able to respond to a comment.'));
+    }
+    
     public function postEditalgorithm() {
         $time = date('Y-m-d H:i:s');
         DB::update('update algorithms set name = ?, language = ?, description = ?, template = ?, original_link = ?, content = ?, request_id = ?, updated_at = ? where id = ?', array(
@@ -335,106 +759,7 @@ class UsersController extends BaseController {
         } 
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to comment.'));
     }
-    public function postDiscussprofile() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $profile_id = Request::input('id');
-            if($profile_id == "me") {
-                $profile_id = Auth::user()->id;
-            }
-            $comment = Request::input('comment');
-            $time = date('Y-m-d H:i:s');
-            DB::insert('insert into profile_discussion (user_id, profile_id, text, deleted, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
-                Auth::user()->id, 
-                $profile_id,
-                $comment,
-                FALSE,
-                $time,
-                $time)
-            );
-
-            $comment_id = DB::table('profile_discussion')
-                ->where('profile_id', $profile_id)
-                ->where('created_at', $time)
-                ->where('user_id', Auth::user()->id)
-                ->first();
-            if($profile_id!=Auth::user()->id) {
-                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
-                    $profile_id, 
-                    Auth::user()->id,
-                    '/profile/'.$profile_id,
-                    "New comment!",
-                    "commented your profile.",
-                    $comment,
-                    FALSE,
-                    $comment_id->id,
-                    $time,
-                    $time)
-                );
-            }
-            
-            $comments_unfiltered = DB::table('profile_discussion')
-                ->where('profile_id', '=', $profile_id)
-                ->orderBy('created_at', 'desc')
-                ->get();
-            $comments = array();
-            foreach ($comments_unfiltered as $array) {
-                $singular = array();
-                $singular["id"] = $array->id;
-                $singular["user_id"] = $array->user_id;
-                $singular["text"] = $array->text;
-                $singular["deleted"] = $array->deleted;
-                if($singular["user_id"] == Auth::user()->id) {
-                    $singular["canDelete"] = true;
-                } else {
-                    $singular["canDelete"] = false;
-                }
-                $singular["reported"] = DB::table('reports')
-                    ->where('user_id','=',Auth::user()->id)
-                    ->where('tbl','=','profile_discussion')
-                    ->where('reported_id','=',$array->id)
-                    ->where('reported_user_id','=',$array->user_id)
-                    ->count();
-                $singular["upvotes"] = $array->upvotes;
-                $singular["downvotes"] = $array->downvotes;
-                $singular["created_at"] = $array->created_at;
-                $singular["replies"] = array(); 
-                $reply_comments_unfiltered = DB::table('profile_discussion_replies')
-                    ->where('profile_id', '=', $profile_id)
-                    ->where('comment_id', '=', $singular["id"])
-                    ->get();
-                foreach ($reply_comments_unfiltered as $secondaryArray) {
-                    $secondarySingular = array();
-                    $secondarySingular["id"] = $secondaryArray->id;
-                    $secondarySingular["user_id"] = $secondaryArray->user_id;
-                    $secondarySingular["text"] = $secondaryArray->text;
-                    $secondarySingular["deleted"] = $secondaryArray->deleted;
-                    if($secondarySingular["user_id"] == Auth::user()->id) {
-                        $secondarySingular["canDelete"] = true;
-                    } else {
-                        $secondarySingular["canDelete"] = false;
-                    }
-                    $secondarySingular["reported"] = DB::table('reports')
-                        ->where('user_id','=',Auth::user()->id)
-                        ->where('tbl','=','profile_discussion_replies')
-                        ->where('reported_id','=',$secondaryArray->id)
-                        ->where('reported_user_id','=',$secondaryArray->user_id)
-                        ->count();
-                    $secondarySingular["created_at"] = $secondaryArray->created_at;
-                    $secondarySingular["upvotes"] = $secondaryArray->upvotes;
-                    $secondarySingular["downvotes"] = $secondaryArray->downvotes;
-                    $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
-                    $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
-                    $singular["replies"][] = $secondarySingular;
-                }
-                
-                $name = DB::select('select * from users where id = ?', array($array->user_id));
-                $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
-                $comments[]=$singular;
-            }
-            return Response::json($comments);
-        } 
-        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to comment.'));
-    }
+    
     public function postCommentline() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('id');
@@ -586,77 +911,6 @@ class UsersController extends BaseController {
         }
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
     }
-    public function postVoteprofilecomment() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            
-            $profile_id = Request::input('profile_id');
-            if($profile_id == "me") {
-                $profile_id = Auth::user()->id;
-            }
-            $comment_id = Request::input('comment_id');
-            $vote = Request::input('vote');
-            $time = date('Y-m-d H:i:s');
-            $found = DB::table('profile_comment_votes')
-                    ->where('user_id','=', Auth::user()->id)
-                    ->where('profile_id','=',$profile_id)
-                    ->where('comment_id','=',$comment_id)
-                    ->where('vote','=',$vote)
-                    ->count();
-            if($found == 1) {
-                DB::table('profile_comment_votes')
-                    ->where('user_id','=', Auth::user()->id)
-                    ->where('profile_id','=',$profile_id)
-                    ->where('comment_id','=',$comment_id)
-                    ->where('vote','=',$vote)
-                    ->delete();
-                $downvotes = DB::table('profile_comment_votes')
-                ->where('profile_id','=',$profile_id)
-                ->where('comment_id','=',$comment_id)
-                ->where('vote','=',0)
-                ->count();
-            
-                $upvotes = DB::table('profile_comment_votes')
-                    ->where('profile_id','=',$profile_id)
-                    ->where('comment_id','=',$comment_id)
-                    ->where('vote','=',1)
-                    ->count(); 
-                DB::update('update profile_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
-            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
-            }
-            $found = DB::table('profile_comment_votes')
-                    ->where('user_id','=', Auth::user()->id)
-                    ->where('profile_id','=',$profile_id)
-                    ->where('comment_id','=',$comment_id)
-                    ->count();
-            if($found==0) {
-                DB::insert('insert into profile_comment_votes (user_id, comment_id, profile_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
-                    Auth::user()->id, 
-                    $comment_id,
-                    $profile_id,
-                    $vote,
-                    $time,
-                    $time)
-                );
-            } else {
-                DB::update('update profile_comment_votes set vote = ?, updated_at = ? where user_id = ? and profile_id = ? and comment_id = ?', array($vote, $time,  Auth::user()->id, $profile_id, $comment_id));
-            }
-            
-            $downvotes = DB::table('profile_comment_votes')
-                ->where('profile_id','=',$profile_id)
-                ->where('comment_id','=',$comment_id)
-                ->where('vote','=',0)
-                ->count();
-            
-            $upvotes = DB::table('profile_comment_votes')
-                ->where('profile_id','=',$profile_id)
-                ->where('comment_id','=',$comment_id)
-                ->where('vote','=',1)
-                ->count(); 
-            DB::update('update profile_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
-            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
-        }
-        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
-    }
     public function postVotecomment() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $algorithm_id = Request::input('algorithm_id');
@@ -720,76 +974,6 @@ class UsersController extends BaseController {
                 ->where('vote','=',1)
                 ->count(); 
             DB::update('update algorithm_discussion set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
-            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
-        }
-        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
-    }
-    public function postVoteprofilereply() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $profile_id = Request::input('profile_id');
-            if($profile_id == "me") {
-                $profile_id = Auth::user()->id;
-            }
-            $comment_id = Request::input('comment_id');
-            $vote = Request::input('vote');
-            $time = date('Y-m-d H:i:s');
-            $found = DB::table('profile_reply_votes')
-                    ->where('user_id','=', Auth::user()->id)
-                    ->where('profile_id','=',$profile_id)
-                    ->where('comment_id','=',$comment_id)
-                    ->where('vote','=',$vote)
-                    ->count();
-            if($found == 1) {
-                DB::table('profile_reply_votes')
-                    ->where('user_id','=', Auth::user()->id)
-                    ->where('profile_id','=',$profile_id)
-                    ->where('comment_id','=',$comment_id)
-                    ->where('vote','=',$vote)
-                    ->delete();
-                $downvotes = DB::table('profile_reply_votes')
-                ->where('profile_id','=',$profile_id)
-                ->where('comment_id','=',$comment_id)
-                ->where('vote','=',0)
-                ->count();
-            
-                $upvotes = DB::table('profile_reply_votes')
-                    ->where('profile_id','=',$profile_id)
-                    ->where('comment_id','=',$comment_id)
-                    ->where('vote','=',1)
-                    ->count(); 
-                DB::update('update algorithm_discussion_replies set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
-            return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
-            }
-            $found = DB::table('profile_reply_votes')
-                    ->where('user_id','=', Auth::user()->id)
-                    ->where('profile_id','=',$profile_id)
-                    ->where('comment_id','=',$comment_id)
-                    ->count();
-            if($found==0) {
-                DB::insert('insert into profile_reply_votes (user_id, comment_id, profile_id, vote, created_at, updated_at) values (?, ?, ?, ?, ?, ?)', array(
-                    Auth::user()->id, 
-                    $comment_id,
-                    $profile_id,
-                    $vote,
-                    $time,
-                    $time)
-                );
-            } else {
-                DB::update('update profile_reply_votes set vote = ?, updated_at = ? where user_id = ? and profile_id = ? and comment_id = ?', array($vote, $time,  Auth::user()->id, $profile_id, $comment_id));
-            }
-            
-            $downvotes = DB::table('profile_reply_votes')
-                ->where('profile_id','=',$profile_id)
-                ->where('comment_id','=',$comment_id)
-                ->where('vote','=',0)
-                ->count();
-            
-            $upvotes = DB::table('profile_reply_votes')
-                ->where('profile_id','=',$profile_id)
-                ->where('comment_id','=',$comment_id)
-                ->where('vote','=',1)
-                ->count(); 
-            DB::update('update profile_discussion_replies set upvotes = ?, downvotes = ?, updated_at = ? where id = ?', array($upvotes, $downvotes, $time, $comment_id));
             return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
         }
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
@@ -860,132 +1044,6 @@ class UsersController extends BaseController {
             return Response::json(array('state' => 'success', 'upvotes'=>$upvotes, 'downvotes'=>$downvotes));
         }
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to be able to vote a comment.'));
-    }
-    public function postRespondtoprofilecomment() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            
-            $profile_id = Request::input('id');
-            if($profile_id == "me") {
-                $profile_id = Auth::user()->id;
-            }
-            $comment = Request::input('comment');
-            $comment_id = Request::input('commentid');
-            $time = date('Y-m-d H:i:s');
-            DB::insert('insert into profile_discussion_replies (user_id, profile_id, comment_id, text, deleted, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?)', array(
-                Auth::user()->id, 
-                $profile_id,
-                $comment_id,
-                $comment,
-                FALSE,
-                $time,
-                $time)
-            );
-            
-            $comment_id_second = DB::table('profile_discussion_replies')
-                ->where('profile_id', $profile_id)
-                ->where('comment_id', $comment_id)
-                ->where('created_at', $time)
-                ->where('user_id', Auth::user()->id)
-                ->first();
-            $comment_id_second = $comment_id_second->id;
-            if($profile_id != Auth::user()->id) { 
-                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
-                    $profile_id, 
-                    Auth::user()->id,
-                    '/profile/'.$profile_id,
-                    "New reply!",
-                    "replied to something you said.",
-                    $comment,
-                    FALSE,
-                    $comment_id."_".$comment_id_second,
-                    $time,
-                    $time)
-                );     
-            }
-            
-            $send_to_users = DB::table('profile_discussion_replies')
-                ->where('comment_id', '=', $comment_id)
-                ->where('user_id', '!=', Auth::user()->id)
-                ->get();
-            foreach ($send_to_users as $array) {
-                if($array->user_id != Auth::user()->id && $array->user_id != $profile_id) { 
-                    DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
-                        $array->user_id, 
-                        Auth::user()->id,
-                        '/profile/'.$profile_id,
-                        "New reply!",
-                        "also replied to a comment you replied to.",
-                        $comment,
-                        FALSE,
-                        $comment_id."_".$comment_id_second,
-                        $time,
-                        $time)
-                    );
-                    
-                }
-            }
-            $comments_unfiltered = DB::table('profile_discussion')
-                ->where('profile_id', '=', $profile_id)
-                ->orderBy('created_at', 'desc')
-                ->get();
-            $comments = array();
-            foreach ($comments_unfiltered as $array) {
-                $singular = array();
-                $singular["id"] = $array->id;
-                $singular["user_id"] = $array->user_id;
-                $singular["text"] = $array->text;
-                $singular["deleted"] = $array->deleted;
-                if($singular["user_id"] == Auth::user()->id) {
-                    $singular["canDelete"] = true;
-                } else {
-                    $singular["canDelete"] = false;
-                }
-                $aingular["reported"] = DB::table('reports')
-                    ->where('user_id','=',Auth::user()->id)
-                    ->where('tbl','=','profile_discussion')
-                    ->where('reported_id','=',$array->id)
-                    ->where('reported_user_id','=',$array->user_id)
-                    ->count();
-                $singular["upvotes"] = $array->upvotes;
-                $singular["downvotes"] = $array->downvotes;
-                $singular["created_at"] = $array->created_at;
-                $singular["replies"] = array(); 
-                $reply_comments_unfiltered = DB::table('profile_discussion_replies')
-                    ->where('profile_id', '=', $profile_id)
-                    ->where('comment_id', '=', $singular["id"])
-                    ->get();
-                foreach ($reply_comments_unfiltered as $secondaryArray) {
-                    $secondarySingular = array();
-                    $secondarySingular["id"] = $secondaryArray->id;
-                    $secondarySingular["user_id"] = $secondaryArray->user_id;
-                    $secondarySingular["text"] = $secondaryArray->text;
-                    $secondarySingular["deleted"] = $secondaryArray->deleted;
-                    if($secondarySingular["user_id"] == Auth::user()->id) {
-                        $secondarySingular["canDelete"] = true;
-                    } else {
-                        $secondarySingular["canDelete"] = false;
-                    }
-                    $secondarySingular["reported"] = DB::table('reports')
-                        ->where('user_id','=',Auth::user()->id)
-                        ->where('tbl','=','profile_discussion_replies')
-                        ->where('reported_id','=',$secondaryArray->id)
-                        ->where('reported_user_id','=',$secondaryArray->user_id)
-                        ->count();
-                    $secondarySingular["upvotes"] = $secondaryArray->upvotes;
-                    $secondarySingular["downvotes"] = $secondaryArray->downvotes;
-                    $secondarySingular["created_at"] = $secondaryArray->created_at;
-                    $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
-                    $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
-                    $singular["replies"][] = $secondarySingular;
-                }
-                
-                $name = DB::select('select * from users where id = ?', array($array->user_id));
-                $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
-                $comments[]=$singular;
-            }
-            return Response::json($comments);
-        } 
-        return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to able to respond to a comment.'));
     }
     public function postRespondtocomment() {
         if(Auth::check() && Auth::user()->user_type > 0) {
@@ -1111,83 +1169,6 @@ class UsersController extends BaseController {
         } 
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in and not banned to able to respond to a comment.'));
     }
-    public function getTemplatedata() {
-        $algorithmId = Request::input('id');
-        $returnData = array();
-        $found = DB::table('algorithms')
-                    ->where('id', '=', $algorithmId)
-                    ->where('template', '=', 1)
-                    ->count();
-        if($found==1) {
-            $unparsedData = DB::select('select * from algorithms where id = ?', array($algorithmId));
-            $returnData["name"] = $unparsedData[0]->name;
-            $returnData["original_link"] = $unparsedData[0]->original_link;
-            $returnData["content"] = $unparsedData[0]->content;
-            $returnData["description"] = $unparsedData[0]->description;
-            $returnData["language"] = $unparsedData[0]->language;
-            $returnData["creator_id"] = $unparsedData[0]->user_id;
-            $returnData["algorithm_id"] = $algorithmId;
-            $returnData["request_id"] = $unparsedData[0]->request_id;
-            return Response::json($returnData);
-        }
-        return Response::json(array('data'=>$found));
-    }
-    
-    public function getUserdata() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $returnData = DB::table('users')
-                ->where('id','=',Auth::user()->id)
-                ->select('id','first_name','last_name','user_type')
-                ->first();
-            return Response::json(array('state' => 'success', 'message'=>'User data retrieved.','data'=>$returnData));    
-        } else {
-            return Response::json(array('state' => 'failure', 'message'=>'You are not logged in.'));
-        }
-    }
-    public function getGroupcrumb() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $returnData = array();
-            $memberGroups = DB::table('groups')
-                ->join('group_members', function($join)
-                {
-                    $join->on('groups.id', '=', 'group_members.group_id')
-                         ->where('group_members.accepted', '=', 1)
-                         ->where('group_members.member_id', '=', Auth::user()->id);
-                })
-                ->select(
-                    'groups.id as group_id', 
-                    'groups.group_name as group_name',
-                    'group_members.read_last_message as read'
-                )
-                ->get();
-            $returnData["crumb"] = $memberGroups;
-            return Response::json($returnData);
-        } else {
-            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive this data.'));
-        }
-    }
-    public function postDeleteprofilecomment() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $id = Input::get('id');
-            $time = date('Y-m-d H:i:s');
-            DB::update('update profile_discussion set deleted = 1, updated_at = ? where id = ?', array(
-            $time, 
-            $id 
-            ));
-            return Response::json(array('state'=>'success', 'deleted'=>$id));
-        }
-    }
-    public function postDeleteprofilereply() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $id = Input::get('id');
-            $time = date('Y-m-d H:i:s');
-            DB::update('update profile_discussion_replies set deleted = 1, updated_at = ? where id = ?', array(
-            $time, 
-            $id
-            ));
-            return Response::json(array('state'=>'success', 'deleted'=>$id));
-        }
-    }
     public function postDeletecomment() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');
@@ -1222,30 +1203,8 @@ class UsersController extends BaseController {
             return Response::json(array('state'=>'success', 'deleted'=>$id));
         }
     }
-    public function putCommend() {
-        $id = Input::get('id');
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $time = date('Y-m-d H:i:s');
-            $commended = DB::table('user_commendations')
-                ->where('user_id','=', $id)
-                ->where('commendator','=', Auth::user()->id)
-                ->count();
-            if($commended == 1) {
-                DB::delete('delete from user_commendations where user_id = ? and commendator = ?', array($id, Auth::user()->id));
-            } else {
-                DB::insert('insert into user_commendations (user_id, commendator, created_at, updated_at) values (?, ?, ?, ?)', array(
-                    $id,
-                    Auth::user()->id,
-                    $time,
-                    $time)
-                );
-            }
-            $number = DB::table('user_commendations')
-                ->where('user_id','=', $id)
-                ->count();
-            return Response::json(array('state' => 'success', 'number'=>$number));
-        }
-    }
+    
+    
     public function getMessagehistory() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Request::input('id');
@@ -1343,41 +1302,50 @@ class UsersController extends BaseController {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive messages.'));
         }
     }
-    public function postKickfromgroup() {
-        //{id:groupID, userid: userid},
+    public function postMessageuser() {
         if(Auth::check() && Auth::user()->user_type > 0) {
-            $groupId = Request::input('id');
-            $userId = Request::input('userid');
+            
+            $id = Request::input('id');
+            $comment = Request::input('comment');
             $time = date('Y-m-d H:i:s');
-            $count = DB::table('groups')
-                ->where('leader','=',Auth::user()->id)
-                ->where('id','=',$groupId)
-                ->count();
-            $groupName = DB::table('groups')
-                ->where('leader','=',Auth::user()->id)
-                ->where('id','=',$groupId)
-                ->first()
-                ->group_name;
-            if($count==1) {
-                DB::delete('delete from group_members where group_id = ? and member_id = ?', array($groupId, $userId));
-                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
-                    $userId, 
-                    Auth::user()->id,
-                    '/groups/'.$groupId,
-                    "Kicked from group!",
-                    "kicked you from <span><strong>".$groupName."</strong></span>.",
-                    "",
-                    FALSE,
-                    "",
-                    $time,
-                    $time)
-                );
-                return Response::json(array('state'=>'success','message'=>'User kicked.'));
-            } else {
-                return Response::json(array('state'=>'failure','message'=>'Something unexpected happened.'));
-            }
+            DB::insert('insert into private_messages (from_id, to_id, message, created_at, updated_at) values (?, ?, ?, ?, ?)', array(
+                Auth::user()->id,
+                $id,
+                $comment,
+                $time,
+                $time
+            ));
+            DB::update('update private_messages set seen = 1, updated_at = ? where to_id = ? and from_id = ?', array(
+                $time, 
+                Auth::user()->id,
+                $id
+            ));
+            return Response::json(array('state' => 'success', 'message'=>'Message sent.', 'id'=>$id, 'comment'=>$comment, 'time'=>$time));
         } else {
-            return Response::json(array('state'=>'failure','message'=>'You must be logged in to kick people from groups.'));
+            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to send messages.'));
+        }
+    }
+    
+    public function getGroupcrumb() {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $returnData = array();
+            $memberGroups = DB::table('groups')
+                ->join('group_members', function($join)
+                {
+                    $join->on('groups.id', '=', 'group_members.group_id')
+                         ->where('group_members.accepted', '=', 1)
+                         ->where('group_members.member_id', '=', Auth::user()->id);
+                })
+                ->select(
+                    'groups.id as group_id', 
+                    'groups.group_name as group_name',
+                    'group_members.read_last_message as read'
+                )
+                ->get();
+            $returnData["crumb"] = $memberGroups;
+            return Response::json($returnData);
+        } else {
+            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive this data.'));
         }
     }
     public function postAcceptgrouprequest() {
@@ -1512,6 +1480,43 @@ class UsersController extends BaseController {
             }    
         } 
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to accept join requests.'));
+    }  
+    public function postKickfromgroup() {
+        //{id:groupID, userid: userid},
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $groupId = Request::input('id');
+            $userId = Request::input('userid');
+            $time = date('Y-m-d H:i:s');
+            $count = DB::table('groups')
+                ->where('leader','=',Auth::user()->id)
+                ->where('id','=',$groupId)
+                ->count();
+            $groupName = DB::table('groups')
+                ->where('leader','=',Auth::user()->id)
+                ->where('id','=',$groupId)
+                ->first()
+                ->group_name;
+            if($count==1) {
+                DB::delete('delete from group_members where group_id = ? and member_id = ?', array($groupId, $userId));
+                DB::insert('insert into notifications (user_id, who_said, url, title, text, what_was_said, seen, reference, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array(
+                    $userId, 
+                    Auth::user()->id,
+                    '/groups/'.$groupId,
+                    "Kicked from group!",
+                    "kicked you from <span><strong>".$groupName."</strong></span>.",
+                    "",
+                    FALSE,
+                    "",
+                    $time,
+                    $time)
+                );
+                return Response::json(array('state'=>'success','message'=>'User kicked.'));
+            } else {
+                return Response::json(array('state'=>'failure','message'=>'Something unexpected happened.'));
+            }
+        } else {
+            return Response::json(array('state'=>'failure','message'=>'You must be logged in to kick people from groups.'));
+        }
     }
     public function postDenygrouprequest() {
         if(Auth::check() && Auth::user()->user_type > 0) {
@@ -1547,6 +1552,37 @@ class UsersController extends BaseController {
             }    
         } 
         return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to accept join requests.'));
+    }
+    public function postMessagegroup() {
+        if(Auth::check() && Auth::user()->user_type > 0) {
+            $id = Request::input('id');
+            $comment = Request::input('comment');
+            $time = date('Y-m-d H:i:s');
+            
+            $memberCheck = DB::table('group_members')
+                ->where('group_id','=',$id)
+                ->where('member_id','=',Auth::user()->id)
+                ->where('accepted','=',1)
+                ->count();
+            if($memberCheck==1) {
+                DB::insert('insert into group_messages (group_id, user_id, message, created_at, updated_at) values (?, ?, ?, ?, ?)', array(
+                    $id,
+                    Auth::user()->id,
+                    $comment,
+                    $time,
+                    $time
+                ));
+                DB::update('update group_members set read_last_message = 0, updated_at = ? where group_id = ? and accepted = 1 and member_id <> ?', array(
+                    $time, 
+                    $id,
+                    Auth::user()->id
+                ));
+                return Response::json(array('state' => 'success', 'message'=>'Message sent.', 'id'=>$id, 'comment'=>$comment, 'time'=>$time));
+            } 
+            return Response::json(array('state' => 'failure', 'message'=>'You must be a member of the group in order to send messages.'));
+        } else {
+            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to send messages.'));
+        }
     }
     public function getGroupinitialdata() {
         if(Auth::check() && Auth::user()->user_type > 0) {
@@ -1695,60 +1731,6 @@ class UsersController extends BaseController {
             return Response::json($returnData);
         } else {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive messages.'));
-        }
-    }
-    public function postMessagegroup() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            $id = Request::input('id');
-            $comment = Request::input('comment');
-            $time = date('Y-m-d H:i:s');
-            
-            $memberCheck = DB::table('group_members')
-                ->where('group_id','=',$id)
-                ->where('member_id','=',Auth::user()->id)
-                ->where('accepted','=',1)
-                ->count();
-            if($memberCheck==1) {
-                DB::insert('insert into group_messages (group_id, user_id, message, created_at, updated_at) values (?, ?, ?, ?, ?)', array(
-                    $id,
-                    Auth::user()->id,
-                    $comment,
-                    $time,
-                    $time
-                ));
-                DB::update('update group_members set read_last_message = 0, updated_at = ? where group_id = ? and accepted = 1 and member_id <> ?', array(
-                    $time, 
-                    $id,
-                    Auth::user()->id
-                ));
-                return Response::json(array('state' => 'success', 'message'=>'Message sent.', 'id'=>$id, 'comment'=>$comment, 'time'=>$time));
-            } 
-            return Response::json(array('state' => 'failure', 'message'=>'You must be a member of the group in order to send messages.'));
-        } else {
-            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to send messages.'));
-        }
-    }
-    public function postMessageuser() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            
-            $id = Request::input('id');
-            $comment = Request::input('comment');
-            $time = date('Y-m-d H:i:s');
-            DB::insert('insert into private_messages (from_id, to_id, message, created_at, updated_at) values (?, ?, ?, ?, ?)', array(
-                Auth::user()->id,
-                $id,
-                $comment,
-                $time,
-                $time
-            ));
-            DB::update('update private_messages set seen = 1, updated_at = ? where to_id = ? and from_id = ?', array(
-                $time, 
-                Auth::user()->id,
-                $id
-            ));
-            return Response::json(array('state' => 'success', 'message'=>'Message sent.', 'id'=>$id, 'comment'=>$comment, 'time'=>$time));
-        } else {
-            return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to send messages.'));
         }
     }
     public function postSearchgroup() {
@@ -1937,6 +1919,7 @@ class UsersController extends BaseController {
             return Response::json(array('state' => 'success', 'message'=>'Group created.', 'id'=>$returnId));
         }
     }
+    
     public function putWarn() {
     //data: {id: reports[reportsActionTarget].id, warn_id: reports[reportsActionTarget].reported_id},
         if(Auth::check() && Auth::user()->user_type >1) {
@@ -2458,44 +2441,6 @@ class UsersController extends BaseController {
             return Response::json(array("state"=>"failure", "message"=>"Insuficient priviledges."));
         }
         return Response::json(array("state"=>"failure","message"=>"Insuficient priviledges."));
-    }
-    public function postReport() {
-        if(Auth::check() && Auth::user()->user_type > 0) {
-            
-            $user_id = Request::input('user_id');
-            $reported_id = Request::input('reported_id');
-            $tbl = Request::input('table');
-            $reported_user_id = Request::input('reported_user_id');
-            $user_reason = Request::input('user_reason');
-            $user_description = Request::input('user_description');
-            $time = date('Y-m-d H:i:s');
-            
-            $count = DB::table('reports')
-                ->where('tbl','=',$tbl)
-                ->where('user_id','=',$user_id)
-                ->where('reported_user_id','=',$reported_user_id)
-                ->where('reported_id','=',$reported_id)
-                ->count();
-            
-            if($count == 0) {
-                
-                DB::insert('insert into reports (user_id, reported_id, tbl, reported_user_id, user_reason, user_description, created_at, updated_at) values (?, ?, ?, ?, ?, ?, ?, ?)', array(
-                    $user_id,
-                    $reported_id,
-                    $tbl,
-                    $reported_user_id,
-                    $user_reason,
-                    $user_description,
-                    $time,
-                    $time
-                ));
-                
-            }
-            
-            return Response::json(array('state' => 'success', 'message'=>$count));
-            
-        }
-        return Response::json(array('state' => 'failure', 'message'=>'Insuficient priviledges.'));
     }
 }
 

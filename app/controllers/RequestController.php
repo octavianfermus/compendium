@@ -3,7 +3,7 @@
 use Illuminate\Auth\Reminders\RemindableTrait;
 use Illuminate\Auth\Reminders\RemindableInterface;
 
-class RequestsController extends BaseController {
+class RequestController extends BaseController {
     
     public function getAll() {
         if(Auth::check() && Auth::user()->user_type > 0) {

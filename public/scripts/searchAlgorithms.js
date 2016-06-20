@@ -231,7 +231,7 @@ $(document).ready(function () {
         
         $.ajax({
             method: 'post',
-            url: root + "/users/report",
+            url: root + "/reports/report",
             dataType: "json",
             data: data,
             success: function (data) {

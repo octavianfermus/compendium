@@ -532,7 +532,7 @@ $(document).ready(function () {
         
         $.ajax({
             method: 'post',
-            url: globalSettings.getRoot() + "/users/report",
+            url: globalSettings.getRoot() + "/reports/report",
             dataType: "json",
             data: data,
             success: function (data) {

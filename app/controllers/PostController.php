@@ -385,6 +385,28 @@ class PostController extends BaseController {
             }
         }
     }
+    public function getTemplatedata() {
+        $algorithmId = Request::input('id');
+        $returnData = array();
+        $found = DB::table('algorithms')
+                    ->where('id', '=', $algorithmId)
+                    ->where('template', '=', 1)
+                    ->count();
+        if($found==1) {
+            $unparsedData = DB::select('select * from algorithms where id = ?', array($algorithmId));
+            $returnData["name"] = $unparsedData[0]->name;
+            $returnData["original_link"] = $unparsedData[0]->original_link;
+            $returnData["content"] = $unparsedData[0]->content;
+            $returnData["description"] = $unparsedData[0]->description;
+            $returnData["language"] = $unparsedData[0]->language;
+            $returnData["creator_id"] = $unparsedData[0]->user_id;
+            $returnData["algorithm_id"] = $algorithmId;
+            $returnData["request_id"] = $unparsedData[0]->request_id;
+            return Response::json($returnData);
+        }
+        return Response::json(array('data'=>$found));
+    }
+    
 }
 
 ?>
