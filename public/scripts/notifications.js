@@ -12,7 +12,7 @@ $(document).ready(function() {
                         $("span.messageCount#messageNotifCount").removeClass("hidden");
                     }
                     if(data.groupCount > 0) {
-                        $("span.messageCount#groupNotifCount").html((data.messageCount > 99 ? "99+" : data.messageCount));
+                        $("span.messageCount#groupNotifCount").html((data.groupCount > 99 ? "99+" : data.groupCount));
                         $("span.messageCount#groupNotifCount").removeClass("hidden");
                     }
                     populateNotificationsBar();
@@ -55,7 +55,7 @@ $(document).ready(function() {
                 var clickedNotification = notifications[$(this).closest("li[listindex]").attr("listindex")];
                 jQuery.ajax({
                     method: 'put',
-                    url: root + "/users/checknotification",
+                    url: root + "/notifications/checknotification",
                     data: {id:clickedNotification.id},
                     dataType: "json",
                     success: function (data) {
@@ -92,7 +92,7 @@ $(document).ready(function() {
                     var listindex = $(this).closest('.extendedNotification').attr("listindex");
                     jQuery.ajax({
                         method: 'delete',
-                        url: root + "/users/deletenotification",
+                        url: root + "/notifications/delete",
                         data: {id:notifications[listindex].id},
                         dataType: "json",
                         success: function (data) {
@@ -104,7 +104,7 @@ $(document).ready(function() {
                     var listindex = $(this).closest('.extendedNotification').attr("listindex");
                     jQuery.ajax({
                         method: 'put',
-                        url: root + "/users/checknotification",
+                        url: root + "/notifications/checknotification",
                         data: {id:notifications[listindex].id},
                         dataType: "json",
                         success: function (data) {
@@ -124,5 +124,5 @@ $(document).ready(function() {
     });
     setInterval(function() {
         startAjax();
-    }, 10000);
+    }, 30000);
 });

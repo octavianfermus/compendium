@@ -1,8 +1,5 @@
 <?php
 
-use Illuminate\Auth\Reminders\RemindableTrait;
-use Illuminate\Auth\Reminders\RemindableInterface;
-
 class RequestController extends BaseController {
     
     public function getAll() {

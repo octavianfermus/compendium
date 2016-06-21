@@ -1,8 +1,5 @@
 <?php
 
-use Illuminate\Auth\Reminders\RemindableTrait;
-use Illuminate\Auth\Reminders\RemindableInterface;
-
 class NotificationsController extends BaseController {
     
     public function putSeeall() {
@@ -26,7 +23,7 @@ class NotificationsController extends BaseController {
             return Response::json(array('state'=>'success', 'checked_out'=>$id));
         }
     }
-    public function deleteDeletenotification() {
+    public function deleteDelete() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Input::get('id');
             DB::delete('delete from notifications where id = ? and user_id = ?', array($id, Auth::user()->id));

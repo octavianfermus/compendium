@@ -65,7 +65,6 @@ Route::get('posts/{id}', function ($algorithm_id) {
         $found = DB::table('algorithms')
             ->where('id', '=', $algorithm_id)
             ->where('template', '=', 0)
-            ->where('user_id', '=', Auth::user()->id)
             ->count();
         if($found==1) {
             if(Auth::check()) {

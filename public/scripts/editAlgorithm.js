@@ -8,12 +8,10 @@ $(document).ready(function() {
         getPostData = function () {
         jQuery.ajax({
             method: 'get',
-            url: "../templatedata",
+            url: root + "/post/template",
             dataType: "json",
             data: {id: postId},
             success: function (data) {
-                console.log(data);
-
                 $("input[name='algorithm_name']").val(data.name);
                 $("input[name='original_link']").val(data.original_link);
                 $("textarea[name='algorithm_description']").val(data.description);
@@ -121,13 +119,12 @@ $(document).ready(function() {
                 }
             };
         jQuery.ajax({
-            method: 'PUT',
-            url: "../deletealgorithm",
+            method: 'DELETE',
+            url: root + "/delete",
             dataType: "json",
             data: data,
             success: function (data) {
                 window.location.href = "http://"+window.location.href.split("/")[2];
-                console.log(data);
             },
             error: function (data) {
                 console.log("error");

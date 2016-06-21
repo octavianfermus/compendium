@@ -26,20 +26,29 @@ $(document).ready(function () {
         y = null,
         decorator,
         editor,
-        createEditor = function() {
+        onMouseUpdate = function (e) {
+            x = e.pageX;
+            y = e.pageY;
+        },
+        getMouseX = function () {
+            return x;
+        },
+        getMouseY = function () {
+            return y;
+        },
+        createEditor = function () {
             $('#postedAlgorithmArea').ace({
                 theme: 'monokai',
                 height: 400
             });
-
-
+            
             decorator = $('#postedAlgorithmArea').data('ace');
             editor = decorator.editor.ace;
 
             editor.setReadOnly(true);
             editor.setValue(content);
             
-            setTimeout(function() {
+            setTimeout(function () {
                 $.each($(".ace_gutter-cell"), function (index, value) {
                     $(value).attr("tabindex", index);
                 });
@@ -54,7 +63,7 @@ $(document).ready(function () {
                 });
             }, 750);
         },
-        recreate = function() {
+        recreate = function () {
             $.each($(".ace_gutter-cell"), function (index, value) {
                 $(value).attr("tabindex", index);
             });
@@ -69,7 +78,7 @@ $(document).ready(function () {
                 gutterCellFunction();
             });
         },
-        gutterCellFunction = function() {
+        gutterCellFunction = function () {
             $(".lineComments").remove();
             $("body").append('<div class="lineComments"></div>');
             $(".lineComments").css({
@@ -95,12 +104,13 @@ $(document).ready(function () {
                     $(".lineComments textarea").val("");
                     $.ajax({
                         method: 'post',
-                        url: "../users/commentline",
+                        url: root + "/post/commentline",
                         dataType: "json",
                         data: {id: postId, line: currentLineSubmitter, comment: comment},
                         success: function (data) {
                             parseLineComments(data);
                             populateInlineUI();
+                            recreate();
                         },
                         fail: function (data) {
 
@@ -112,22 +122,12 @@ $(document).ready(function () {
                 $(".lineComments").remove();
             });
         },
-        onMouseUpdate = function (e) {
-            x = e.pageX;
-            y = e.pageY;
-        },
-        getMouseX = function () {
-            return x;
-        },
-        getMouseY = function () {
-            return y;
-        },
         voteLineCommentAjax = function (vote, comment_id, algorithm_id, tabindex) {
             $.ajax({
                 method: 'post',
-                url: root + "/users/voteinlinecomment",
+                url: root + "/post/votecommentline",
                 dataType: "json",
-                data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
+                data: {comment_id: comment_id, vote: vote},
                 success: function (data) {
                     lineComments[currentLineSubmitter][tabindex].upvotes = data.upvotes;
                     lineComments[currentLineSubmitter][tabindex].downvotes = data.downvotes;
@@ -142,7 +142,7 @@ $(document).ready(function () {
         voteCommentAjax = function (vote, comment_id, algorithm_id, tabindex) {
             $.ajax({
                 method: 'post',
-                url: root +"/users/votecomment",
+                url: root + "/post/votecomment",
                 dataType: "json",
                 data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
                 success: function (data) {
@@ -160,10 +160,10 @@ $(document).ready(function () {
                 $(".lineComments .conversation").append("<p>No other comments on this line yet..</p>");
             } else {
                 $.each(lineComments[currentLineSubmitter], function (index, value) {
-                    if(!value.done) {
+                    if (!value.done) {
                         value.done = true;
                         value.text = value.text.split("\n");
-                        $.each(value.text,function(index,singular) {
+                        $.each(value.text, function (index, singular) {
                             value.text[index] = globalSettings.htmlEncode(singular);
                         });
                         value.text = value.text.join("<br>");
@@ -172,7 +172,14 @@ $(document).ready(function () {
                         '<p><span class="person"><a href="../profile/' + value.user_id + '">' + value.name + '</a></span> <span class="created"> on ' + value.created_at + '</span></p>' +
                         '<p>' + (parseInt(value.deleted, 10) === 1 ? '<em>This comment was deleted.</em>' : value.text) + '</p>' +
                         (parseInt(value.deleted, 10) === 0 ?
-                                '<p><a href="javascript:void(0)" class="likeLineComment">Like <span class="green">(' + value.upvotes + ')</span></a> | <a href="javascript:void(0)" class="dislikeLineComment">Dislike <span class="red">(' + value.downvotes + ')</span></a> ' + (parseInt(value.deleted, 10) === 0 ? (value.user_id !== globalSettings.getUserData().id ? (parseInt(value.reported, 10) === 0 ? ' | <a href="javascript:void(0)" class="reportLineComment">Report</a>' : '<p><strong><em>Your report was successfully submitted. Thank you!</em></strong></p>') : "") : '<a href="javascript:void(0)" class="deleteLineComment">Delete</a>') + '</p><hr>' : "<hr>"));
+                                '<p><a href="javascript:void(0)" class="likeLineComment">Like <span class="green">(' + value.upvotes + ')</span></a> | <a href="javascript:void(0)" class="dislikeLineComment">Dislike <span class="red">(' + value.downvotes + ')</span></a> ' +
+                                (value.user_id !== globalSettings.getUserData().id ?
+                                        (parseInt(value.reported, 10) === 0 ?
+                                                ' | <a href="javascript:void(0)" class="reportLineComment">Report</a>' :
+                                                '<p><strong><em>Your report was successfully submitted. Thank you!</em></strong></p>') :
+                                        ' | <a href="javascript:void(0)" class="deleteLineComment">Delete</a>') +
+                                '</p><hr>' :
+                                "<hr>"));
                 });
                 $(".reportLineComment").click(function () {
                     reportType = "inline_algorithm_comments";
@@ -182,8 +189,8 @@ $(document).ready(function () {
                 $(".deleteLineComment").click(function () {
                     var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
                     $.ajax({
-                        method: 'post',
-                        url: root + "/users/deletelinecomment",
+                        method: 'delete',
+                        url: root + "/post/deletecommentline",
                         dataType: "json",
                         data: {id: lineComments[currentLineSubmitter][tabindex].id},
                         success: function (data) {
@@ -215,7 +222,7 @@ $(document).ready(function () {
         voteReplyAjax = function (vote, comment_id, algorithm_id, tabindex, sectabindex) {
             $.ajax({
                 method: 'post',
-                url: root + "/users/votereply",
+                url: root + "/post/votereply",
                 dataType: "json",
                 data: {comment_id: comment_id, vote: vote, algorithm_id: algorithm_id},
                 success: function (data) {
@@ -231,7 +238,7 @@ $(document).ready(function () {
             var toAppend = "";
             $.each(comments, function (index, value) {
                 value.text = value.text.split("\n");
-                $.each(value.text,function(index,singular) {
+                $.each(value.text, function (index, singular) {
                     value.text[index] = globalSettings.htmlEncode(singular);
                 });
                 value.text = value.text.join("<br>");
@@ -242,7 +249,7 @@ $(document).ready(function () {
                             '<p><a href="javascript:void(0)" class="likeComment">Like <span class="green">(' + value.upvotes + ')</span></a> | <a href="javascript:void(0)" class="dislikeComment">Dislike <span class="red">(' + value.downvotes + ')</span></a>' + (value.canDelete === false ? (value.reported === 0 ? '| <a href="javascript:void(0)" class="reportComment">Report</a>' : "<p><strong><em>Your report was successfully submitted. Thank you!</em></strong></p>") : '| <a href="javascript:void(0)" class="deleteComment">Delete</a>') + ' </p><hr>' : "<hr>");
                 $.each(value.replies, function (secIndex, secValue) {
                     secValue.text = secValue.text.split("\n");
-                    $.each(secValue.text,function(index,singular) {
+                    $.each(secValue.text, function (index, singular) {
                         secValue.text[index] = globalSettings.htmlEncode(singular);
                     });
                     secValue.text = secValue.text.join("<br>");
@@ -273,7 +280,7 @@ $(document).ready(function () {
                 var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
                 $.ajax({
                     method: 'post',
-                    url: root + "/users/deletecomment",
+                    url: root + "/post/deletecomment",
                     dataType: "json",
                     data: {id: comments[tabindex].id},
                     success: function (data) {
@@ -290,7 +297,7 @@ $(document).ready(function () {
                     sectabindex = $(this).closest(".reply[parent='noparent']").attr("sectabindex");
                 $.ajax({
                     method: 'post',
-                    url: root + "/users/deletereply",
+                    url: root + "/post/deletereply",
                     dataType: "json",
                     data: {id: comments[tabindex].replies[sectabindex].id},
                     success: function (data) {
@@ -336,7 +343,7 @@ $(document).ready(function () {
                             $(".send-message textarea").val("");
                             $.ajax({
                                 method: 'post',
-                                url: "../users/respondtocomment",
+                                url: root + "/post/reply",
                                 dataType: "json",
                                 data: {id: postId, commentid: comments[tabindex].id, comment: comment},
                                 success: function (data) {
@@ -435,7 +442,7 @@ $(document).ready(function () {
         voteAlgorithmAjax = function (vote) {
             $.ajax({
                 method: 'post',
-                url: "../users/votealgorithm",
+                url: root + "/post/vote",
                 dataType: "json",
                 data: {id: postId, vote: vote},
                 success: function (data) {
@@ -449,13 +456,12 @@ $(document).ready(function () {
         };
     document.addEventListener('mousemove', onMouseUpdate, false);
     document.addEventListener('mouseenter', onMouseUpdate, false);
-    $(window).resize( function() {
+    $(window).resize(function () {
         var newWidth = $(".col-md-12").width();
         $(".ace_editor").width(newWidth);
     });
-    setInterval(function() {
-        if($(".ace_gutter-cell[tabindex]").length == 0) {
-            console.log("recreating");
+    setInterval(function () {
+        if ($(".ace_gutter-cell[tabindex]").length === 0) {
             recreate();
         }
     }, 0);
@@ -472,7 +478,7 @@ $(document).ready(function () {
             $(".send-message textarea").val("");
             $.ajax({
                 method: 'post',
-                url: "../users/discussalgorithm",
+                url: root + "/post/comment",
                 dataType: "json",
                 data: {id: postId, comment: comment},
                 success: function (data) {
