@@ -1,10 +1,11 @@
 $(document).ready(function() {
-    var root = "http://localhost:8080",
+    var root = globalSettings.getRoot(),
         groups = undefined,
         lastSearch = "",
         searchResults = undefined,
         manageFilters = [],    
         crumbs = undefined,
+        timestamp = "",
         populateCrumbs = function(data) {
             var toAppend ="",
                 groupID = undefined;
@@ -23,9 +24,16 @@ $(document).ready(function() {
         crumbAjax = function() {
             $.ajax({
                 method: 'get',
-                url: root+'/users/groupcrumb',
+                url: root + '/messaging/groupcrumb',
+                data: {
+                    timestamp : timestamp
+                },
                 success: function(data) {
-                    populateCrumbs(data.crumb);
+                    
+                    if(data.timestamp !== timestamp) {
+                        timestamp = data.timestamp;
+                        populateCrumbs(data.crumb);
+                    }
                 },
                 error: function(data) {
                     console.log(data);
@@ -64,8 +72,8 @@ $(document).ready(function() {
             $(".cancelRequestButton").click(function() {
                 var index = $(this).closest(".styled-list-member").attr("listindex");
                 $.ajax({
-                    method:'post',
-                    url: root+'/users/cancelrequest',
+                    method:'delete',
+                    url: root+'/messaging/cancelrequest',
                     data: {id:data[index].group_id},
                     success: function(datas) {
                         getGroups();
@@ -91,7 +99,7 @@ $(document).ready(function() {
                 var index = $(this).closest(".styled-list-member").attr("listindex");
                 $.ajax({
                     method:'post',
-                    url: root+'/users/leavegroup',
+                    url: root+'/messaging/leavegroup',
                     data: {id:data[index].group_id},
                     success: function(datas) {
                         getGroups();
@@ -107,7 +115,7 @@ $(document).ready(function() {
         getGroups = function() {
             $.ajax({
                 method: 'get',
-                url: root+"/users/getmygroups",
+                url: root+"/messaging/groups",
                 success: function(data) {
                     groups = data;
                     populateGroups(data);
@@ -158,7 +166,7 @@ $(document).ready(function() {
         ajaxSearch = function() {
             $.ajax({
                 method:'post',
-                url: root+"/users/searchgroup",
+                url: root+"/messaging/searchgroup",
                 dataType: "json",
                 data: {search: lastSearch},
                 success: function(data) {
@@ -172,7 +180,6 @@ $(document).ready(function() {
         },
         filter = function() {
             manageFilters = $("#manageGroupsFilter").val().trim().split(",");
-            console.log(manageFilters,groups);
             if(manageFilters.length>0 && manageFilters[0].trim().length > 0){
                 var filtered = [];
                 $.each(groups, function(index,value) {
@@ -227,7 +234,7 @@ $(document).ready(function() {
                 var index = $(this).closest(".styled-list-member").attr("listindex");
                 $.ajax({
                     method:'post',
-                    url: root+'/users/joingroup',
+                    url: root+'/messaging/joingroup',
                     data: {id:data[index].id},
                     success: function(datas) {
                         if(datas.accepted == 1) {
@@ -246,8 +253,8 @@ $(document).ready(function() {
             $(".cancelRequestButton").click(function() {
                 var index = $(this).closest(".styled-list-member").attr("listindex");
                 $.ajax({
-                    method:'post',
-                    url: root+'/users/cancelrequest',
+                    method:'delete',
+                    url: root+'/messaging/cancelrequest',
                     data: {id:data[index].id},
                     success: function(datas) {
                         ajaxSearch();
@@ -307,7 +314,7 @@ $(document).ready(function() {
         } else {
             jQuery.ajax({
                 method: 'post',
-                url: root+"/users/creategroup",
+                url: root+"/messaging/creategroup",
                 dataType: "json",
                 data: {name:name,description:description,type:type},
                 success: function (data) {
@@ -337,5 +344,5 @@ $(document).ready(function() {
     });
     
     crumbAjax();
-    setInterval(function() {crumbAjax();}, 10000);
+    setInterval(function() {crumbAjax();}, 2000);
 });

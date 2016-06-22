@@ -46,7 +46,7 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Profile <span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li>{{ HTML::link('profile/me', 'Profile') }}</li>
-                                <li>@if(Auth::user()->user_type==2 || Auth::user()->user_type==3) {{ HTML::link('users/admin', 'Admin Page') }} @endif</li>
+                                <li>@if(Auth::user()->user_type==2 || Auth::user()->user_type==3) {{ HTML::link('admin', 'Admin Page') }} @endif</li>
                                 <li role="separator" class="divider"></li>
                                 <li>{{ HTML::link('users/logout', 'Logout') }}</li>
                             </ul>

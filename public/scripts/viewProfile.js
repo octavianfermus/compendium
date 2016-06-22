@@ -22,7 +22,7 @@ $(document).ready(function () {
         voteProfileReplyAjax = function (vote, comment_id, profile_id, tabindex, sectabindex) {
             $.ajax({
                 method: 'post',
-                url: "../users/voteprofilereply",
+                url: root + "/users/votereply",
                 dataType: "json",
                 data: {comment_id: comment_id, vote: vote, profile_id: profile_id},
                 success: function (data) {
@@ -37,7 +37,7 @@ $(document).ready(function () {
         voteProfileCommentAjax = function (vote, comment_id, profile_id, tabindex) {
             $.ajax({
                 method: 'post',
-                url: "../users/voteprofilecomment",
+                url: root + "/users/votecomment",
                 dataType: "json",
                 data: {comment_id: comment_id, vote: vote, profile_id: profile_id},
                 success: function (data) {
@@ -88,7 +88,7 @@ $(document).ready(function () {
                 var tabindex = $(this).closest(".reply[parent='parent']").attr("tabindex");
                 $.ajax({
                     method: 'post',
-                    url: root + "/users/deleteprofilecomment",
+                    url: root + "/users/deletecomment",
                     dataType: "json",
                     data: {id: comments[tabindex].id},
                     success: function (data) {
@@ -105,7 +105,7 @@ $(document).ready(function () {
                     sectabindex = $(this).closest(".reply[parent='noparent']").attr("sectabindex");
                 $.ajax({
                     method: 'post',
-                    url: root + "/users/deleteprofilereply",
+                    url: root + "/users/deletereply",
                     dataType: "json",
                     data: {id: comments[tabindex].replies[sectabindex].id},
                     success: function (data) {
@@ -151,7 +151,7 @@ $(document).ready(function () {
                             $(".send-message textarea").val("");
                             $.ajax({
                                 method: 'post',
-                                url: "../users/respondtoprofilecomment",
+                                url: root + "/users/reply",
                                 dataType: "json",
                                 data: {id: profileId, commentid: comments[tabindex].id, comment: comment},
                                 success: function (data) {
@@ -268,8 +268,8 @@ $(document).ready(function () {
         },
         getProfileDetails = function () {
             $.ajax({
-                method: 'post',
-                url: root + "/profiledetails",
+                method: 'get',
+                url: root + "/users/profiledetails",
                 dataType: "json",
                 data: {id: profileId},
                 success: function (data) {
@@ -325,7 +325,7 @@ $(document).ready(function () {
             $(".send-message textarea").val("");
             $.ajax({
                 method: 'post',
-                url: "../users/discussprofile",
+                url: root + "/users/comment",
                 dataType: "json",
                 data: {id: profileId, comment: comment},
                 success: function (data) {

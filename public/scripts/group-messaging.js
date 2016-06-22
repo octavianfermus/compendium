@@ -65,7 +65,7 @@ $(document).ready(function() {
                     userid = requests[listindex].id;
                 $.ajax({
                     method: 'post',
-                    url: root+'/users/acceptgrouprequest',
+                    url: root+'/messaging/acceptgrouprequest',
                     dataType:"json",
                     data: {id:groupID, userid: userid},
                     success: function(data) {
@@ -141,7 +141,7 @@ $(document).ready(function() {
                     userid = members[listindex].id;
                 $.ajax({
                     method: 'post',
-                    url: root+'/users/kickfromgroup',
+                    url: root+'/messaging/kickfromgroup',
                     dataType:"json",
                     data: {id:groupID, userid: userid},
                     success: function(data) {
@@ -155,7 +155,7 @@ $(document).ready(function() {
                     userid = members[listindex].id;
                 $.ajax({
                     method: 'post',
-                    url: root+'/users/promotetoleader',
+                    url: root+'/messaging/promotetoleader',
                     dataType:"json",
                     data: {id:groupID, userid: userid},
                     success: function(data) {
@@ -176,7 +176,7 @@ $(document).ready(function() {
             $(".leaveGroupConfirm").click(function() {
                 $.ajax({
                     method: 'post',
-                    url: root+'/users/leavegroup',
+                    url: root+'/messaging/leavegroup',
                     dataType:"json",
                     data: {id:groupID},
                     success: function(data) {
@@ -218,7 +218,7 @@ $(document).ready(function() {
         getPostData = function () {
             jQuery.ajax({
                 method: 'get',
-                url: root+"/users/groupinitialdata?id="+groupID,
+                url: root+"/messaging/groupinitialdata?id="+groupID,
                 success: function (data) {
                     leader_id = data.leader_id;
                     $("#groupName").html(data.groupName);
@@ -244,7 +244,7 @@ $(document).ready(function() {
                             $(".confirmConvert").click(function() {
                                 $.ajax({
                                     method: 'post',
-                                    url: root+'/users/convertgrouppublic',
+                                    url: root+'/messaging/convertgrouppublic',
                                     dataType:"json",
                                     data: {id:groupID},
                                     success: function(data) {
@@ -272,7 +272,7 @@ $(document).ready(function() {
                             $(".confirmConvert").click(function() {
                                 $.ajax({
                                     method: 'post',
-                                    url: root+'/users/convertgroupprivate',
+                                    url: root+'/messaging/convertgroupprivate',
                                     dataType:"json",
                                     data: {id:groupID},
                                     success: function(data) {
@@ -312,7 +312,7 @@ $(document).ready(function() {
             $(".send-message input").val("");
             jQuery.ajax({
                 method: 'post',
-                url: root+"/users/messagegroup",
+                url: root+"/messaging/messagegroup",
                 dataType: "json",
                 data: {id: groupID, comment: comment},
                 success: function(data) {

@@ -1,25 +1,25 @@
 $(document).ready(function () {
     var conversationID = window.location.href.split("#")[0].split("/")[window.location.href.split("/").length-1],
-        root = "http://localhost:8080",
+        root = globalSettings.getRoot(),
         messageHistory = undefined,
         crumbs = undefined,
         initiated = false,
-        timestamp = undefined,
+        timestamp = 0,
         userlist = undefined,
         populateCrumbs = function(data) {
             var toAppend ="";
-                crumbs = data;
-                $.each(crumbs, function(index, value) {
+            crumbs = data;
+            $.each(crumbs, function(index, value) {
 
-                    toAppend +='<li '+(value.link == conversationID ? 'class="selected"':(value.seen == 0 ? 'class="notSeen"': ""))+'>'+
-                        '<a href="'+root+'/messages/'+value.link +'">'+
-                        '<span>'+value.name+'</span>'+
-                        '<span style="float:right; margin-right: 4px" class="newSpan">'+(value.seen == 0 ? 'New!' : "")+'</span>' +
-                        '<p>'+value.from + ": " + value.message+'</p>'+
-                        '</a>'+
-                        '</li>';
-                });
-                $(".sidebar ul.messageList").html(toAppend);
+                toAppend +='<li '+(value.link == conversationID ? 'class="selected"':(value.seen == 0 ? 'class="notSeen"': ""))+'>'+
+                    '<a href="'+root+'/messages/'+value.link +'">'+
+                    '<span>'+value.name+'</span>'+
+                    '<span style="float:right; margin-right: 4px" class="newSpan">'+(value.seen == 0 ? 'New!' : "")+'</span>' +
+                    '<p>'+value.from + ": " + value.message+'</p>'+
+                    '</a>'+
+                    '</li>';
+            });
+            $(".sidebar ul.messageList").html(toAppend);
         },
         populateMessages = function() {
             var toAppend = "",
@@ -54,30 +54,14 @@ $(document).ready(function () {
         getPostData = function () {
             jQuery.ajax({
                 method: 'get',
-                url: root+"/users/messagehistory?id="+conversationID,
+                url: root+"/messaging/messagehistory",
+                data: {id: conversationID, timestamp: timestamp},
                 success: function (data) {
                     if(timestamp!== data.timestamp) {
                         timestamp = data.timestamp;
-                        if(data.history) {
-                            $("#talkingTo").html("<a href='"+root+"/profile/"+conversationID+"'>"+data.talkingTo+"</a>");
-                            messageHistory = data.history;
-                            $(".main .conversation").removeClass("hidden"); 
-                            populateMessages();
-                            $(".closeConversation").removeClass("hidden");
-                        } else {
-                            if($(".main .conversation").length>0) {
-                                $(".main .conversation").remove(); 
-                                $("#allMessagesBox").removeClass("hidden");
-                                $.ajax({
-                                    method: 'get',
-                                    url: root+'/userlist',
-                                    success: function(data) {
-                                       userlist = data;
-                                    }
-                                });
-                                    
-                            };
-                        }
+                        $("#talkingTo span").html("<a href='"+root+"/profile/"+conversationID+"'>"+data.talkingTo+"</a>");
+                        messageHistory = data.history;
+                        populateMessages();
                         populateCrumbs(data.crumb);
                     }
                 },
@@ -91,18 +75,20 @@ $(document).ready(function () {
     getPostData();
     setInterval(function() {
         getPostData();
-    }, 2000);
+    }, 500);
     $(".send-message #sendButton .btn").click(function() {
         var comment = $(".send-message input").val().trim();
         if(comment.length>0) {
             $(".send-message input").val("");
             jQuery.ajax({
                 method: 'post',
-                url: root+"/users/messageuser",
+                url: root+"/messaging/messageuser",
                 dataType: "json",
                 data: {id: conversationID, comment: comment},
                 success: function(data) {
-                   $(".boxWrapper p")[$(".boxWrapper p").length-1].scrollIntoView();
+                    if($(".boxWrapper p").length) {
+                        $(".boxWrapper p")[$(".boxWrapper p").length-1].scrollIntoView();
+                    }
                 },
                 error: function(data) {
                     
@@ -113,21 +99,19 @@ $(document).ready(function () {
     $(".search-user #searchUserButton .btn").click(function() {
         var comment = $(".search-user input").val().trim(),
             toAppend = "";
-        if(comment.length>0) {
-            $(".search-user input").val("");
-            $.each(userlist,function(index,value) {
-                if(comment.toLowerCase().split(" ").indexOf(value.first_name.toLowerCase())>-1 ||
-                   comment.toLowerCase().split(" ").indexOf(value.last_name.toLowerCase())>-1) {
-                    toAppend +='<div class="boxWrapper">'+
-                        '<p><span>Name: </span>'+value.last_name+ " " +value.first_name + '</p>'+
-                        '<a href="'+root+'/profile/'+value.id+'">See profile</a> | <a href="'+root+'/messages/'+value.id+'">Send message</a>'+
-                        '</div>';
-                }
-            });
-            if(toAppend == "") {
-                toAppend = "<div class='boxwrapper'><p>No results based on your queries. Please try again.</p></div>";
+        $(".search-user input").val("");
+        $.each(userlist,function(index,value) {
+            if(comment === "" || comment.toLowerCase().split(" ").indexOf(value.first_name.toLowerCase())>-1 ||
+               comment.toLowerCase().split(" ").indexOf(value.last_name.toLowerCase())>-1) {
+                toAppend +='<div class="boxWrapper">'+
+                    '<p><span>Name: </span>'+value.last_name+ " " +value.first_name + '</p>'+
+                    '<a href="'+root+'/profile/'+value.id+'">See profile</a> | <a href="'+root+'/messages/'+value.id+'">Send message</a>'+
+                    '</div>';
             }
-            $(".searchResults").html(toAppend);
+        });
+        if(toAppend == "") {
+            toAppend = "<div class='boxwrapper'><p>No results based on your queries. Please try again.</p></div>";
         }
+        $(".searchResults").html(toAppend);
     });
 });

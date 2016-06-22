@@ -25,9 +25,16 @@ Route::controller('post', 'PostController');
 Route::controller('notifications', 'NotificationsController');
 Route::controller('requests', 'RequestController');
 Route::controller('reports', 'ReportController');
+Route::controller('messaging', 'MessagingController');
+Route::controller('administrative', 'AdminController');
 
-Route::get('check', function() {
-    return View::make('check');
+Route::get('admin', function() {
+    if(Auth::check() && Auth::user()->user_type > 1) {
+        return View::make('admin');
+    } else {
+        return Redirect::to('/')
+            ->withErrors(["This account does not have the required privilege."]);
+    }
 });
 
 Route::get('contact', function() {
@@ -145,169 +152,6 @@ Route::get('userlist', function() {
     return Response::json($returnData);
 });
 
-Route::post('profiledetails', function() {
-    if(Auth::user()->user_type == 0) {
-        Session::flush();
-        return Redirect::to('/')
-            ->withErrors(["This account is currently banned."]);
-    }
-    $id = Input::get('id');
-    $profile_id = Request::input('profile_id');
-    if($id == "me") {
-        $id = Auth::user()->id;
-    }
-    $returnData = array();
-    $returnData["requested_user_id"]=$id;
-    $found = DB::table('users')
-        ->where('id','=', $id)
-        ->first();
-    if($found) {
-        $returnData["userFound"]=TRUE;
-        $returnData["userData"]["firstName"]=$found->first_name;
-        $returnData["userData"]["lastName"]=$found->last_name;
-        $returnData["userData"]["reported"] = DB::table('reports')
-                ->where('user_id','=',Auth::user()->id)
-                ->where('tbl','=','users')
-                ->where('reported_id','=',$id)
-                ->where('reported_user_id','=',$id)
-                ->count();
-        $returnData["userData"]["commendations"]["number"] = DB::table('user_commendations')
-            ->where('user_id','=', $id)
-            ->count();
-        if(Auth::check()) {
-            $commended = DB::table('user_commendations')
-                ->where('user_id','=', $id)
-                ->where('commendator','=', Auth::user()->id)
-                ->count();
-            if($commended == 1) {
-                $returnData["userData"]["commendations"]["commendedByYou"] = TRUE; 
-            } else {
-                $returnData["userData"]["commendations"]["commendedByYou"] = FALSE;
-            }
-            if($id != Auth::user()->id) {
-                $returnData["userData"]["commendations"]["youCantCommend"] = FALSE;
-            } else {
-                $returnData["userData"]["commendations"]["youCantCommend"] = TRUE;
-            }
-        } else {
-            $returnData["userData"]["commendations"]["commendedByYou"] = FALSE;
-            $returnData["userData"]["commendations"]["youCantCommend"] = TRUE;
-        }
-        $algorithms_unfiltered = DB::table('algorithms')
-            ->where('user_id', '=', $id)
-            ->where('template','=',0)
-            ->get();
-        $algorithms = array();
-        foreach ($algorithms_unfiltered as $array) {
-            $singular = array();
-            $singular["id"] = $array->id;
-            $singular["name"] = $array->name;
-            $singular["language"] = $array->language;
-            $singular["description"] = $array->description;
-            $singular["template"] = $array->template;
-            $singular["upvotes"] = $array->upvotes;
-            $singular["downvotes"] = $array->downvotes;
-            $singular["reported"] = DB::table('reports')
-                ->where('user_id','=',Auth::user()->id)
-                ->where('tbl','=','algorithms')
-                ->where('reported_id','=',$array->id)
-                ->where('reported_user_id','=',$array->user_id)
-                ->count();
-            $singular["views"] = $array->views;
-            $singular["comments"] = DB::table('algorithm_discussion')
-                ->where('algorithm_id','=',$array->id)
-                ->count();
-            $algorithms[]=$singular;
-        }
-        $returnData["algorithms"]=$algorithms;
-        
-        $comments_unfiltered = DB::table('profile_discussion')->where('profile_id', '=', $id)->get();
-        $comments = array();
-        foreach ($comments_unfiltered as $array) {
-            $singular = array();
-            $singular["id"] = $array->id;
-            $singular["user_id"] = $array->user_id;
-            $singular["text"] = $array->text;
-            $singular["deleted"] = $array->deleted;
-            if($singular["user_id"] == Auth::user()->id) {
-                $singular["canDelete"] = true;
-            } else {
-                $singular["canDelete"] = false;
-            }
-            $singular["upvotes"] = $array->upvotes;
-            $singular["downvotes"] = $array->downvotes;
-            $singular["reported"] = DB::table('reports')
-                ->where('user_id','=',Auth::user()->id)
-                ->where('tbl','=','profile_discussion')
-                ->where('reported_id','=',$array->id)
-                ->where('reported_user_id','=',$array->user_id)
-                ->count();
-            $singular["created_at"] = $array->created_at;
-            $singular["replies"] = array(); 
-            $reply_comments_unfiltered = DB::table('profile_discussion_replies')
-                ->where('profile_id', '=', $id)
-                ->where('comment_id', '=', $singular["id"])
-                ->get();
-            foreach ($reply_comments_unfiltered as $secondaryArray) {
-                $secondarySingular = array();
-                $secondarySingular["id"] = $secondaryArray->id;
-                $secondarySingular["user_id"] = $secondaryArray->user_id;
-                $secondarySingular["text"] = $secondaryArray->text;
-                $secondarySingular["deleted"] = $secondaryArray->deleted;
-                if($secondarySingular["user_id"] == Auth::user()->id) {
-                    $secondarySingular["canDelete"] = true;
-                } else {
-                    $secondarySingular["canDelete"] = false;
-                }
-                $secondarySingular["created_at"] = $secondaryArray->created_at;
-                $secondarySingular["upvotes"] = $secondaryArray->upvotes;
-                $secondarySingular["downvotes"] = $secondaryArray->downvotes;
-                $secondarySingular["reported"] = DB::table('reports')
-                    ->where('user_id','=',Auth::user()->id)
-                    ->where('tbl','=','profile_discussion_replies')
-                    ->where('reported_id','=',$secondaryArray->id)
-                    ->where('reported_user_id','=',$secondaryArray->user_id)
-                    ->count();
-                $secondaryName = DB::select('select * from users where id = ?', array($secondaryArray->user_id));
-                $secondarySingular["name"] = $secondaryName[0]->last_name." ".$secondaryName[0]->first_name;
-                $singular["replies"][] = $secondarySingular;
-            }
-
-            $name = DB::select('select * from users where id = ?', array($array->user_id));
-            $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
-            $comments[]=$singular;
-        }
-        $returnData["comments"]=$comments;
-        $statistics = array();
-        $statistics["algorithm_comments"] = DB::table('algorithm_discussion') 
-            ->where('user_id','=',$id)
-            ->count();
-        $statistics["algorithm_replies"] = DB::table('algorithm_discussion_replies') 
-            ->where('user_id','=',$id)
-            ->count();
-        $statistics["profile_comments"] = DB::table('profile_discussion') 
-            ->where('user_id','=',$id)
-            ->count();
-        $statistics["profile_replies"] = DB::table('profile_discussion_replies') 
-            ->where('user_id','=',$id)
-            ->count();
-        $statistics["algorithm_likes"] = DB::table('algorithm_votes') 
-            ->where('user_id','=',$id)
-            ->where('vote','=',1)
-            ->count();
-        $statistics["algorithm_requests"] = DB::table('algorithm_requests') 
-            ->where('user_id','=',$id)
-            ->count();
-        $statistics["given_commendations"] = DB::table('user_commendations') 
-            ->where('commendator','=',$id)
-            ->count();
-        $returnData["statistics"]=$statistics;
-    } else {
-        $returnData["user_found"]=FALSE;
-    }
-    return Response::json($returnData);
-});
-
 Route::get('messages/{id}', function($id) {
     if(Auth::check()) {
         if(Auth::user()->user_type == 0) {
@@ -316,7 +160,8 @@ Route::get('messages/{id}', function($id) {
                 ->withErrors(["This account is currently banned."]);
         }
         $found = DB::table('users')
-            ->where('id','=', $id)->count();
+            ->where('id','=', $id)
+            ->count();
         if($found != 0) {
             $time = date('Y-m-d H:i:s');
             DB::update('update private_messages set seen = 1, updated_at = ? where to_id = ? and from_id = ? and seen = 0', array(
@@ -324,6 +169,7 @@ Route::get('messages/{id}', function($id) {
                 Auth::user()->id,
                 $id
             ));
+            return View::make('privatechat');
         }
         return View::make('404')->withErrors(["This page cannot be reached because the user you are trying to talk to doesn't exist."]);
     } else {

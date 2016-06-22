@@ -58,8 +58,8 @@ $(document).ready(function() {
         },
         cancelAjax = function() {
             $.ajax({
-                method:'post',
-                url: root+'/users/cancelrequest',
+                method:'delete',
+                url: root+'/messaging/cancelrequest',
                 data: {id:groupID},
                 success: function(datas) {
                     requested = 0;
@@ -82,7 +82,7 @@ $(document).ready(function() {
         joinAjax = function() {
             $.ajax({
                 method:'post',
-                url: root+'/users/joingroup',
+                url: root+'/messaging/joingroup',
                 data: {id:groupID},
                 success: function(datas) {
                     if(datas.accepted == 1) {

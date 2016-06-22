@@ -81,6 +81,8 @@
   border: 1px solid #F1BB59;
 }
 .sidebar ul li {
+  max-height: 35px;
+  overflow: hidden;
   margin-bottom: 0;
 }
 .sidebar ul li:not(:first-of-type) {

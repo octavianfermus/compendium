@@ -199,7 +199,7 @@ $(document).ready(function () {
                 case "banReportedUser":
                     $.ajax({
                         method: 'put',
-                        url: root + '/users/banuser',
+                        url: root + '/administrative/banuser',
                         data: {id: reports[reportsActionTarget].reported_id},
                         success: function (data) {
                             getAdminData();
@@ -209,7 +209,7 @@ $(document).ready(function () {
                 case "banReporter":
                     $.ajax({
                         method: 'put',
-                        url: root + '/users/banuser',
+                        url: root + '/administrative/banuser',
                         data: {id: reports[reportsActionTarget].reporter_id},
                         success: function (data) {
                             getAdminData();
@@ -219,12 +219,12 @@ $(document).ready(function () {
                 case "banBoth":
                     $.ajax({
                         method: 'put',
-                        url: root + '/users/banuser',
+                        url: root + '/administrative/banuser',
                         data: {id: reports[reportsActionTarget].reported_id},
                         success: function (data) {
                             $.ajax({
                                 method: 'put',
-                                url: root + '/users/banuser',
+                                url: root + '/administrative/banuser',
                                 data: {id: reports[reportsActionTarget].reporter_id},
                                 success: function (data) {
                                     getAdminData();
@@ -235,8 +235,8 @@ $(document).ready(function () {
                     break;
                 case "warnReportedUser":
                     $.ajax({
-                        method: 'put',
-                        url: root + '/users/warn',
+                        method: 'post',
+                        url: root + '/administrative/warn',
                         data: {id: reports[reportsActionTarget].id, warn_id: reports[reportsActionTarget].reported_id},
                         success: function (data) {
                             getAdminData();
@@ -245,8 +245,8 @@ $(document).ready(function () {
                     break;
                 case "warnReporter":
                     $.ajax({
-                        method: 'put',
-                        url: root + '/users/warn',
+                        method: 'post',
+                        url: root + '/administrative/warn',
                         data: {id: reports[reportsActionTarget].id, warn_id: reports[reportsActionTarget].reporter_id},
                         success: function (data) {
                             getAdminData();
@@ -255,8 +255,8 @@ $(document).ready(function () {
                     break;
                 case "warnBoth":
                     $.ajax({
-                        method: 'put',
-                        url: root + '/users/warn',
+                        method: 'post',
+                        url: root + '/administrative/warn',
                         data: {id: reports[reportsActionTarget].id, warn_id: reports[reportsActionTarget].reported_id},
                         success: function (data) {
                             $.ajax({
@@ -273,7 +273,7 @@ $(document).ready(function () {
                 case "setAsAnswered":
                     $.ajax({
                         method: 'put',
-                        url: root + '/users/setasanswered',
+                        url: root + '/administrative/setanswered',
                         data: {id: reports[reportsActionTarget].id},
                         success: function (data) {
                             getAdminData();
@@ -517,8 +517,8 @@ $(document).ready(function () {
                 switch (actionName) {
                 case "demote":
                     $.ajax({
-                        method: 'put',
-                        url: root + '/users/demoteuser',
+                        method: 'post',
+                        url: root + '/administrative/demoteuser',
                         data: {id: userlist[actionTarget].id},
                         success: function (data) {
                             getAdminData();
@@ -527,8 +527,8 @@ $(document).ready(function () {
                     break;
                 case "promote":
                     $.ajax({
-                        method: 'put',
-                        url: root + '/users/promoteuser',
+                        method: 'post',
+                        url: root + '/administrative/promoteuser',
                         data: {id: userlist[actionTarget].id},
                         success: function (data) {
                             getAdminData();
@@ -538,7 +538,7 @@ $(document).ready(function () {
                 case "ban":
                     $.ajax({
                         method: 'put',
-                        url: root + '/users/banuser',
+                        url: root + '/administrative/banuser',
                         data: {id: userlist[actionTarget].id},
                         success: function (data) {
                             getAdminData();
@@ -547,8 +547,8 @@ $(document).ready(function () {
                     break;
                 case "unban":
                     $.ajax({
-                        method: 'put',
-                        url: root + '/users/unbanuser',
+                        method: 'post',
+                        url: root + '/administrative/unbanuser',
                         data: {id: userlist[actionTarget].id},
                         success: function (data) {
                             getAdminData();
@@ -601,7 +601,7 @@ $(document).ready(function () {
         getAdminData = function () {
             $.ajax({
                 method: 'get',
-                url: root + '/users/admindata',
+                url: root + '/administrative/fetch',
                 success: function (data) {
                     if (data.state === "success") {
                         userlist = data.data.userlist;

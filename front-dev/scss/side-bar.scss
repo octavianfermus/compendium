@@ -13,6 +13,8 @@
         padding-left: 0;
         border: 1px solid $main-color;
         li {
+            max-height: 35px;
+            overflow: hidden;
             &:not(:first-of-type) {
                 border-top: 1px solid $main-color;
             }   
