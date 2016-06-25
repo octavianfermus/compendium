@@ -234,7 +234,7 @@ class MessagingController extends BaseController {
                     }
                     $returnData["crumb"]=$crumbs;
                 } else {
-                    $returnData["timestamp"] = "";
+                    $returnData["timestamp"] = $timestamp;
                 }
                 
                 
