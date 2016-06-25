@@ -1,6 +1,6 @@
 $(document).ready(function() {
     var groupID = window.location.href.split("#")[0].split("/")[window.location.href.split("/").length-1],
-        root = "http://localhost:8080",
+        root = globalSettings.getRoot(),
         members = [],
         requests = [],
         timestamp = undefined,
@@ -210,93 +210,102 @@ $(document).ready(function() {
                 fromMe = value.id;
             });
             $(".conversation .boxWrapper#messages").html(toAppend);
-            if(initiated == false) {
-                $(".boxWrapper p")[$(".boxWrapper p").length-1].scrollIntoView();
-                initiated = true;
+            
+            if($(".boxWrapper#messages p").length) {
+                $(".boxWrapper#messages p")[$(".boxWrapper#messages p").length-1].scrollIntoView();
             }
+                
         },
         getPostData = function () {
             jQuery.ajax({
                 method: 'get',
-                url: root+"/messaging/groupinitialdata?id="+groupID,
+                url: root+"/messaging/groupinitialdata",
+                data: {
+                    id: groupID,
+                    timestamp: timestamp
+                },
                 success: function (data) {
-                    leader_id = data.leader_id;
-                    $("#groupName").html(data.groupName);
-                    if(data.groupDescription) {
-                        $("#groupDescription").removeClass("hidden").html(description);
-                    }
-                    $("#groupLeader").html("<span>Leader: </span><a href='"+root+"/profile/"+data.leader_id+"'>" + data.leader_name + (data.leader_me == true ? " (You)</a>" : "</a>"));
-                    if(data.privateGroup == 1) {
-                        $("#groupType").html("<span>Group type: </span>Private");
-                        if(data.leader_me == true) {
-                            $(".convertToPublicGroup").removeClass("hidden");
-                            $(".convertToPrivateGroup").remove();
-                            $(".convertToPublicGroup").click(function() {
-                                $(this).addClass("hidden");
-                                $(".confirmConvert").removeClass("hidden");
-                                $(".cancelConvert").removeClass("hidden");
-                            });
-                            $(".cancelConvert").click(function() {
-                                $(this).addClass("hidden");
-                                $(".confirmConvert").addClass("hidden");
-                                $(".convertToPublicGroup").removeClass("hidden");
-                            });
-                            $(".confirmConvert").click(function() {
-                                $.ajax({
-                                    method: 'post',
-                                    url: root+'/messaging/convertgrouppublic',
-                                    dataType:"json",
-                                    data: {id:groupID},
-                                    success: function(data) {
-                                        location.reload();
-                                    }
-                                });
-                            });
-                        }
-                    } else {
-                        $("#groupType").html("<span>Group type: </span>Public");
-                        if(data.leader_me== true) {
-                            $(".convertToPrivateGroup").removeClass("hidden");
-                            $(".convertToPublicGroup").remove();
-                            $(".convertToPrivateGroup").click(function() {
-                                $(this).addClass("hidden");
-                                $(".confirmConvert").removeClass("hidden");
-                                $(".cancelConvert").removeClass("hidden");
-                            });
-                            $(".cancelConvert").click(function() {
-                                $(this).addClass("hidden");
-                                $(".confirmConvert").addClass("hidden");
-                                $(".convertToPrivateGroup").removeClass("hidden");
-                            });
+                    if(timestamp !== data.timestamp) {
+                        if(timestamp == undefined) {
+                            $("#groupName").html(data.groupName);
+                            leader_id = data.leader_id;
+                            if(data.groupDescription) {
+                                $("#groupDescription").removeClass("hidden").html(description);
+                            }
+                            $("#groupLeader").html("<span>Leader: </span><a href='"+root+"/profile/"+data.leader_id+"'>" + data.leader_name + (data.leader_me == true ? " (You)</a>" : "</a>"));
+                            if(data.privateGroup == 1) {
+                                $("#groupType").html("<span>Group type: </span>Private");
+                                if(data.leader_me == true) {
+                                    $(".convertToPublicGroup").removeClass("hidden");
+                                    $(".convertToPrivateGroup").remove();
+                                    $(".convertToPublicGroup").click(function() {
+                                        $(this).addClass("hidden");
+                                        $(".confirmConvert").removeClass("hidden");
+                                        $(".cancelConvert").removeClass("hidden");
+                                    });
+                                    $(".cancelConvert").click(function() {
+                                        $(this).addClass("hidden");
+                                        $(".confirmConvert").addClass("hidden");
+                                        $(".convertToPublicGroup").removeClass("hidden");
+                                    });
+                                    $(".confirmConvert").click(function() {
+                                        $.ajax({
+                                            method: 'post',
+                                            url: root+'/messaging/convertgrouppublic',
+                                            dataType:"json",
+                                            data: {id:groupID},
+                                            success: function(data) {
+                                                location.reload();
+                                            }
+                                        });
+                                    });
+                                }
+                            } else {
+                                $("#groupType").html("<span>Group type: </span>Public");
+                                if(data.leader_me== true) {
+                                    $(".convertToPrivateGroup").removeClass("hidden");
+                                    $(".convertToPublicGroup").remove();
+                                    $(".convertToPrivateGroup").click(function() {
+                                        $(this).addClass("hidden");
+                                        $(".confirmConvert").removeClass("hidden");
+                                        $(".cancelConvert").removeClass("hidden");
+                                    });
+                                    $(".cancelConvert").click(function() {
+                                        $(this).addClass("hidden");
+                                        $(".confirmConvert").addClass("hidden");
+                                        $(".convertToPrivateGroup").removeClass("hidden");
+                                    });
 
-                            $(".confirmConvert").click(function() {
-                                $.ajax({
-                                    method: 'post',
-                                    url: root+'/messaging/convertgroupprivate',
-                                    dataType:"json",
-                                    data: {id:groupID},
-                                    success: function(data) {
-                                        location.reload();
-                                    }
-                                });
-                            });
+                                    $(".confirmConvert").click(function() {
+                                        $.ajax({
+                                            method: 'post',
+                                            url: root+'/messaging/convertgroupprivate',
+                                            dataType:"json",
+                                            data: {id:groupID},
+                                            success: function(data) {
+                                                location.reload();
+                                            }
+                                        });
+                                    });
+                                }
+                            }
+                            if(data.leader_me == true && data.privateGroup == 1) {
+                                requests = data.active_requests;
+                                $("#seeActiveRequests").removeClass("hidden");
+                                createRequestList();
+                            }
+                            me = data.me;
+                            members = data.members;
+                            createMemberList(data.leader_me);
                         }
-                    }
-                    if(data.leader_me == true && data.privateGroup == 1) {
-                        requests = data.active_requests;
-                        $("#seeActiveRequests").removeClass("hidden");
-                        createRequestList();
-                    }
-                    me = data.me;
-                    members = data.members;
-                    createMemberList(data.leader_me);
-                    if(timestamp!== data.timestamp) {
-                        timestamp = data.timestamp;
+                        
                         if(data.history) {
                             messageHistory = data.history;
                             populateMessages();
                         }
-                     populateCrumbs(data.crumb);
+                         populateCrumbs(data.crumb);
+                        
+                        timestamp = data.timestamp;
                     }
                 },
                 error: function (data) {
@@ -305,7 +314,11 @@ $(document).ready(function() {
             });
         };
     getPostData();
-    
+    $(".send-message input[type='text']").keypress(function(e) {
+        if(e.keyCode == 13) { 
+            $(".send-message #sendButton .btn").click();
+        }
+    });
     $(".send-message #sendButton .btn").click(function() {
         var comment = $(".send-message input").val().trim();
         if(comment.length>0) {
@@ -327,5 +340,5 @@ $(document).ready(function() {
 
     setInterval(function() {
         getPostData();
-    }, 1000);
+    }, 700);
 });

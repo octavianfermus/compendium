@@ -475,6 +475,7 @@ class MessagingController extends BaseController {
     public function getGroupinitialdata() {
         if(Auth::check() && Auth::user()->user_type > 0) {
             $id = Request::input('id');
+            $timestamp = Request::input('timestamp');
             $found = DB::table('group_members')
                 ->where('group_id','=',$id)
                 ->where('member_id','=',Auth::user()->id)
@@ -482,115 +483,6 @@ class MessagingController extends BaseController {
                 ->count();
             $returnData = array();
             
-            if($found ==0) {
-                $found = DB::table('groups')
-                ->where('id','=',$id)
-                ->count();
-                if($found == 0) {
-                    $returnData["state"] = 'failure';
-                    $returnData["message"] = 'No group with the provided id exists.';
-                } else {
-                    $returnData["state"] = 'success';
-                    $returnData["message"] = 'Group found. You are not in the group. Returning available data.';
-                    $found = DB::table('groups')
-                        ->where('id','=',$id)
-                        ->first();
-                    $returnData["requested"] = DB::table('group_members')
-                        ->where('accepted','=',0)
-                        ->where('member_id','=',Auth::user()->id)
-                        ->where('group_id','=',$id)
-                        ->count();
-                       // 
-                        //
-                    $returnData["groupName"] = $found->group_name;
-                    $returnData["description"] = $found->description;
-                    $returnData["privateGroup"] = $found->private;
-                    $returnData["leader_id"] = $found->leader;
-                    $found = DB::table('users')
-                        ->where('id','=',$found->leader)
-                        ->first();
-                    $returnData["leader_name"] = $found->last_name." ".$found->first_name;
-                    $returnData["members"] = DB::table('group_members')
-                        ->where('group_id','=',$id)
-                        ->where('accepted','=',1)
-                        ->join('users', function($join)
-                            {
-                                $join->on('group_members.member_id', '=', 'users.id');
-                            })
-                        ->select(
-                            'users.first_name as first_name',
-                            'users.last_name as last_name',
-                            'users.id as id',
-                            'group_members.updated_at as since'
-                        )
-                        ->get();
-
-                }
-            } else {
-                $returnData["state"] = 'success';
-                $returnData["message"] = 'Group found. Returning message history';
-                $found = DB::table('groups')
-                    ->where('id','=',$id)
-                    ->first();
-                $returnData["groupName"] = $found->group_name;
-                $returnData["description"] = $found->description;
-                $returnData["privateGroup"] = $found->private;
-                if($found->leader == Auth::user()->id) {
-                    $returnData["leader_me"] = TRUE;
-                } else {
-                    $returnData["leader_me"] = FALSE;
-                }
-                $returnData["me"] = Auth::user()->id;
-                $returnData["leader_id"] = $found->leader;
-                $found = DB::table('users')
-                    ->where('id','=',$found->leader)
-                    ->first();
-                $returnData["leader_name"] = $found->last_name." ".$found->first_name;
-                $returnData["members"] = DB::table('group_members')
-                    ->where('group_id','=',$id)
-                    ->where('accepted','=',1)
-                    ->join('users', function($join)
-                        {
-                            $join->on('group_members.member_id', '=', 'users.id');
-                        })
-                    ->select(
-                        'users.first_name as first_name',
-                        'users.last_name as last_name',
-                        'users.id as id',
-                        'group_members.updated_at as since'
-                    )
-                    ->get();
-                if($returnData["leader_me"]==TRUE) {
-                    $returnData["active_requests"] = DB::table('group_members')
-                        ->where('group_id','=',$id)
-                        ->where('accepted','=',0)
-                        ->join('users', function($join)
-                            {
-                                $join->on('group_members.member_id', '=', 'users.id');
-                            })
-                        ->select(
-                            'users.first_name as first_name',
-                            'users.last_name as last_name',
-                            'users.id as id',
-                            'group_members.updated_at as since'
-                        )
-                        ->get();
-                }
-                $history_unparsed = DB::table('group_messages')
-                    ->where('group_id', '=', $id)
-                    ->get();
-                $history = array();
-                foreach($history_unparsed as $array) {
-                    $singular = array();
-                    $singular["timestamp"] = $array->created_at;
-                    $name = DB::select('select * from users where id = ?', array($array->user_id));
-                    $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
-                    $singular["id"] = $array->user_id;
-                    $singular["message"] = $array->message;
-                    $history[] = $singular;
-                }
-                $returnData["history"]=$history;
-            }
             
             $returnData["timestamp"] = DB::table('group_messages')
                 ->where('group_id', '=', $id)
@@ -601,21 +493,132 @@ class MessagingController extends BaseController {
                 ->orderBy('updated_at', 'desc')
                 ->first()
                 ->updated_at;
+                if($timestamp != $returnData["timestamp"] || $timestamp == 0) {
+                    if($found ==0) {
+                        $found = DB::table('groups')
+                        ->where('id','=',$id)
+                        ->count();
+                        if($found == 0) {
+                            $returnData["state"] = 'failure';
+                            $returnData["message"] = 'No group with the provided id exists.';
+                        } else {
+                            $returnData["state"] = 'success';
+                            $returnData["message"] = 'Group found. You are not in the group. Returning available data.';
+                            $found = DB::table('groups')
+                                ->where('id','=',$id)
+                                ->first();
+                            $returnData["requested"] = DB::table('group_members')
+                                ->where('accepted','=',0)
+                                ->where('member_id','=',Auth::user()->id)
+                                ->where('group_id','=',$id)
+                                ->count();
+                            $returnData["groupName"] = $found->group_name;
+                            $returnData["description"] = $found->description;
+                            $returnData["privateGroup"] = $found->private;
+                            $returnData["leader_id"] = $found->leader;
+                            $found = DB::table('users')
+                                ->where('id','=',$found->leader)
+                                ->first();
+                            $returnData["leader_name"] = $found->last_name." ".$found->first_name;
+                            $returnData["members"] = DB::table('group_members')
+                                ->where('group_id','=',$id)
+                                ->where('accepted','=',1)
+                                ->join('users', function($join)
+                                    {
+                                        $join->on('group_members.member_id', '=', 'users.id');
+                                    })
+                                ->select(
+                                    'users.first_name as first_name',
+                                    'users.last_name as last_name',
+                                    'users.id as id',
+                                    'group_members.updated_at as since'
+                                )
+                                ->get();
+
+                        }
+                    } else {
+                        $returnData["state"] = 'success';
+                        $returnData["message"] = 'Group found. Returning message history';
+                        $found = DB::table('groups')
+                            ->where('id','=',$id)
+                            ->first();
+                        $returnData["groupName"] = $found->group_name;
+                        $returnData["description"] = $found->description;
+                        $returnData["privateGroup"] = $found->private;
+                        if($found->leader == Auth::user()->id) {
+                            $returnData["leader_me"] = TRUE;
+                        } else {
+                            $returnData["leader_me"] = FALSE;
+                        }
+                        $returnData["me"] = Auth::user()->id;
+                        $returnData["leader_id"] = $found->leader;
+                        $found = DB::table('users')
+                            ->where('id','=',$found->leader)
+                            ->first();
+                        $returnData["leader_name"] = $found->last_name." ".$found->first_name;
+                        $returnData["members"] = DB::table('group_members')
+                            ->where('group_id','=',$id)
+                            ->where('accepted','=',1)
+                            ->join('users', function($join)
+                                {
+                                    $join->on('group_members.member_id', '=', 'users.id');
+                                })
+                            ->select(
+                                'users.first_name as first_name',
+                                'users.last_name as last_name',
+                                'users.id as id',
+                                'group_members.updated_at as since'
+                            )
+                            ->get();
+                        if($returnData["leader_me"]==TRUE) {
+                            $returnData["active_requests"] = DB::table('group_members')
+                                ->where('group_id','=',$id)
+                                ->where('accepted','=',0)
+                                ->join('users', function($join)
+                                    {
+                                        $join->on('group_members.member_id', '=', 'users.id');
+                                    })
+                                ->select(
+                                    'users.first_name as first_name',
+                                    'users.last_name as last_name',
+                                    'users.id as id',
+                                    'group_members.updated_at as since'
+                                )
+                                ->get();
+                        }
+                        $history_unparsed = DB::table('group_messages')
+                            ->where('group_id', '=', $id)
+                            ->get();
+                        $history = array();
+                        foreach($history_unparsed as $array) {
+                            $singular = array();
+                            $singular["timestamp"] = $array->created_at;
+                            $name = DB::select('select * from users where id = ?', array($array->user_id));
+                            $singular["name"] = $name[0]->last_name." ".$name[0]->first_name;
+                            $singular["id"] = $array->user_id;
+                            $singular["message"] = $array->message;
+                            $history[] = $singular;
+                        }
+                        $returnData["history"]=$history;
+                    }
+            
+                }
+                $memberGroups = DB::table('groups')
+                    ->join('group_members', function($join)
+                    {
+                        $join->on('groups.id', '=', 'group_members.group_id')
+                             ->where('group_members.accepted', '=', 1)
+                             ->where('group_members.member_id', '=', Auth::user()->id);
+                    })
+                    ->select(
+                        'groups.id as group_id', 
+                        'groups.group_name as group_name',
+                        'group_members.read_last_message as read'
+                    )
+                    ->get();
+                $returnData["crumb"] = $memberGroups;
             }
-            $memberGroups = DB::table('groups')
-                ->join('group_members', function($join)
-                {
-                    $join->on('groups.id', '=', 'group_members.group_id')
-                         ->where('group_members.accepted', '=', 1)
-                         ->where('group_members.member_id', '=', Auth::user()->id);
-                })
-                ->select(
-                    'groups.id as group_id', 
-                    'groups.group_name as group_name',
-                    'group_members.read_last_message as read'
-                )
-                ->get();
-            $returnData["crumb"] = $memberGroups;
+            
             return Response::json($returnData);
         } else {
             return Response::json(array('state' => 'failure', 'message'=>'You must be logged in to receive messages.'));

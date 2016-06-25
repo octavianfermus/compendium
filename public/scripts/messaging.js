@@ -47,7 +47,9 @@ $(document).ready(function () {
             });
             $(".conversation .boxWrapper#messages").html(toAppend);
             if(initiated == false) {
-                $(".boxWrapper p")[$(".boxWrapper p").length-1].scrollIntoView();
+                if($(".boxWrapper p").length) {
+                    $(".boxWrapper p")[$(".boxWrapper p").length-1].scrollIntoView();
+                }
                 initiated = true;
             }
         },
@@ -57,6 +59,9 @@ $(document).ready(function () {
                 url: root+"/messaging/messagehistory",
                 data: {id: conversationID, timestamp: timestamp},
                 success: function (data) {
+                    if(timestamp == undefined) {
+                        populateCrumbs(data.crumb);
+                    }
                     if(timestamp!== data.timestamp) {
                         timestamp = data.timestamp;
                         $("#talkingTo span").html("<a href='"+root+"/profile/"+conversationID+"'>"+data.talkingTo+"</a>");
@@ -76,6 +81,11 @@ $(document).ready(function () {
     setInterval(function() {
         getPostData();
     }, 500);
+    $(".send-message input[type='text']").keypress(function(e) {
+        if(e.keyCode == 13) { 
+            $(".send-message #sendButton .btn").click();
+        }
+    });
     $(".send-message #sendButton .btn").click(function() {
         var comment = $(".send-message input").val().trim();
         if(comment.length>0) {

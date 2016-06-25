@@ -250,6 +250,9 @@ ul.tagit {
         }
     }
     .reply {
+        &:last-of-type {
+            margin-bottom: 0;
+        }
         transition: all $transition-speed;
         border-left: 2px solid $main-color;
         padding-left: 10px;

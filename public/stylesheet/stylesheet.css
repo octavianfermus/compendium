@@ -406,6 +406,9 @@ ul.tagit {
   padding-left: 10px;
   margin-bottom: 20px;
 }
+.conversation .reply:last-of-type {
+  margin-bottom: 0;
+}
 .conversation .reply .replyComment {
   font-weight: 700;
   font-size: 15px;
