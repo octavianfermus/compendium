@@ -3,7 +3,7 @@ $(document).ready(function() {
         root = globalSettings.getRoot(),
         members = [],
         requests = [],
-        timestamp = undefined,
+        timestamp = "",
         messageHistory = [],
         initiated = false,
         leader_id,
@@ -71,8 +71,9 @@ $(document).ready(function() {
                     success: function(data) {
                         $("#requestsModal .styled-list-member[listindex='"+listindex+"']").remove();
                         members.push(requests[listindex]);
+                        requests.splice(listindex,1);
                         createMemberList(true);
-                        $("#requestsModal .boxWrapper").html($("#requestsModal .boxWrapper").html() || "<p>No active requests..</p>");
+                        createRequestList();
                     }
                 });
             });
@@ -81,12 +82,14 @@ $(document).ready(function() {
                     userid = requests[listindex].id;
                 $.ajax({
                     method: 'post',
-                    url: root+'/users/denygrouprequest',
+                    url: root+'/messaging/denygrouprequest',
                     dataType:"json",
                     data: {id:groupID, userid: userid},
                     success: function(data) {
                         $("#requestsModal .styled-list-member[listindex='"+listindex+"']").remove();
-                        $("#requestsModal .boxWrapper").html($("#requestsModal .boxWrapper").html() || "<p>No active requests..</p>");
+                        requests.splice(listindex,1);
+                        createMemberList(true);
+                        createRequestList();
                     }
                 });
             });
@@ -226,7 +229,7 @@ $(document).ready(function() {
                 },
                 success: function (data) {
                     if(timestamp !== data.timestamp) {
-                        if(timestamp == undefined) {
+                        if(timestamp == "") {
                             $("#groupName").html(data.groupName);
                             leader_id = data.leader_id;
                             if(data.groupDescription) {
@@ -329,7 +332,9 @@ $(document).ready(function() {
                 dataType: "json",
                 data: {id: groupID, comment: comment},
                 success: function(data) {
-                    $(".boxWrapper#messages p")[$(".boxWrapper#messages p").length-1].scrollIntoView();
+                    if($(".boxWrapper#messages p").length) {
+                        $(".boxWrapper#messages p")[$(".boxWrapper#messages p").length-1].scrollIntoView();
+                    }
                 },
                 error: function(data) {
                     console.log(data);

@@ -43,7 +43,7 @@ class PostController extends BaseController {
             if($ratio=="true") {
                 $algorithms_unfiltered_ratio = DB::table('algorithms')
                     ->where('template','=','0')
-                    ->where('upvotes','!<','downvotes')
+                    ->where('upvotes','>','downvotes')
                     ->get();
             } else {
                 $algorithms_unfiltered_ratio = DB::table('algorithms')

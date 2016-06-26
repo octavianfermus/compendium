@@ -1,6 +1,6 @@
 $(document).ready(function() {
     var groupID = window.location.href.split("#")[0].split("/")[window.location.href.split("/").length-1],
-        root = "http://localhost:8080",
+        root = globalSettings.getRoot(),
         members = [],
         requested,
         me,  
@@ -22,7 +22,7 @@ $(document).ready(function() {
         crumbAjax = function() {
             $.ajax({
                 method: 'get',
-                url: root+'/users/groupcrumb',
+                url: root+'/messaging/groupcrumb',
                 success: function(data) {
                     populateCrumbs(data.crumb);
                 },
@@ -109,7 +109,7 @@ $(document).ready(function() {
         getPostData = function () {
             jQuery.ajax({
                 method: 'get',
-                url: root+"/users/groupinitialdata?id="+groupID,
+                url: root+"/messaging/groupinitialdata?id="+groupID,
                 success: function (data) {
                     $("#groupName").html(data.groupName);
                     if(data.groupDescription) {

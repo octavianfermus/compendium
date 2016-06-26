@@ -132,28 +132,35 @@ $(document).ready(function() {
         filterRequests();
     });
     $("#takeRequestModalOpener").click(function() {
-        $('#takeRequestModal').modal('toggle');
-        getRequests();
+        if($("#post_algorithm_form").css("display") !== "none") {
+            $('#takeRequestModal').modal('toggle');
+            getRequests();
+        }
     });
     $("#cancelRequest").click(function() {
-        $("#post_algorithm_form").slideDown();
-        $("#partTwo").slideUp();
-        $("#continueToCode").removeClass("hidden");
-        $("#post_algorithm_form input[name='algorithm_name']").val("");
-        $("#post_algorithm_form input[name='algorithm_name']").removeAttr("readonly");
-        $("#post_algorithm_form textarea[name='algorithm_description']").val("");
-        $("#post_algorithm_form textarea[name='algorithm_description']").removeAttr("readonly");
-        $("#post_algorithm_form input[name='language']").val("");
-        $("#post_algorithm_form input[name='language']").removeAttr("readonly");
-        $("#post_algorithm_form input[name='original_link']").val("");
-        $("h1#algorithmName").html("");
-        $("p#language").html("<span>Language: </span>");
-        $("a#creatorUsername").html("");
-        $("p#algorithmDescription").html("<span>Description: </span>");
-        requestedValues = null;
-        if(codeEditor) {
-            codeEditor.setValue("");
-            $("[name='algorithm_code']").val(codeEditor.getValue());
+        if($("#post_algorithm_form").css("display") !== "none") {
+            $("#post_algorithm_form input[name='algorithm_name']").val("");
+            $("#post_algorithm_form input[name='algorithm_name']").removeAttr("readonly");
+            $("#post_algorithm_form textarea[name='algorithm_description']").val("");
+            $("#post_algorithm_form textarea[name='algorithm_description']").removeAttr("readonly");
+            $("#post_algorithm_form input[name='language']").val("");
+            $("#post_algorithm_form input[name='language']").removeAttr("readonly");
+            $("#post_algorithm_form input[name='original_link']").val("");
+            $("h1#algorithmName").html("");
+            $("p#language").html("<span>Language: </span>");
+            $("a#creatorUsername").html("");
+            $("p#algorithmDescription").html("<span>Description: </span>");
+            requestedValues = null;
+        } else {
+            $("#post_algorithm_form").slideDown();
+            $("#partTwo").slideUp();
+            $("#continueToCode").removeClass("hidden");
+            if(codeEditor) {
+                codeEditor.setValue("");
+                $("[name='algorithm_code']").val(codeEditor.getValue());
+            }
         }
+ 
+        
     });
 });

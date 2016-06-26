@@ -69,14 +69,18 @@ $(document).ready(function() {
             });
             toAppend = toAppend || "<p>No groups found..</p>";
             $(".groupManager").html(toAppend);
-            $(".cancelRequestButton").click(function() {
+            $(".groupManager .cancelRequestButton").click(function() {
                 var index = $(this).closest(".styled-list-member").attr("listindex");
+                $(".groupManager button").attr("disabled","disabled");
                 $.ajax({
                     method:'delete',
                     url: root+'/messaging/cancelrequest',
                     data: {id:data[index].group_id},
                     success: function(datas) {
                         getGroups();
+                        if($(".searchResults").html().trim()) {
+                            ajaxSearch();
+                        }
                         filter();
                     },
                     error: function(datas) {
@@ -85,24 +89,29 @@ $(document).ready(function() {
                     }
                 });    
             });
-            $(".leaveGroupButton").click(function() {
+            $(".groupManager .leaveGroupButton").click(function() {
                 $(this).closest("span").children(".leaveGroupConfirmButton").removeClass("hidden");
                 $(this).closest("span").children(".leaveGroupCancelButton").removeClass("hidden");
                 $(this).addClass("hidden");
             });
-            $(".leaveGroupCancelButton").click(function() {
+            $(".groupManager .leaveGroupCancelButton").click(function() {
                 $(this).closest("span").children(".leaveGroupConfirmButton").addClass("hidden");
                 $(this).closest("span").children(".leaveGroupCancelButton").addClass("hidden");
                 $(this).closest("span").children(".leaveGroupButton").removeClass("hidden");    
             });
-            $(".leaveGroupConfirmButton").click(function() {
+            $(".groupManager .leaveGroupConfirmButton").click(function() {
                 var index = $(this).closest(".styled-list-member").attr("listindex");
+                $(".groupManager button").attr("disabled","disabled");
                 $.ajax({
                     method:'post',
                     url: root+'/messaging/leavegroup',
                     data: {id:data[index].group_id},
                     success: function(datas) {
                         getGroups();
+                        if($(".searchResults").html().trim()) {
+                            ajaxSearch();
+                            
+                        }
                         filter();
                     },
                     error: function(datas) {
@@ -222,7 +231,7 @@ $(document).ready(function() {
                     '</p>'+
                     '<p>' +
                         '<span>Leader: </span>' +
-                        '<a href="'+root+'/profile/'+value.leader_id+'">'+value.leader_name+'</a>' +
+                        '<a href="'+root+'/profile/'+value.leader+'">'+value.leader_name+'</a>' +
                         (value.leader_me == 1 ? ' <span>(you)</span>':'') +
                     '</p>' +
                     '<p><span>Member count: </span>' + value.memberCount + '</p>'+
@@ -230,12 +239,12 @@ $(document).ready(function() {
             });
             toAppend = toAppend || "<p>No groups found..</p>";
             $(".searchResults").html(toAppend);
-            $(".joinGroupButton").click(function() {
+            $(".searchResults .joinGroupButton").click(function() {
                 var index = $(this).closest(".styled-list-member").attr("listindex");
                 $.ajax({
                     method:'post',
                     url: root+'/messaging/joingroup',
-                    data: {id:data[index].id},
+                    data: {id:searchResults[index].id},
                     success: function(datas) {
                         if(datas.accepted == 1) {
                             data[index].memberCount += 1;
@@ -250,12 +259,13 @@ $(document).ready(function() {
                     }
                 });
             });
-            $(".cancelRequestButton").click(function() {
+            $(".searchResults .cancelRequestButton").click(function() {
                 var index = $(this).closest(".styled-list-member").attr("listindex");
+                $(".searchResults button").attr("disabled","disabled");
                 $.ajax({
                     method:'delete',
                     url: root+'/messaging/cancelrequest',
-                    data: {id:data[index].id},
+                    data: {id:searchResults[index].id},
                     success: function(datas) {
                         ajaxSearch();
                         populateGroups();
@@ -266,22 +276,23 @@ $(document).ready(function() {
                     }
                 });    
             });
-            $(".leaveGroupButton").click(function() {
+            $(".searchResults .leaveGroupButton").click(function() {
                 $(this).closest("span").children(".leaveGroupConfirmButton").removeClass("hidden");
                 $(this).closest("span").children(".leaveGroupCancelButton").removeClass("hidden");
                 $(this).addClass("hidden");
             });
-            $(".leaveGroupCancelButton").click(function() {
+            $(".searchResults .leaveGroupCancelButton").click(function() {
                 $(this).closest("span").children(".leaveGroupConfirmButton").addClass("hidden");
                 $(this).closest("span").children(".leaveGroupCancelButton").addClass("hidden");
                 $(this).closest("span").children(".leaveGroupButton").removeClass("hidden");    
             });
-            $(".leaveGroupConfirmButton").click(function() {
+            $(".searchResults .leaveGroupConfirmButton").click(function() {
                 var index = $(this).closest(".styled-list-member").attr("listindex");
+                $(".searchResults button").attr("disabled","disabled");
                 $.ajax({
                     method:'post',
-                    url: root+'/users/leavegroup',
-                    data: {id:data[index].id},
+                    url: root+'/messaging/leavegroup',
+                    data: {id:searchResults[index].id},
                     success: function(datas) {
                         ajaxSearch();
                         populateGroups();
@@ -306,6 +317,7 @@ $(document).ready(function() {
         var name = $("#createGroupName").val().trim(),
             description = $("#createGroupDescription").val().trim(),
             type = $("#createGroupType").val().trim();
+        $("#createGroup").attr("disabled","disabled");
         if(name==""||type=="") {
             $(".fader#submitFader").fadeIn("slow");
             setTimeout(function(){
@@ -324,9 +336,10 @@ $(document).ready(function() {
                     $("#createGroupName").val("");
                     $("#createGroupDescription").val("");
                     filter();
+                    $("#createGroup").removeAttr("disabled");
                 },
                 error: function(data) {
-                    console.log(data);
+                    $("#createGroup").removeAttr("disabled");
                 }
             });
         }

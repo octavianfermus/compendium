@@ -47,11 +47,11 @@ class RequestController extends BaseController {
         $time = date('Y-m-d H:i:s');
         
         $found = DB::table('algorithm_request_votes')
-                    ->where('request_id', '=', $request_id)
-                    ->where('user_id', '=', Auth::user()->id)
-                    ->count();
+            ->where('request_id', '=', $request_id)
+            ->where('user_id', '=', Auth::user()->id)
+            ->count();
         
-        if($found==1) {
+        if($found!=0) {
             DB::delete('delete from algorithm_request_votes where request_id = ? and user_id = ?', array($request_id, Auth::user()->id));
             $updater = DB::table('algorithm_request_votes')
                 ->where('request_id', '=', $request_id)

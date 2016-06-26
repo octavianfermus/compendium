@@ -46,11 +46,8 @@ $(document).ready(function () {
                 fromMe = value.from_me;
             });
             $(".conversation .boxWrapper#messages").html(toAppend);
-            if(initiated == false) {
-                if($(".boxWrapper p").length) {
-                    $(".boxWrapper p")[$(".boxWrapper p").length-1].scrollIntoView();
-                }
-                initiated = true;
+            if($(".boxWrapper p").length) {
+                $(".boxWrapper p")[$(".boxWrapper p").length-1].scrollIntoView();
             }
         },
         getPostData = function () {
