@@ -43,7 +43,7 @@ $(document).ready(function () {
     getPostData();
     setInterval(function() {
         getPostData();
-    }, 2000);
+    }, 1500);
     $.ajax({
         method: 'get',
         url: root+'/userlist',

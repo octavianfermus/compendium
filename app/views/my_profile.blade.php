@@ -5,7 +5,7 @@
         <div class="row main">
             <div class="col-md-12">
                 <div class="boxWrapper heading">
-                    <h1>Your Profile <button id="commendPerson" href="javascript:void(0)" class="commend-star"> <span class="glyphicon glyphicon-star"></span></button></h1>
+                    <h1>Your Profile <button id="commendPerson" href="javascript:void(0)" class="commend-star"> <span class="glyphicon glyphicon-star"></span><span id="commendationNumber">0</span></button></h1>
                     <p>Hello, <span class="person" id="person-me">{{Auth::user()->last_name;}} {{Auth::user()->first_name;}}</span>. Here you can manage your profile and see some related statistics. </p>
                 </div>
             </div>

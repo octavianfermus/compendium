@@ -277,7 +277,6 @@ $(document).ready(function () {
                     algorithms = data.algorithms;
                     comments = data.comments;
                     statistics = data.statistics;
-                    console.log(data);
                     populate();
                 },
                 error: function (data) {

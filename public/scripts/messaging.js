@@ -80,7 +80,7 @@ $(document).ready(function () {
     getPostData();
     setInterval(function() {
         getPostData();
-    }, 500);
+    }, 1500);
     $(".send-message input[type='text']").keypress(function(e) {
         if(e.keyCode == 13) { 
             $(".send-message #sendButton .btn").click();

@@ -340,5 +340,5 @@ $(document).ready(function() {
 
     setInterval(function() {
         getPostData();
-    }, 700);
+    }, 1500);
 });
